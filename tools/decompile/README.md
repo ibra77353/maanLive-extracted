@@ -112,6 +112,19 @@ Run the focused regression checks and the 18-module syntax audit:
 python3 -m unittest discover -s tools/decompile -p 'test_emit_source.py' -v
 ```
 
+```sh
+python3 tools/verify/structure.py
+python3 -m unittest discover -s tools/verify -p 'test_structure.py' -v
+```
+
+`tools/verify/structure.py` checks the repaired loop and `switch` structures against the bytecode
+itself rather than the emitted syntax: it compares `recovered/` with the committed
+`decompiled/bytecode/*.disasm.txt` listings (loop back edges and nesting depth per function, `switch`
+jump tables and their clause blocks, strict-comparison `switch` chains, and `async` generator resume
+dispatch). One row per module; a non-zero exit means a construct in `recovered/` is not backed by the
+listing, or a listing construct is missing from it. `tools/verify/crosscheck.py` compares recovered
+names against the names the running bytecode exposes.
+
 The audit generates files only in a temporary directory, calls `node --check` on each one, and
 removes them afterwards. Only synthetic fixtures are executed in the behavioural tests, never
 recovered application modules. A passing syntax check is **not** proof of runtime equivalence.
@@ -121,8 +134,12 @@ Node-dependent tests are marked skipped if Node is unavailable; that is not a su
 has been regenerated from the listings — all **18/18** modules are emitted and each one passes
 `node --check`. `tools/verify/crosscheck.py` still reports 18/18 modules whose every `require()` name
 the running bytecode produced is present in the output, and all 44 such names appear in
-`recovered/` as well. RegExp flags, flattened exception handlers, V8 context lifetimes and the loop
-and switch structure restored by `normalize_listing.py` still require bytecode-level verification:
+`recovered/` as well. The loop and switch structure restored by `normalize_listing.py` **is** verified
+at bytecode level: `tools/verify/structure.py` reports **18/18** modules in which every one of the
+**142** loop back edges and all **8** jump tables — plus the strict-comparison `switch` chains and
+the `async` resume dispatches — is backed by the committed listings, and its 9 regression tests
+pass. RegExp flags, flattened exception handlers and V8 context lifetimes still require
+bytecode-level verification:
 a passing syntax check is not runtime equivalence. The original `server.js`, `src/` binaries and
 `decompiled/` listings are left untouched.
 

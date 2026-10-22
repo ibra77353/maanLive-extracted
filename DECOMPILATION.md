@@ -1,6 +1,6 @@
 # AmaanLive — binary module analysis and decompilation
 
-**ملخّص بالعربية:** ملفات `server.js` وجميع ملفات `src/*.js` في هذا المستودع ليست جافاسكربت ولا كوداً تنفيذياً للآلة، بل **ذاكرة مؤقتة لكود V8 (V8 code cache)** — أي "بایت‌كود المحرك Ignition" مُسلسَل مع جدول الثوابت (constant pool) وشجرة `SharedFunctionInfo`. النسخة المولِّدة لها: **Node.js v18.5.0 / V8 10.2.154.4-node.8** مع إعدادات V8 الافتراضية، وتم تصنيفها بنسخ مُشوَّش (javascript-obfuscator). تم تحويلها كلها (18/18 وحدة) إلى جافاسكربت مقروء مع استعادة مصفوفة النصوص المُشفّرة، والنتائج في مجلد `decompiled/` (سجلات على مستوى السجلات). ثم يُخفّض كل سجل إلى وحدة جافاسكربت صالحة نحوياً في مجلد `recovered/` عبر `tools/decompile/emit_source.py`: الوحدات الثماني عشرة كلها مُولّدة وكلها تنجح في `node --check`، مع بقاء التحقق الدلالي على مستوى البايت‌كود مطلوباً. الأدوات وخطوات إعادة التنفيذ في `tools/decompile/`.
+**ملخّص بالعربية:** ملفات `server.js` وجميع ملفات `src/*.js` في هذا المستودع ليست جافاسكربت ولا كوداً تنفيذياً للآلة، بل **ذاكرة مؤقتة لكود V8 (V8 code cache)** — أي "بایت‌كود المحرك Ignition" مُسلسَل مع جدول الثوابت (constant pool) وشجرة `SharedFunctionInfo`. النسخة المولِّدة لها: **Node.js v18.5.0 / V8 10.2.154.4-node.8** مع إعدادات V8 الافتراضية، وتم تصنيفها بنسخ مُشوَّش (javascript-obfuscator). تم تحويلها كلها (18/18 وحدة) إلى جافاسكربت مقروء مع استعادة مصفوفة النصوص المُشفّرة، والنتائج في مجلد `decompiled/` (سجلات على مستوى السجلات). ثم يُخفّض كل سجل إلى وحدة جافاسكربت صالحة نحوياً في مجلد `recovered/` عبر `tools/decompile/emit_source.py`: الوحدات الثماني عشرة كلها مُولّدة وكلها تنجح في `node --check`، وتم التحقق من بنية الحلقات وعبارات `switch` في كل وحدة مقابل البايت‌كود (`tools/verify/structure.py`، 18/18 وحدة)، مع بقاء تحقق إضافي مطلوباً على مستوى البايت‌كود لِلافتات RegExp ومعالجات الاستثناءات وأعمار سياقات V8. الأدوات وخطوات إعادة التنفيذ في `tools/decompile/`.
 
 ---
 
@@ -108,6 +108,11 @@ Recovered content is the real application logic, e.g.
 3. **String resolution cross-check**: all **44/44** `require()` module names recovered from the obfuscated
    string array across the modules are exactly the module specifiers the bytecode requested at runtime;
    for 12 modules the recovered and observed sets are identical.
+4. **Loop / switch structure cross-check**: `tools/verify/structure.py` compares `recovered/` against the
+   bytecode listings (`decompiled/bytecode/*.disasm.txt`) and reports **18/18** modules whose every loop
+   back edge (**142**), `switch` jump table (**8**), strict-comparison `switch` chain and `async` resume
+   dispatch is backed by the bytecode, with matching per-function loop multisets (587 functions). 9
+   regression tests cover the checker itself.
 
 ### Lowering to JavaScript (`recovered/`)
 
@@ -117,10 +122,11 @@ against its listing. All **18/18** modules are emitted and every one of them pas
 and all **44/44** `require()` names the running bytecode produced are present in them as well.
 
 This is a syntactic reconstruction, not a proof of equivalence. Literals are verified against the code
-cache's string table (see above), but RegExp flags, flattened exception handlers, V8 context lifetimes,
-and the loop and switch blocks View8 prints without their own braces — restored by
-`tools/decompile/normalize_listing.py` — still require bytecode-level verification. The register-level
-listings in `decompiled/` remain the reference representation.
+cache's string table (see above). The loop and switch blocks View8 prints without their own braces —
+restored by `tools/decompile/normalize_listing.py` — are checked against the bytecode itself by
+`tools/verify/structure.py` (18/18 modules, every back edge and jump table accounted for), but RegExp
+flags, flattened exception handlers and V8 context lifetimes still require bytecode-level verification.
+The register-level listings in `decompiled/` remain the reference representation.
 
 ### Module table
 
