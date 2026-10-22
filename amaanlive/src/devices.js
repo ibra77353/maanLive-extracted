@@ -245,7 +245,7 @@ function buildInputArgs(source, platform) {
     if (source.videoSize) args.push('-video_size', source.videoSize);
     args.push('-i', win ? 'desktop' : (process.env.DISPLAY || ':0'));
     if (source.audioDevice && win) {
-      args.push('-f', 'dshow', '-i', 'audio="' + source.audioDevice + '"');
+      args.push('-f', 'dshow', '-i', 'audio=' + source.audioDevice);
     }
     return args;
   }
@@ -258,8 +258,10 @@ function buildInputArgs(source, platform) {
       if (source.videoSize) args.push('-video_size', source.videoSize);
       if (source.fps) args.push('-framerate', String(source.fps));
     }
-    args.push('-i', 'video="' + source.videoDevice + '"' +
-      (source.audioDevice ? ':audio="' + source.audioDevice + '"' : ''));
+    // spawn receives one complete argument, not a shell command: extra quotes become
+    // part of the DirectShow device name and cause "Could not find video device".
+    args.push('-i', 'video=' + source.videoDevice +
+      (source.audioDevice ? ':audio=' + source.audioDevice : ''));
     return args;
   }
 
@@ -454,7 +456,7 @@ async function scanLinux() {
 /** قراءة قدرات جهاز واحد (تُستدعى للجهاز المطلوب فقط لتقليل زمن الفحص). */
 async function readCaps(device) {
   if (device.kind === 'audio') {
-    const target = IS_WIN ? 'audio="' + device.name + '"' : device.name;
+    const target = IS_WIN ? 'audio=' + device.name : device.name;
     const args = IS_WIN
       ? ['-hide_banner', '-f', 'dshow', '-list_options', 'true', '-i', target]
       : ['-hide_banner', '-f', 'alsa', '-list_devices', 'true', '-i', 'dummy'];
@@ -465,7 +467,7 @@ async function readCaps(device) {
 
   if (IS_WIN) {
     const res = await run(
-      ['-hide_banner', '-f', 'dshow', '-list_options', 'true', '-i', 'video="' + device.name + '"'],
+      ['-hide_banner', '-f', 'dshow', '-list_options', 'true', '-i', 'video=' + device.name],
       { timeout: 15000 }
     );
     const formats = parseDshowVideoOptions(res.stderr || '');

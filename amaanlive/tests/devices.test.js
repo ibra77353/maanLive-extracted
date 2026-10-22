@@ -105,8 +105,8 @@ test('مجموعات الإدخال: المحفوظ أولاً ثم بلا صو�
     'الإعدادات التلقائية للجهاز',
     'الإعدادات التلقائية بلا صوت'
   ]);
-  assert.ok(variants[0].args.includes('video="USB Video":audio="USB Audio"'));
-  assert.strictEqual(variants[1].args[variants[1].args.length - 1], 'video="USB Video"');
+  assert.ok(variants[0].args.includes('video=USB Video:audio=USB Audio'));
+  assert.strictEqual(variants[1].args[variants[1].args.length - 1], 'video=USB Video');
 
   const auto = variants[2].args.join(' ');
   assert.ok(!auto.includes('-pixel_format') && !auto.includes('-video_size') && !auto.includes('-framerate'),

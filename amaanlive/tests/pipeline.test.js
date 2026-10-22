@@ -25,7 +25,7 @@ test('وسائط الإدخال على Windows: dshow مع الحجم والمع
     '-pixel_format', 'mjpeg',
     '-video_size', '1280x720',
     '-framerate', '30',
-    '-i', 'video="USB Video":audio="USB Audio"'
+    '-i', 'video=USB Video:audio=USB Audio'
   ]);
 });
 
@@ -38,7 +38,7 @@ test('وضع الالتقاط الآمن: لا يفرض الدقة ولا الم
 
 test('بلا جهاز صوت: الإدخال فيديو فقط', () => {
   const args = ffmpeg.buildInputArgs(Object.assign({}, USB_SOURCE, { audioDevice: '' }), 'win32');
-  assert.strictEqual(args[args.length - 1], 'video="USB Video"');
+  assert.strictEqual(args[args.length - 1], 'video=USB Video');
 });
 
 test('وسائط الإدخال على Linux: v4l2', () => {
