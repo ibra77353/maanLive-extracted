@@ -269,18 +269,26 @@ function resolveLogo() {
 // ---------------------------------------------------------------- viewer stats
 
 /*
- * سجل تراكمي للمشاهدين المختلفين: مفتاح «القناة|الطرفية» يُضاف مرة واحدة لكل مشاهد
- * ولا يُفرَّغ إلا بإعادة تشغيل البرنامج — ومنه تُحسب «إجمالي المشاهدين منذ بدء التشغيل».
+ * عدّاد تراكمي لمرات المشاهدة منذ إقلاع البرنامج (لِـ«إجمالي المشاهدين» في اللوحة):
+ * تُحتسب مشاهدة جديدة كلما بدأ المشاهد يشاهد بعد انقطاع أطول من نافذة النشاط،
+ * فيزداد العدّاد مع كل مشاهدة من نفس الجهاز أيضاً. لا يُصفَّر إلا بإعادة التشغيل.
  */
-const seenViewers = new Set();
+let viewersTotal = 0;
+const lastViewerSeen = new Map(); // «القناة|الطرفية» → آخر ظهور
 
 function noteViewer(channelId, ip) {
-  if (ip) seenViewers.add(channelId + '|' + ip);
+  if (!ip) return;
+  const key = channelId + '|' + ip;
+  const now = Date.now();
+  const windowMs = Math.max(5, Number(store.get().settings.viewerWindowSeconds) || 20) * 1000;
+  const last = lastViewerSeen.get(key);
+  if (!last || now - last > windowMs) viewersTotal += 1;
+  lastViewerSeen.set(key, now);
 }
 
-/** عدد المشاهدين المختلفين منذ إقلاع البرنامج (المشاهد يُحسب مرة واحدة لكل قناة). */
+/** عدد مرات المشاهدة منذ إقلاع البرنامج (تزداد مع كل مشاهدة جديدة لكل قناة). */
 function totalViewersSeen() {
-  return seenViewers.size;
+  return viewersTotal;
 }
 
 /** يُسجّل قراءة من مسار HLS لقناة: آخر ظهور + حجم مخدوم (لعدّ الخمول والبيانات). */
