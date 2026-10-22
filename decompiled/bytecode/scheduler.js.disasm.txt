@@ -1,0 +1,2448 @@
+
+Start SharedFunctionInfo
+Parameter count 1
+Register count 1
+Frame size 8
+OSR urgency: 0
+Bytecode age: 0
+    0 S> 00000120802DDD48 @    0 : 80 00 00 00       CreateClosure [0], [0], #0
+         00000120802DDD4C @    4 : c4                Star0 
+ 5748 S> 00000120802DDD4D @    5 : a9                Return 
+Constant pool (size = 1)
+00000120802DDD51: [FixedArray] in OldSpace
+ - map: 0x02d9ca6012e1 <Map>
+ - length: 1
+           0: 0x0120802ddd69 <SharedFunctionInfo>
+Start SharedFunctionInfo
+00000120802DDD69: [SharedFunctionInfo] in OldSpace
+ - map: 0x02d9ca601991 <Map[56]>
+ - name: 0x02d9ca6017d1 <String[0]: #>
+ - inferred name: 0x02d9ca6017d1 <String[0]: #>
+ - kind: NormalFunction
+ - syntax kind: AnonymousExpression
+ - function_map_index: 197
+ - formal_parameter_count: 5
+ - expected_nof_properties: 
+ - language_mode: strict
+ - data: 0x0120802ddda1 <BytecodeArray[151]>
+ - code (from data): 0x0000c0544301 <Code BUILTIN InterpreterEntryTrampoline>
+ - script: 0x0120802de809 <Script>
+ - function token position: 1
+ - start position: 10
+ - end position: 5746
+ - no debug info
+ - scope info: 0x0120802ddf09 <ScopeInfo FUNCTION_SCOPE>
+ - length: 5
+ - feedback_metadata: 00000120802E0DE1: [FeedbackMetadata] in OldSpace
+ - map: 0x02d9ca601f81 <Map>
+ - slot_count: 19
+ - create_closure_slot_count: 9
+ Slot #0 Call
+ Slot #2 Call
+ Slot #4 Call
+ Slot #6 Call
+ Slot #8 Literal
+ Slot #9 DefineNamedOwn
+ Slot #11 DefineNamedOwn
+ Slot #13 DefineNamedOwn
+ Slot #15 DefineNamedOwn
+ Slot #17 StoreKeyedStrict
+
+
+Start BytecodeArray
+Parameter count 6
+Register count 7
+Frame size 56
+OSR urgency: 0
+Bytecode age: 0
+   10 E> 00000120802DDDD8 @    0 : 83 00 09          CreateFunctionContext [0], [9]
+         00000120802DDDDB @    3 : 1a f7             PushContext r3
+         00000120802DDDDD @    5 : 10                LdaTheHole 
+         00000120802DDDDE @    6 : 25 02             StaCurrentContextSlot [2]
+         00000120802DDDE0 @    8 : 10                LdaTheHole 
+         00000120802DDDE1 @    9 : 25 03             StaCurrentContextSlot [3]
+         00000120802DDDE3 @   11 : 80 01 00 02       CreateClosure [1], [0], #2
+         00000120802DDDE7 @   15 : 25 04             StaCurrentContextSlot [4]
+         00000120802DDDE9 @   17 : 80 02 01 02       CreateClosure [2], [1], #2
+         00000120802DDDED @   21 : 25 05             StaCurrentContextSlot [5]
+         00000120802DDDEF @   23 : 80 03 02 02       CreateClosure [3], [2], #2
+         00000120802DDDF3 @   27 : 25 06             StaCurrentContextSlot [6]
+         00000120802DDDF5 @   29 : 80 04 03 02       CreateClosure [4], [3], #2
+         00000120802DDDF9 @   33 : 25 07             StaCurrentContextSlot [7]
+         00000120802DDDFB @   35 : 80 05 04 02       CreateClosure [5], [4], #2
+         00000120802DDDFF @   39 : 25 08             StaCurrentContextSlot [8]
+         00000120802DDE01 @   41 : 10                LdaTheHole 
+         00000120802DDE02 @   42 : 25 09             StaCurrentContextSlot [9]
+         00000120802DDE04 @   44 : 80 06 05 02       CreateClosure [6], [5], #2
+         00000120802DDE08 @   48 : 25 0a             StaCurrentContextSlot [10]
+         00000120802DDE0A @   50 : 80 07 06 02       CreateClosure [7], [6], #2
+         00000120802DDE0E @   54 : c3                Star1 
+         00000120802DDE0F @   55 : 80 08 07 02       CreateClosure [8], [7], #2
+         00000120802DDE13 @   59 : c2                Star2 
+   91 S> 00000120802DDE14 @   60 : 17 05             LdaImmutableCurrentContextSlot [5]
+         00000120802DDE16 @   62 : c4                Star0 
+   99 S> 00000120802DDE17 @   63 : 80 09 08 02       CreateClosure [9], [8], #2
+         00000120802DDE1B @   67 : c0                Star4 
+         00000120802DDE1C @   68 : 16 04             LdaCurrentContextSlot [4]
+         00000120802DDE1E @   70 : bf                Star5 
+         00000120802DDE1F @   71 : 01 0d e8 7b 04 00 LdaSmi.ExtraWide [293864]
+         00000120802DDE25 @   77 : be                Star6 
+  732 E> 00000120802DDE26 @   78 : 63 f6 f5 f4 00    CallUndefinedReceiver2 r4, r5, r6, [0]
+  763 S> 00000120802DDE2B @   83 : 13 0a             LdaConstant [10]
+         00000120802DDE2D @   85 : bf                Star5 
+  763 E> 00000120802DDE2E @   86 : 62 04 f5 02       CallUndefinedReceiver1 a1, r5, [2]
+  763 E> 00000120802DDE32 @   90 : 25 02             StaCurrentContextSlot [2]
+  789 S> 00000120802DDE34 @   92 : 13 0b             LdaConstant [11]
+         00000120802DDE36 @   94 : bf                Star5 
+  789 E> 00000120802DDE37 @   95 : 62 04 f5 04       CallUndefinedReceiver1 a1, r5, [4]
+  789 E> 00000120802DDE3B @   99 : 25 03             StaCurrentContextSlot [3]
+ 3804 S> 00000120802DDE3D @  101 : 0f                LdaNull 
+ 3804 E> 00000120802DDE3E @  102 : 25 09             StaCurrentContextSlot [9]
+ 5621 S> 00000120802DDE40 @  104 : 00 0d 3b 01       LdaSmi.Wide [315]
+         00000120802DDE44 @  108 : be                Star6 
+ 5628 E> 00000120802DDE45 @  109 : 62 fa f4 06       CallUndefinedReceiver1 r0, r6, [6]
+         00000120802DDE49 @  113 : bf                Star5 
+         00000120802DDE4A @  114 : 7c 0c 08 29       CreateObjectLiteral [12], [8], #41
+         00000120802DDE4E @  118 : be                Star6 
+         00000120802DDE4F @  119 : 0b f9             Ldar r1
+ 5659 E> 00000120802DDE51 @  121 : 33 f4 0d 09       DefineNamedOwnProperty r6, [13], [9]
+         00000120802DDE55 @  125 : 17 0a             LdaImmutableCurrentContextSlot [10]
+ 5676 E> 00000120802DDE57 @  127 : 33 f4 0e 0b       DefineNamedOwnProperty r6, [14], [11]
+         00000120802DDE5B @  131 : 17 08             LdaImmutableCurrentContextSlot [8]
+ 5696 E> 00000120802DDE5D @  133 : 33 f4 0f 0d       DefineNamedOwnProperty r6, [15], [13]
+         00000120802DDE61 @  137 : 0b f8             Ldar r2
+ 5727 E> 00000120802DDE63 @  139 : 33 f4 10 0f       DefineNamedOwnProperty r6, [16], [15]
+         00000120802DDE67 @  143 : 0b f4             Ldar r6
+ 5645 E> 00000120802DDE69 @  145 : 34 05 f5 11       SetKeyedProperty a2, r5, [17]
+         00000120802DDE6D @  149 : 0e                LdaUndefined 
+ 5745 S> 00000120802DDE6E @  150 : a9                Return 
+Constant pool (size = 17)
+00000120802DDE71: [FixedArray] in OldSpace
+ - map: 0x02d9ca6012e1 <Map>
+ - length: 17
+           0: 0x0120802ddf09 <ScopeInfo FUNCTION_SCOPE>
+           1: 0x0120802de0d1 <SharedFunctionInfo _0x5d58>
+Start SharedFunctionInfo
+00000120802DE0D1: [SharedFunctionInfo] in OldSpace
+ - map: 0x02d9ca601991 <Map[56]>
+ - name: 0x0120802de011 <String[7]: #_0x5d58>
+ - inferred name: 0x02d9ca6017d1 <String[0]: #>
+ - kind: NormalFunction
+ - syntax kind: Declaration
+ - function_map_index: 197
+ - formal_parameter_count: 0
+ - expected_nof_properties: 
+ - language_mode: strict
+ - data: 0x0120802de109 <BytecodeArray[31]>
+ - code (from data): 0x0000c0544301 <Code BUILTIN InterpreterEntryTrampoline>
+ - script: 0x0120802de809 <Script>
+ - function token position: 809
+ - start position: 825
+ - end position: 1358
+ - no debug info
+ - scope info: 0x0120802de189 <ScopeInfo FUNCTION_SCOPE>
+ - outer scope info: 0x0120802ddf09 <ScopeInfo FUNCTION_SCOPE>
+ - length: 0
+ - feedback_metadata: 00000120802E0D01: [FeedbackMetadata] in OldSpace
+ - map: 0x02d9ca601f81 <Map>
+ - slot_count: 3
+ - create_closure_slot_count: 1
+ Slot #0 Literal
+ Slot #1 Call
+
+
+Start BytecodeArray
+Parameter count 1
+Register count 2
+Frame size 16
+OSR urgency: 0
+Bytecode age: 0
+  825 E> 00000120802DE140 @    0 : 83 00 01          CreateFunctionContext [0], [1]
+         00000120802DE143 @    3 : 1a fa             PushContext r0
+         00000120802DE145 @    5 : 10                LdaTheHole 
+         00000120802DE146 @    6 : 25 02             StaCurrentContextSlot [2]
+  844 S> 00000120802DE148 @    8 : 79 01 00 25       CreateArrayLiteral [1], [0], #37
+  844 E> 00000120802DE14C @   12 : 25 02             StaCurrentContextSlot [2]
+ 1302 S> 00000120802DE14E @   14 : 80 02 00 02       CreateClosure [2], [0], #2
+ 1309 E> 00000120802DE152 @   18 : 24 fa 04 00       StaContextSlot r0, [4], [0]
+ 1340 S> 00000120802DE156 @   22 : 14 fa 04 00       LdaContextSlot r0, [4], [0]
+         00000120802DE15A @   26 : c3                Star1 
+ 1347 E> 00000120802DE15B @   27 : 61 f9 01          CallUndefinedReceiver0 r1, [1]
+ 1357 S> 00000120802DE15E @   30 : a9                Return 
+Constant pool (size = 3)
+00000120802DE161: [FixedArray] in OldSpace
+ - map: 0x02d9ca6012e1 <Map>
+ - length: 3
+           0: 0x0120802de189 <ScopeInfo FUNCTION_SCOPE>
+           1: 0x0120802de209 <ArrayBoilerplateDescription PACKED_ELEMENTS, 0x0120802de221 <FixedArray[32]>
+Start FixedArray
+00000120802DE221: [FixedArray] in OldSpace
+ - map: 0x02d9ca601829 <Map>
+ - length: 32
+           0: 0x0120802de331 <String[6]: #zxHLyW>
+           1: 0x0120802de349 <String[12]: #y2HHBM5LBeLK>
+           2: 0x0120802de369 <String[4]: #z2v0>
+           3: 0x0120802de381 <String[7]: #C3rHCNq>
+           4: 0x0120802de399 <String[10]: #zxHWB3j0CW>
+           5: 0x0120802de3b9 <String[16]: #mtq2odm2rwfxww5b>
+           6: 0x0120802de3d9 <String[12]: #C2nOzwr1BgvZ>
+           7: 0x0120802de3f9 <String[10]: #m2DiywLQrG>
+           8: 0x0120802de419 <String[11]: #nZbiywPWyNK>
+           9: 0x0120802de439 <String[18]: #mta4mZC3ogjRDK9YCq>
+          10: 0x0120802de461 <String[8]: #z2v0rgf5>
+          11: 0x0120802de479 <String[6]: #C3rVCa>
+          12: 0x0120802de491 <String[12]: #AxnsDw5UAw5N>
+          13: 0x0120802de4b1 <String[18]: #mtyZmdG5mgXnv3PxBa>
+          14: 0x0120802de4d9 <String[11]: #mtjsr2TPzM4>
+          15: 0x0120802de4f9 <String[10]: #mw1wzfLvyG>
+          16: 0x0120802de519 <String[16]: #mJqYmZyWu3jwAvPY>
+          17: 0x0120802de539 <String[11]: #Aw5JBhvKzxm>
+          18: 0x0120802de559 <String[18]: #nti2ota4mfHLsLjerq>
+          19: 0x0120802de581 <String[11]: #z2v0sg91CNm>
+          20: 0x0120802de5a1 <String[18]: #mJKYntqWnLjfBwPdyW>
+          21: 0x0120802de5c9 <String[18]: #BwfUDwfSu3rVChbLza>
+          22: 0x0120802de5f1 <String[10]: #zw5HyMXLza>
+          23: 0x0120802de611 <String[6]: #zgf5CW>
+          24: 0x0120802de629 <String[7]: #C2XVDhm>
+          25: 0x0120802de641 <String[10]: #AxnbCNjHEq>
+          26: 0x0120802de661 <String[8]: #BgvUz3rO>
+          27: 0x0120802de679 <String[4]: #zw5K>
+          28: 0x0120802de691 <String[11]: #y2HHBM5LBhm>
+          29: 0x0120802de6b1 <String[11]: #mZz1DgXctge>
+          30: 0x0120802de6d1 <String[14]: #z2v0twLUDxrLCW>
+          31: 0x0120802de6f1 <String[16]: #mZqYnZy4wMTqBvD4>
+
+End FixedArray
+>
+           2: 0x0120802de711 <SharedFunctionInfo _0x5d58>
+Start SharedFunctionInfo
+00000120802DE711: [SharedFunctionInfo] in OldSpace
+ - map: 0x02d9ca601991 <Map[56]>
+ - name: 0x0120802de011 <String[7]: #_0x5d58>
+ - inferred name: 0x02d9ca6017d1 <String[0]: #>
+ - kind: NormalFunction
+ - syntax kind: AnonymousExpression
+ - function_map_index: 197
+ - formal_parameter_count: 0
+ - expected_nof_properties: 
+ - language_mode: strict
+ - data: 0x0120802de749 <BytecodeArray[5]>
+ - code (from data): 0x0000c0544301 <Code BUILTIN InterpreterEntryTrampoline>
+ - script: 0x0120802de809 <Script>
+ - function token position: 1310
+ - start position: 1318
+ - end position: 1339
+ - no debug info
+ - scope info: 0x0120802de7b9 <ScopeInfo FUNCTION_SCOPE>
+ - outer scope info: 0x0120802de189 <ScopeInfo FUNCTION_SCOPE>
+ - length: 0
+ - feedback_metadata: 000002D9CA603399: [FeedbackMetadata] in ReadOnlySpace
+ - map: 0x02d9ca601f81 <Map>
+ - slot_count: 0
+ - create_closure_slot_count: 0
+
+
+Start BytecodeArray
+Parameter count 1
+Register count 0
+Frame size 0
+OSR urgency: 0
+Bytecode age: 0
+ 1321 S> 00000120802DE780 @    0 : 17 02             LdaImmutableCurrentContextSlot [2]
+         00000120802DE782 @    2 : aa 00             ThrowReferenceErrorIfHole [0]
+ 1338 S> 00000120802DE784 @    4 : a9                Return 
+Constant pool (size = 1)
+00000120802DE789: [FixedArray] in OldSpace
+ - map: 0x02d9ca6012e1 <Map>
+ - length: 1
+           0: 0x0120802de1e9 <String[9]: #_0x2b9dbd>
+Handler Table (size = 0)
+Source Position Table (size = 7)
+0x0120802de7a1 <ByteArray[7]>
+
+End BytecodeArray
+
+End SharedFunctionInfo
+
+Handler Table (size = 0)
+Source Position Table (size = 20)
+0x0120802e0cd9 <ByteArray[20]>
+
+End BytecodeArray
+
+End SharedFunctionInfo
+
+           2: 0x0120802ded99 <SharedFunctionInfo _0xd839>
+Start SharedFunctionInfo
+00000120802DED99: [SharedFunctionInfo] in OldSpace
+ - map: 0x02d9ca601991 <Map[56]>
+ - name: 0x0120802de029 <String[7]: #_0xd839>
+ - inferred name: 0x02d9ca6017d1 <String[0]: #>
+ - kind: NormalFunction
+ - syntax kind: Declaration
+ - function_map_index: 197
+ - formal_parameter_count: 2
+ - expected_nof_properties: 
+ - language_mode: strict
+ - data: 0x0120802dedd1 <BytecodeArray[132]>
+ - code (from data): 0x0000c0544301 <Code BUILTIN InterpreterEntryTrampoline>
+ - script: 0x0120802de809 <Script>
+ - function token position: 1358
+ - start position: 1374
+ - end position: 2489
+ - no debug info
+ - scope info: 0x0120802df379 <ScopeInfo FUNCTION_SCOPE>
+ - outer scope info: 0x0120802ddf09 <ScopeInfo FUNCTION_SCOPE>
+ - length: 2
+ - feedback_metadata: 00000120802DF3C9: [FeedbackMetadata] in OldSpace
+ - map: 0x02d9ca601f81 <Map>
+ - slot_count: 27
+ - create_closure_slot_count: 1
+ Slot #0 BinaryOp
+ Slot #1 Call
+ Slot #3 LoadKeyed
+ Slot #5 LoadProperty
+ Slot #7 SetNamedStrict
+ Slot #9 SetNamedStrict
+ Slot #11 Literal
+ Slot #12 SetNamedStrict
+ Slot #14 LoadKeyed
+ Slot #16 BinaryOp
+ Slot #17 LoadProperty
+ Slot #19 LoadKeyed
+ Slot #21 LoadProperty
+ Slot #23 Call
+ Slot #25 StoreKeyedStrict
+
+
+Start BytecodeArray
+Parameter count 3
+Register count 8
+Frame size 64
+OSR urgency: 0
+Bytecode age: 0
+ 1396 S> 00000120802DEE08 @    0 : 0b 03             Ldar a0
+ 1415 E> 00000120802DEE0A @    2 : 00 46 2a 01 00 00 SubSmi.Wide [298], [0]
+         00000120802DEE10 @    8 : 18 03             Star a0
+ 1438 S> 00000120802DEE12 @   10 : 16 04             LdaCurrentContextSlot [4]
+         00000120802DEE14 @   12 : be                Star6 
+ 1438 E> 00000120802DEE15 @   13 : 61 f4 01          CallUndefinedReceiver0 r6, [1]
+         00000120802DEE18 @   16 : c4                Star0 
+ 1462 S> 00000120802DEE19 @   17 : 0b 03             Ldar a0
+ 1471 E> 00000120802DEE1B @   19 : 2f fa 03          GetKeyedProperty r0, [3]
+         00000120802DEE1E @   22 : c3                Star1 
+ 1483 S> 00000120802DEE1F @   23 : 17 05             LdaImmutableCurrentContextSlot [5]
+         00000120802DEE21 @   25 : be                Star6 
+ 1493 E> 00000120802DEE22 @   26 : 2d f4 00 05       GetNamedProperty r6, [0], [5]
+         00000120802DEE26 @   30 : 9d 23             JumpIfNotUndefined [35] (00000120802DEE49 @ 65)
+ 1531 S> 00000120802DEE28 @   32 : 80 01 00 02       CreateClosure [1], [0], #2
+         00000120802DEE2C @   36 : c2                Star2 
+ 2188 S> 00000120802DEE2D @   37 : 17 05             LdaImmutableCurrentContextSlot [5]
+         00000120802DEE2F @   39 : be                Star6 
+         00000120802DEE30 @   40 : 0b f8             Ldar r2
+ 2205 E> 00000120802DEE32 @   42 : 32 f4 02 07       SetNamedProperty r6, [2], [7]
+         00000120802DEE36 @   46 : 17 05             LdaImmutableCurrentContextSlot [5]
+         00000120802DEE38 @   48 : be                Star6 
+ 2216 E> 00000120802DEE39 @   49 : 7d                CreateEmptyObjectLiteral 
+ 2233 E> 00000120802DEE3A @   50 : 32 f4 03 09       SetNamedProperty r6, [3], [9]
+         00000120802DEE3E @   54 : 17 05             LdaImmutableCurrentContextSlot [5]
+         00000120802DEE40 @   56 : be                Star6 
+ 2237 E> 00000120802DEE41 @   57 : 7b 0b             CreateEmptyArrayLiteral [11]
+         00000120802DEE43 @   59 : 55                ToBooleanLogicalNot 
+         00000120802DEE44 @   60 : 56                LogicalNot 
+ 2254 E> 00000120802DEE45 @   61 : 32 f4 00 0c       SetNamedProperty r6, [0], [12]
+ 2277 S> 00000120802DEE49 @   65 : 0c                LdaZero 
+ 2286 E> 00000120802DEE4A @   66 : 2f fa 0e          GetKeyedProperty r0, [14]
+         00000120802DEE4D @   69 : c1                Star3 
+ 2302 S> 00000120802DEE4E @   70 : 0b f7             Ldar r3
+ 2311 E> 00000120802DEE50 @   72 : 39 03 10          Add a0, [16]
+         00000120802DEE53 @   75 : c0                Star4 
+ 2332 S> 00000120802DEE54 @   76 : 17 05             LdaImmutableCurrentContextSlot [5]
+         00000120802DEE56 @   78 : be                Star6 
+ 2339 E> 00000120802DEE57 @   79 : 2d f4 03 11       GetNamedProperty r6, [3], [17]
+         00000120802DEE5B @   83 : be                Star6 
+         00000120802DEE5C @   84 : 0b f6             Ldar r4
+ 2349 E> 00000120802DEE5E @   86 : 2f f4 13          GetKeyedProperty r6, [19]
+         00000120802DEE61 @   89 : bf                Star5 
+ 2361 S> 00000120802DEE62 @   90 : 96 22             JumpIfToBooleanTrue [34] (00000120802DEE84 @ 124)
+         00000120802DEE64 @   92 : 17 05             LdaImmutableCurrentContextSlot [5]
+         00000120802DEE66 @   94 : bd                Star7 
+ 2396 E> 00000120802DEE67 @   95 : 2d f3 02 15       GetNamedProperty r7, [2], [21]
+         00000120802DEE6B @   99 : be                Star6 
+ 2406 E> 00000120802DEE6C @  100 : 5e f4 f3 f9 17    CallProperty1 r6, r7, r1, [23]
+         00000120802DEE71 @  105 : c3                Star1 
+         00000120802DEE72 @  106 : 17 05             LdaImmutableCurrentContextSlot [5]
+         00000120802DEE74 @  108 : be                Star6 
+ 2425 E> 00000120802DEE75 @  109 : 2d f4 03 11       GetNamedProperty r6, [3], [17]
+         00000120802DEE79 @  113 : be                Star6 
+         00000120802DEE7A @  114 : 0b f9             Ldar r1
+ 2446 E> 00000120802DEE7C @  116 : 34 f4 f6 19       SetKeyedProperty r6, r4, [25]
+         00000120802DEE80 @  120 : 0b f9             Ldar r1
+         00000120802DEE82 @  122 : 8a 07             Jump [7] (00000120802DEE89 @ 129)
+         00000120802DEE84 @  124 : 19 f5 f9          Mov r5, r1
+         00000120802DEE87 @  127 : 0b f9             Ldar r1
+         00000120802DEE89 @  129 : 0b f9             Ldar r1
+ 2488 S> 00000120802DEE8B @  131 : a9                Return 
+Constant pool (size = 4)
+00000120802DEE91: [FixedArray] in OldSpace
+ - map: 0x02d9ca6012e1 <Map>
+ - length: 4
+           0: 0x0120802deec1 <String[6]: #mSdHjn>
+           1: 0x0120802deed9 <SharedFunctionInfo _0x5ba414>
+Start SharedFunctionInfo
+00000120802DEED9: [SharedFunctionInfo] in OldSpace
+ - map: 0x02d9ca601991 <Map[56]>
+ - name: 0x0120802df2a1 <String[9]: #_0x5ba414>
+ - inferred name: 0x02d9ca6017d1 <String[0]: #>
+ - kind: NormalFunction
+ - syntax kind: AnonymousExpression
+ - function_map_index: 197
+ - formal_parameter_count: 1
+ - expected_nof_properties: 
+ - language_mode: strict
+ - data: 0x0120802def11 <BytecodeArray[224]>
+ - code (from data): 0x0000c0544301 <Code BUILTIN InterpreterEntryTrampoline>
+ - script: 0x0120802de809 <Script>
+ - function token position: 1531
+ - start position: 1539
+ - end position: 2187
+ - no debug info
+ - scope info: 0x0120802df251 <ScopeInfo FUNCTION_SCOPE>
+ - outer scope info: 0x0120802ddf09 <ScopeInfo FUNCTION_SCOPE>
+ - length: 1
+ - feedback_metadata: 00000120802DF2C1: [FeedbackMetadata] in OldSpace
+ - map: 0x02d9ca601f81 <Map>
+ - slot_count: 49
+ - create_closure_slot_count: 0
+ Slot #0 LoadProperty
+ Slot #2 BinaryOp
+ Slot #3 Call
+ Slot #5 LoadProperty
+ Slot #7 Call
+ Slot #9 BinaryOp
+ Slot #10 BinaryOp
+ Slot #11 BinaryOp
+ Slot #12 BinaryOp
+ Slot #13 BinaryOp
+ Slot #14 BinaryOp
+ Slot #15 BinaryOp
+ Slot #16 LoadGlobalNotInsideTypeof
+ Slot #18 LoadProperty
+ Slot #20 BinaryOp
+ Slot #21 BinaryOp
+ Slot #22 BinaryOp
+ Slot #23 BinaryOp
+ Slot #24 Call
+ Slot #26 LoadProperty
+ Slot #28 CompareOp
+ Slot #29 BinaryOp
+ Slot #30 BinaryOp
+ Slot #31 BinaryOp
+ Slot #32 LoadProperty
+ Slot #34 Call
+ Slot #36 LoadProperty
+ Slot #38 Call
+ Slot #40 LoadProperty
+ Slot #42 Call
+ Slot #44 BinaryOp
+ Slot #45 LoadGlobalNotInsideTypeof
+ Slot #47 Call
+
+
+Start BytecodeArray
+Parameter count 2
+Register count 16
+Frame size 128
+OSR urgency: 0
+Bytecode age: 0
+ 1567 S> 00000120802DEF48 @    0 : 13 00             LdaConstant [0]
+         00000120802DEF4A @    2 : c4                Star0 
+ 1649 S> 00000120802DEF4B @    3 : 13 01             LdaConstant [1]
+         00000120802DEF4D @    5 : c3                Star1 
+ 1662 S> 00000120802DEF4E @    6 : 13 01             LdaConstant [1]
+         00000120802DEF50 @    8 : c2                Star2 
+ 1683 S> 00000120802DEF51 @    9 : 0c                LdaZero 
+         00000120802DEF52 @   10 : bf                Star5 
+ 1687 S> 00000120802DEF53 @   11 : 0e                LdaUndefined 
+         00000120802DEF54 @   12 : be                Star6 
+ 1697 S> 00000120802DEF55 @   13 : 0e                LdaUndefined 
+         00000120802DEF56 @   14 : bd                Star7 
+ 1717 S> 00000120802DEF57 @   15 : 0c                LdaZero 
+         00000120802DEF58 @   16 : bc                Star8 
+ 1740 S> 00000120802DEF59 @   17 : 2d 03 02 00       GetNamedProperty a0, [2], [0]
+         00000120802DEF5D @   21 : bb                Star9 
+         00000120802DEF5E @   22 : 0b f2             Ldar r8
+         00000120802DEF60 @   24 : 75 02             ToNumeric [2]
+         00000120802DEF62 @   26 : b9                Star11 
+         00000120802DEF63 @   27 : 51 02             Inc [2]
+         00000120802DEF65 @   29 : bc                Star8 
+ 1750 E> 00000120802DEF66 @   30 : 5e f1 03 ef 03    CallProperty1 r9, a0, r11, [3]
+         00000120802DEF6B @   35 : bd                Star7 
+ 1730 E> 00000120802DEF6C @   36 : 97 64             JumpIfToBooleanFalse [100] (00000120802DEFD0 @ 136)
+ 1949 S> 00000120802DEF6E @   38 : 2d fa 03 05       GetNamedProperty r0, [3], [5]
+         00000120802DEF72 @   42 : bb                Star9 
+ 1960 E> 00000120802DEF73 @   43 : 5e f1 fa f3 07    CallProperty1 r9, r0, r7, [7]
+         00000120802DEF78 @   48 : bd                Star7 
+ 1764 S> 00000120802DEF79 @   49 : 54 09             BitwiseNot [9]
+         00000120802DEF7B @   51 : 97 51             JumpIfToBooleanFalse [81] (00000120802DEFCC @ 132)
+         00000120802DEF7D @   53 : 0b f5             Ldar r5
+ 1796 E> 00000120802DEF7F @   55 : 49 04 0a          ModSmi [4], [10]
+         00000120802DEF82 @   58 : 97 0f             JumpIfToBooleanFalse [15] (00000120802DEF91 @ 73)
+         00000120802DEF84 @   60 : 0b f4             Ldar r6
+ 1810 E> 00000120802DEF86 @   62 : 47 40 0c          MulSmi [64], [12]
+         00000120802DEF89 @   65 : bb                Star9 
+         00000120802DEF8A @   66 : 0b f3             Ldar r7
+ 1815 E> 00000120802DEF8C @   68 : 39 f1 0b          Add r9, [11]
+         00000120802DEF8F @   71 : 8a 04             Jump [4] (00000120802DEF93 @ 75)
+         00000120802DEF91 @   73 : 0b f3             Ldar r7
+         00000120802DEF93 @   75 : be                Star6 
+         00000120802DEF94 @   76 : 0b f5             Ldar r5
+ 1786 E> 00000120802DEF96 @   78 : 75 0e             ToNumeric [14]
+         00000120802DEF98 @   80 : bb                Star9 
+         00000120802DEF99 @   81 : 51 0e             Inc [14]
+         00000120802DEF9B @   83 : bf                Star5 
+         00000120802DEF9C @   84 : 0b f1             Ldar r9
+ 1847 E> 00000120802DEF9E @   86 : 49 04 0d          ModSmi [4], [13]
+         00000120802DEFA1 @   89 : 97 2b             JumpIfToBooleanFalse [43] (00000120802DEFCC @ 132)
+ 1864 E> 00000120802DEFA3 @   91 : 21 04 10          LdaGlobal [4], [16]
+         00000120802DEFA6 @   94 : b9                Star11 
+ 1870 E> 00000120802DEFA7 @   95 : 2d ef 05 12       GetNamedProperty r11, [5], [18]
+         00000120802DEFAB @   99 : ba                Star10 
+         00000120802DEFAC @  100 : 0b f5             Ldar r5
+ 1908 E> 00000120802DEFAE @  102 : 47 fe 17          MulSmi [-2], [23]
+ 1918 E> 00000120802DEFB1 @  105 : 4d 06 16          BitwiseAndSmi [6], [22]
+ 1901 E> 00000120802DEFB4 @  108 : 43 f4 15          ShiftRight r6, [21]
+ 1891 E> 00000120802DEFB7 @  111 : 00 4d ff 00 14 00 BitwiseAndSmi.Wide [255], [20]
+         00000120802DEFBD @  117 : b8                Star12 
+ 1886 E> 00000120802DEFBE @  118 : 5e f0 ef ee 18    CallProperty1 r10, r11, r12, [24]
+         00000120802DEFC3 @  123 : 39 f9 0f          Add r1, [15]
+         00000120802DEFC6 @  126 : 19 f9 f1          Mov r1, r9
+         00000120802DEFC9 @  129 : c3                Star1 
+         00000120802DEFCA @  130 : 8a 03             Jump [3] (00000120802DEFCD @ 133)
+         00000120802DEFCC @  132 : 0c                LdaZero 
+ 1665 E> 00000120802DEFCD @  133 : 89 74 00          JumpLoop [116], [0] (00000120802DEF59 @ 17)
+ 1991 S> 00000120802DEFD0 @  136 : 0c                LdaZero 
+         00000120802DEFD1 @  137 : c1                Star3 
+ 2014 S> 00000120802DEFD2 @  138 : 2d f9 06 1a       GetNamedProperty r1, [6], [26]
+         00000120802DEFD6 @  142 : c0                Star4 
+ 2034 S> 00000120802DEFD7 @  143 : 0b f6             Ldar r4
+ 2034 E> 00000120802DEFD9 @  145 : 6d f7 1c          TestLessThan r3, [28]
+         00000120802DEFDC @  148 : 99 43             JumpIfFalse [67] (00000120802DF01F @ 215)
+ 2058 S> 00000120802DEFDE @  150 : 13 07             LdaConstant [7]
+         00000120802DEFE0 @  152 : ba                Star10 
+         00000120802DEFE1 @  153 : 13 08             LdaConstant [8]
+         00000120802DEFE3 @  155 : b8                Star12 
+ 2088 E> 00000120802DEFE4 @  156 : 2d f9 09 20       GetNamedProperty r1, [9], [32]
+         00000120802DEFE8 @  160 : b6                Star14 
+ 2102 E> 00000120802DEFE9 @  161 : 5e ec f9 f7 22    CallProperty1 r14, r1, r3, [34]
+         00000120802DEFEE @  166 : b6                Star14 
+ 2113 E> 00000120802DEFEF @  167 : 2d ec 0a 24       GetNamedProperty r14, [10], [36]
+         00000120802DEFF3 @  171 : b7                Star13 
+         00000120802DEFF4 @  172 : 0d 10             LdaSmi [16]
+         00000120802DEFF6 @  174 : b5                Star15 
+ 2125 E> 00000120802DEFF7 @  175 : 5e ed ec eb 26    CallProperty1 r13, r14, r15, [38]
+ 2078 E> 00000120802DEFFC @  180 : 39 ee 1f          Add r12, [31]
+         00000120802DEFFF @  183 : b8                Star12 
+ 2132 E> 00000120802DF000 @  184 : 2d ee 0b 28       GetNamedProperty r12, [11], [40]
+         00000120802DF004 @  188 : b9                Star11 
+         00000120802DF005 @  189 : 0d fe             LdaSmi [-2]
+         00000120802DF007 @  191 : b7                Star13 
+ 2141 E> 00000120802DF008 @  192 : 5e ef ee ed 2a    CallProperty1 r11, r12, r13, [42]
+ 2072 E> 00000120802DF00D @  197 : 39 f0 1e          Add r10, [30]
+         00000120802DF010 @  200 : 39 f8 1d          Add r2, [29]
+         00000120802DF013 @  203 : 19 f8 f1          Mov r2, r9
+         00000120802DF016 @  206 : c2                Star2 
+ 2054 S> 00000120802DF017 @  207 : 0b f7             Ldar r3
+         00000120802DF019 @  209 : 51 2c             Inc [44]
+         00000120802DF01B @  211 : c1                Star3 
+ 1973 E> 00000120802DF01C @  212 : 89 45 00          JumpLoop [69], [0] (00000120802DEFD7 @ 143)
+ 2149 S> 00000120802DF01F @  215 : 21 0c 2d          LdaGlobal [12], [45]
+         00000120802DF022 @  218 : bb                Star9 
+ 2156 E> 00000120802DF023 @  219 : 62 f1 f8 2f       CallUndefinedReceiver1 r9, r2, [47]
+ 2186 S> 00000120802DF027 @  223 : a9                Return 
+Constant pool (size = 13)
+00000120802DF029: [FixedArray] in OldSpace
+ - map: 0x02d9ca6012e1 <Map>
+ - length: 13
+           0: 0x0120802df0a1 <String[65]: #abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=>
+           1: 0x02d9ca6017d1 <String[0]: #>
+           2: 0x000fcc3c21f9 <String[6]: #charAt>
+           3: 0x000fcc3c16a9 <String[7]: #indexOf>
+           4: 0x02d9ca606141 <String[6]: #String>
+           5: 0x000fcc3c2189 <String[12]: #fromCharCode>
+           6: 0x02d9ca6055f9 <String[6]: #length>
+           7: 0x0120802df149 <String[1]: #%>
+           8: 0x0120802df161 <String[2]: #00>
+           9: 0x000fcc3c2211 <String[10]: #charCodeAt>
+          10: 0x02d9ca6062b9 <String[8]: #toString>
+          11: 0x000fcc3c1749 <String[5]: #slice>
+          12: 0x000fcc3c2da1 <String[18]: #decodeURIComponent>
+Handler Table (size = 0)
+Source Position Table (size = 104)
+0x0120802df1d9 <ByteArray[104]>
+
+End BytecodeArray
+
+End SharedFunctionInfo
+
+           2: 0x0120802df2f9 <String[6]: #xhNHQC>
+           3: 0x0120802df311 <String[6]: #JRIDmF>
+Handler Table (size = 0)
+Source Position Table (size = 63)
+0x0120802df329 <ByteArray[63]>
+
+End BytecodeArray
+
+End SharedFunctionInfo
+
+           3: 0x0120802df3f1 <SharedFunctionInfo toMinutes>
+Start SharedFunctionInfo
+00000120802DF3F1: [SharedFunctionInfo] in OldSpace
+ - map: 0x02d9ca601991 <Map[56]>
+ - name: 0x0120802de041 <String[9]: #toMinutes>
+ - inferred name: 0x02d9ca6017d1 <String[0]: #>
+ - kind: NormalFunction
+ - syntax kind: Declaration
+ - function_map_index: 197
+ - formal_parameter_count: 1
+ - expected_nof_properties: 
+ - language_mode: strict
+ - data: 0x0120802df429 <BytecodeArray[82]>
+ - code (from data): 0x0000c0544301 <Code BUILTIN InterpreterEntryTrampoline>
+ - script: 0x0120802de809 <Script>
+ - function token position: 2489
+ - start position: 2507
+ - end position: 2705
+ - no debug info
+ - scope info: 0x0120802df541 <ScopeInfo FUNCTION_SCOPE>
+ - outer scope info: 0x0120802ddf09 <ScopeInfo FUNCTION_SCOPE>
+ - length: 1
+ - feedback_metadata: 00000120802DF591: [FeedbackMetadata] in OldSpace
+ - map: 0x02d9ca601f81 <Map>
+ - slot_count: 19
+ - create_closure_slot_count: 0
+ Slot #0 Literal
+ Slot #1 Call
+ Slot #3 LoadKeyed
+ Slot #5 Call
+ Slot #7 BinaryOp
+ Slot #8 BinaryOp
+ Slot #9 LoadGlobalNotInsideTypeof
+ Slot #11 LoadKeyed
+ Slot #13 Call
+ Slot #15 LoadKeyed
+ Slot #17 Call
+
+
+Start BytecodeArray
+Parameter count 2
+Register count 6
+Frame size 48
+OSR urgency: 0
+Bytecode age: 0
+ 2535 S> 00000120802DF460 @    0 : 17 05             LdaImmutableCurrentContextSlot [5]
+         00000120802DF462 @    2 : c4                Star0 
+ 2553 S> 00000120802DF463 @    3 : 78 00 00 00       CreateRegExpLiteral [0], [0], #0
+         00000120802DF467 @    7 : c1                Star3 
+         00000120802DF468 @    8 : 00 0d 37 01       LdaSmi.Wide [311]
+         00000120802DF46C @   12 : bf                Star5 
+ 2575 E> 00000120802DF46D @   13 : 62 fa f5 01       CallUndefinedReceiver1 r0, r5, [1]
+ 2574 E> 00000120802DF471 @   17 : 2f f7 03          GetKeyedProperty r3, [3]
+         00000120802DF474 @   20 : c2                Star2 
+         00000120802DF475 @   21 : 0b 03             Ldar a0
+ 2593 E> 00000120802DF477 @   23 : 96 04             JumpIfToBooleanTrue [4] (00000120802DF47B @ 27)
+         00000120802DF479 @   25 : 13 01             LdaConstant [1]
+         00000120802DF47B @   27 : c0                Star4 
+ 2592 E> 00000120802DF47C @   28 : 5e f8 f7 f6 05    CallProperty1 r2, r3, r4, [5]
+         00000120802DF481 @   33 : c3                Star1 
+ 2608 S> 00000120802DF482 @   34 : 96 04             JumpIfToBooleanTrue [4] (00000120802DF486 @ 38)
+ 2622 S> 00000120802DF484 @   36 : 0f                LdaNull 
+ 2634 S> 00000120802DF485 @   37 : a9                Return 
+ 2634 S> 00000120802DF486 @   38 : 21 02 09          LdaGlobal [2], [9]
+         00000120802DF489 @   41 : c2                Star2 
+         00000120802DF48A @   42 : 0d 01             LdaSmi [1]
+ 2659 E> 00000120802DF48C @   44 : 2f f9 0b          GetKeyedProperty r1, [11]
+         00000120802DF48F @   47 : c1                Star3 
+         00000120802DF490 @   48 : 0d 0a             LdaSmi [10]
+         00000120802DF492 @   50 : c0                Star4 
+ 2641 E> 00000120802DF493 @   51 : 63 f8 f7 f6 0d    CallUndefinedReceiver2 r2, r3, r4, [13]
+ 2669 E> 00000120802DF498 @   56 : 47 3c 08          MulSmi [60], [8]
+         00000120802DF49B @   59 : c2                Star2 
+         00000120802DF49C @   60 : 21 02 09          LdaGlobal [2], [9]
+         00000120802DF49F @   63 : c1                Star3 
+         00000120802DF4A0 @   64 : 0d 02             LdaSmi [2]
+ 2693 E> 00000120802DF4A2 @   66 : 2f f9 0f          GetKeyedProperty r1, [15]
+         00000120802DF4A5 @   69 : c0                Star4 
+         00000120802DF4A6 @   70 : 0d 0a             LdaSmi [10]
+         00000120802DF4A8 @   72 : bf                Star5 
+ 2675 E> 00000120802DF4A9 @   73 : 63 f7 f6 f5 11    CallUndefinedReceiver2 r3, r4, r5, [17]
+ 2674 E> 00000120802DF4AE @   78 : 39 f8 07          Add r2, [7]
+ 2704 S> 00000120802DF4B1 @   81 : a9                Return 
+Constant pool (size = 3)
+00000120802DF4B9: [FixedArray] in OldSpace
+ - map: 0x02d9ca6012e1 <Map>
+ - length: 3
+           0: 0x0120802df4e1 <String[19]: #^(\\d{1,2}):(\\d{2})$>
+           1: 0x02d9ca6017d1 <String[0]: #>
+           2: 0x000fcc3c27d9 <String[8]: #parseInt>
+Handler Table (size = 0)
+Source Position Table (size = 37)
+0x0120802df509 <ByteArray[37]>
+
+End BytecodeArray
+
+End SharedFunctionInfo
+
+           4: 0x0120802df5b1 <SharedFunctionInfo slotActive>
+Start SharedFunctionInfo
+00000120802DF5B1: [SharedFunctionInfo] in OldSpace
+ - map: 0x02d9ca601991 <Map[56]>
+ - name: 0x0120802de061 <String[10]: #slotActive>
+ - inferred name: 0x02d9ca6017d1 <String[0]: #>
+ - kind: NormalFunction
+ - syntax kind: Declaration
+ - function_map_index: 197
+ - formal_parameter_count: 3
+ - expected_nof_properties: 
+ - language_mode: strict
+ - data: 0x0120802df5e9 <BytecodeArray[84]>
+ - code (from data): 0x0000c0544301 <Code BUILTIN InterpreterEntryTrampoline>
+ - script: 0x0120802de809 <Script>
+ - function token position: 2705
+ - start position: 2724
+ - end position: 3038
+ - no debug info
+ - scope info: 0x0120802df6f1 <ScopeInfo FUNCTION_SCOPE>
+ - outer scope info: 0x0120802ddf09 <ScopeInfo FUNCTION_SCOPE>
+ - length: 3
+ - feedback_metadata: 00000120802DF741: [FeedbackMetadata] in OldSpace
+ - map: 0x02d9ca601f81 <Map>
+ - slot_count: 16
+ - create_closure_slot_count: 0
+ Slot #0 LoadProperty
+ Slot #2 Call
+ Slot #4 Call
+ Slot #6 LoadKeyed
+ Slot #8 Call
+ Slot #10 Literal
+ Slot #11 CompareOp
+ Slot #12 CompareOp
+ Slot #13 CompareOp
+ Slot #14 CompareOp
+ Slot #15 CompareOp
+
+
+Start BytecodeArray
+Parameter count 4
+Register count 7
+Frame size 56
+OSR urgency: 0
+Bytecode age: 0
+ 2772 S> 00000120802DF620 @    0 : 17 05             LdaImmutableCurrentContextSlot [5]
+         00000120802DF622 @    2 : c4                Star0 
+ 2790 S> 00000120802DF623 @    3 : 17 06             LdaImmutableCurrentContextSlot [6]
+         00000120802DF625 @    5 : c1                Star3 
+ 2809 E> 00000120802DF626 @    6 : 2d 03 00 00       GetNamedProperty a0, [0], [0]
+         00000120802DF62A @   10 : c0                Star4 
+ 2790 E> 00000120802DF62B @   11 : 62 f7 f6 02       CallUndefinedReceiver1 r3, r4, [2]
+         00000120802DF62F @   15 : c3                Star1 
+ 2830 S> 00000120802DF630 @   16 : 17 06             LdaImmutableCurrentContextSlot [6]
+         00000120802DF632 @   18 : c1                Star3 
+         00000120802DF633 @   19 : 00 0d 32 01       LdaSmi.Wide [306]
+         00000120802DF637 @   23 : be                Star6 
+ 2850 E> 00000120802DF638 @   24 : 62 fa f4 04       CallUndefinedReceiver1 r0, r6, [4]
+ 2849 E> 00000120802DF63C @   28 : 2f 03 06          GetKeyedProperty a0, [6]
+         00000120802DF63F @   31 : c0                Star4 
+ 2830 E> 00000120802DF640 @   32 : 62 f7 f6 08       CallUndefinedReceiver1 r3, r4, [8]
+         00000120802DF644 @   36 : c2                Star2 
+ 2869 S> 00000120802DF645 @   37 : 0b f9             Ldar r1
+         00000120802DF647 @   39 : 1d                TestUndetectable 
+         00000120802DF648 @   40 : 98 07             JumpIfTrue [7] (00000120802DF64F @ 47)
+         00000120802DF64A @   42 : 0b f8             Ldar r2
+         00000120802DF64C @   44 : 1d                TestUndetectable 
+         00000120802DF64D @   45 : 99 06             JumpIfFalse [6] (00000120802DF653 @ 51)
+ 2905 S> 00000120802DF64F @   47 : 7b 0a             CreateEmptyArrayLiteral [10]
+         00000120802DF651 @   49 : 55                ToBooleanLogicalNot 
+ 2915 S> 00000120802DF652 @   50 : a9                Return 
+ 2915 S> 00000120802DF653 @   51 : 0b f8             Ldar r2
+ 2927 E> 00000120802DF655 @   53 : 6f f9 0b          TestLessThanOrEqual r1, [11]
+         00000120802DF658 @   56 : 99 0f             JumpIfFalse [15] (00000120802DF667 @ 71)
+ 2939 S> 00000120802DF65A @   58 : 0b f9             Ldar r1
+ 2955 E> 00000120802DF65C @   60 : 70 05 0c          TestGreaterThanOrEqual a2, [12]
+         00000120802DF65F @   63 : 99 07             JumpIfFalse [7] (00000120802DF666 @ 70)
+         00000120802DF661 @   65 : 0b f8             Ldar r2
+ 2977 E> 00000120802DF663 @   67 : 6d 05 0d          TestLessThan a2, [13]
+ 2988 S> 00000120802DF666 @   70 : a9                Return 
+ 2988 S> 00000120802DF667 @   71 : 0b f9             Ldar r1
+ 3004 E> 00000120802DF669 @   73 : 70 05 0e          TestGreaterThanOrEqual a2, [14]
+         00000120802DF66C @   76 : 98 07             JumpIfTrue [7] (00000120802DF673 @ 83)
+         00000120802DF66E @   78 : 0b f8             Ldar r2
+ 3026 E> 00000120802DF670 @   80 : 6d 05 0f          TestLessThan a2, [15]
+ 3037 S> 00000120802DF673 @   83 : a9                Return 
+Constant pool (size = 1)
+00000120802DF679: [FixedArray] in OldSpace
+ - map: 0x02d9ca6012e1 <Map>
+ - length: 1
+           0: 0x0120802df691 <String[5]: #start>
+Handler Table (size = 0)
+Source Position Table (size = 49)
+0x0120802df6a9 <ByteArray[49]>
+
+End BytecodeArray
+
+End SharedFunctionInfo
+
+           5: 0x0120802df761 <SharedFunctionInfo shouldRunNow>
+Start SharedFunctionInfo
+00000120802DF761: [SharedFunctionInfo] in OldSpace
+ - map: 0x02d9ca601991 <Map[56]>
+ - name: 0x0120802de081 <String[12]: #shouldRunNow>
+ - inferred name: 0x02d9ca6017d1 <String[0]: #>
+ - kind: NormalFunction
+ - syntax kind: Declaration
+ - function_map_index: 197
+ - formal_parameter_count: 2
+ - expected_nof_properties: 
+ - language_mode: strict
+ - data: 0x0120802df799 <BytecodeArray[609]>
+ - code (from data): 0x0000c0544301 <Code BUILTIN InterpreterEntryTrampoline>
+ - script: 0x0120802de809 <Script>
+ - function token position: 3038
+ - start position: 3059
+ - end position: 3794
+ - no debug info
+ - scope info: 0x0120802dfae1 <ScopeInfo FUNCTION_SCOPE>
+ - outer scope info: 0x0120802ddf09 <ScopeInfo FUNCTION_SCOPE>
+ - length: 2
+ - feedback_metadata: 00000120802DFE69: [FeedbackMetadata] in OldSpace
+ - map: 0x02d9ca601f81 <Map>
+ - slot_count: 102
+ - create_closure_slot_count: 1
+ Slot #0 Call
+ Slot #2 LoadKeyed
+ Slot #4 Call
+ Slot #6 Call
+ Slot #8 LoadKeyed
+ Slot #10 LoadProperty
+ Slot #12 Call
+ Slot #14 LoadProperty
+ Slot #16 LoadProperty
+ Slot #18 Call
+ Slot #20 BinaryOp
+ Slot #21 BinaryOp
+ Slot #22 Call
+ Slot #24 LoadKeyed
+ Slot #26 Call
+ Slot #28 Call
+ Slot #30 LoadKeyed
+ Slot #32 Call
+ Slot #34 LoadProperty
+ Slot #36 Call
+ Slot #38 LoadProperty
+ Slot #40 Call
+ Slot #42 LoadProperty
+ Slot #44 LoadProperty
+ Slot #46 LoadGlobalNotInsideTypeof
+ Slot #48 Call
+ Slot #50 LoadKeyed
+ Slot #52 Call
+ Slot #54 LoadKeyed
+ Slot #56 Call
+ Slot #58 LoadProperty
+ Slot #60 Call
+ Slot #62 LoadKeyed
+ Slot #64 Call
+ Slot #66 LoadKeyed
+ Slot #68 Literal
+ Slot #69 LoadProperty
+ Slot #71 Call
+ Slot #73 Call
+ Slot #75 LoadKeyed
+ Slot #77 Literal
+ Slot #78 LoadProperty
+ Slot #80 Call
+ Slot #82 LoadProperty
+ Slot #84 Call
+ Slot #86 LoadProperty
+ Slot #88 LoadProperty
+ Slot #90 Call
+ Slot #92 Literal
+ Slot #93 LoadProperty
+ Slot #95 Call
+ Slot #97 LoadProperty
+ Slot #99 Call
+ Slot #101 Literal
+
+
+Start BytecodeArray
+Parameter count 3
+Register count 30
+Frame size 240
+OSR urgency: 0
+Bytecode age: 0
+ 3059 E> 00000120802DF7D0 @    0 : 83 00 02          CreateFunctionContext [0], [2]
+         00000120802DF7D3 @    3 : 1a ef             PushContext r11
+         00000120802DF7D5 @    5 : 0b 03             Ldar a0
+         00000120802DF7D7 @    7 : 25 02             StaCurrentContextSlot [2]
+         00000120802DF7D9 @    9 : 10                LdaTheHole 
+         00000120802DF7DA @   10 : 25 03             StaCurrentContextSlot [3]
+ 3097 S> 00000120802DF7DC @   12 : 15 ef 05 00       LdaImmutableContextSlot r11, [5], [0]
+ 3097 E> 00000120802DF7E0 @   16 : 25 03             StaCurrentContextSlot [3]
+ 3115 S> 00000120802DF7E2 @   18 : 15 ef 02 00       LdaImmutableContextSlot r11, [2], [0]
+         00000120802DF7E6 @   22 : aa 01             ThrowReferenceErrorIfHole [1]
+         00000120802DF7E8 @   24 : b7                Star13 
+         00000120802DF7E9 @   25 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802DF7EB @   27 : b6                Star14 
+         00000120802DF7EC @   28 : 00 0d 39 01       LdaSmi.Wide [313]
+         00000120802DF7F0 @   32 : b5                Star15 
+ 3121 E> 00000120802DF7F1 @   33 : 62 ec eb 00       CallUndefinedReceiver1 r14, r15, [0]
+ 3120 E> 00000120802DF7F5 @   37 : 2f ed 02          GetKeyedProperty r13, [2]
+         00000120802DF7F8 @   40 : b8                Star12 
+ 3138 E> 00000120802DF7F9 @   41 : 5d ee ed 04       CallProperty0 r12, r13, [4]
+         00000120802DF7FD @   45 : c4                Star0 
+ 3151 S> 00000120802DF7FE @   46 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802DF800 @   48 : b6                Star14 
+         00000120802DF801 @   49 : 00 0d 3d 01       LdaSmi.Wide [317]
+         00000120802DF805 @   53 : b5                Star15 
+ 3161 E> 00000120802DF806 @   54 : 62 ec eb 06       CallUndefinedReceiver1 r14, r15, [6]
+ 3160 E> 00000120802DF80A @   58 : 2f fa 08          GetKeyedProperty r0, [8]
+         00000120802DF80D @   61 : b7                Star13 
+ 3178 E> 00000120802DF80E @   62 : 2d ed 02 0a       GetNamedProperty r13, [2], [10]
+         00000120802DF812 @   66 : b8                Star12 
+         00000120802DF813 @   67 : 80 03 00 02       CreateClosure [3], [0], #2
+         00000120802DF817 @   71 : b6                Star14 
+ 3188 E> 00000120802DF818 @   72 : 5e ee ed ec 0c    CallProperty1 r12, r13, r14, [12]
+         00000120802DF81D @   77 : c3                Star1 
+ 3289 S> 00000120802DF81E @   78 : 2d f9 04 0e       GetNamedProperty r1, [4], [14]
+         00000120802DF822 @   82 : 96 04             JumpIfToBooleanTrue [4] (00000120802DF826 @ 86)
+ 3300 S> 00000120802DF824 @   84 : 0f                LdaNull 
+ 3312 S> 00000120802DF825 @   85 : a9                Return 
+ 3337 S> 00000120802DF826 @   86 : 2d 04 05 10       GetNamedProperty a1, [5], [16]
+         00000120802DF82A @   90 : b8                Star12 
+ 3347 E> 00000120802DF82B @   91 : 5d ee 04 12       CallProperty0 r12, a1, [18]
+         00000120802DF82F @   95 : c2                Star2 
+ 3360 S> 00000120802DF830 @   96 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802DF832 @   98 : b6                Star14 
+         00000120802DF833 @   99 : 00 0d 2a 01       LdaSmi.Wide [298]
+         00000120802DF837 @  103 : b5                Star15 
+ 3370 E> 00000120802DF838 @  104 : 62 ec eb 16       CallUndefinedReceiver1 r14, r15, [22]
+ 3369 E> 00000120802DF83C @  108 : 2f 04 18          GetKeyedProperty a1, [24]
+         00000120802DF83F @  111 : b8                Star12 
+ 3387 E> 00000120802DF840 @  112 : 5d ee 04 1a       CallProperty0 r12, a1, [26]
+ 3389 E> 00000120802DF844 @  116 : 47 3c 15          MulSmi [60], [21]
+         00000120802DF847 @  119 : b8                Star12 
+         00000120802DF848 @  120 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802DF84A @  122 : b5                Star15 
+         00000120802DF84B @  123 : 00 0d 35 01       LdaSmi.Wide [309]
+         00000120802DF84F @  127 : 18 ea             Star r16
+ 3405 E> 00000120802DF851 @  129 : 62 eb ea 1c       CallUndefinedReceiver1 r15, r16, [28]
+ 3404 E> 00000120802DF855 @  133 : 2f 04 1e          GetKeyedProperty a1, [30]
+         00000120802DF858 @  136 : b7                Star13 
+ 3422 E> 00000120802DF859 @  137 : 5d ed 04 20       CallProperty0 r13, a1, [32]
+ 3394 E> 00000120802DF85D @  141 : 39 ee 14          Add r12, [20]
+         00000120802DF860 @  144 : c1                Star3 
+ 3448 S> 00000120802DF861 @  145 : b1 f9 22 24       GetIterator r1, [34], [36]
+         00000120802DF865 @  149 : 9f 07             JumpIfJSReceiver [7] (00000120802DF86C @ 156)
+         00000120802DF867 @  151 : 65 c7 00 fa 00    CallRuntime [ThrowSymbolIteratorInvalid], r0-r0
+         00000120802DF86C @  156 : b7                Star13 
+         00000120802DF86D @  157 : 2d ed 06 26       GetNamedProperty r13, [6], [38]
+         00000120802DF871 @  161 : b8                Star12 
+         00000120802DF872 @  162 : 12                LdaFalse 
+         00000120802DF873 @  163 : b6                Star14 
+         00000120802DF874 @  164 : 19 ff e9          Mov <context>, r17
+         00000120802DF877 @  167 : 11                LdaTrue 
+         00000120802DF878 @  168 : b6                Star14 
+ 3435 S> 00000120802DF879 @  169 : 5d ee ed 28       CallProperty0 r12, r13, [40]
+         00000120802DF87D @  173 : 18 e8             Star r18
+         00000120802DF87F @  175 : 9f 07             JumpIfJSReceiver [7] (00000120802DF886 @ 182)
+         00000120802DF881 @  177 : 65 be 00 e8 01    CallRuntime [ThrowIteratorResultNotAnObject], r18-r18
+         00000120802DF886 @  182 : 2d e8 07 2a       GetNamedProperty r18, [7], [42]
+         00000120802DF88A @  186 : 94 10             JumpIfToBooleanTrueConstant [16] (00000120802DF9E5 @ 533)
+         00000120802DF88C @  188 : 2d e8 08 2c       GetNamedProperty r18, [8], [44]
+         00000120802DF890 @  192 : 18 e8             Star r18
+         00000120802DF892 @  194 : 12                LdaFalse 
+         00000120802DF893 @  195 : b6                Star14 
+         00000120802DF894 @  196 : 19 e8 f5          Mov r18, r5
+ 3435 S> 00000120802DF897 @  199 : 19 f5 f3          Mov r5, r7
+ 3475 S> 00000120802DF89A @  202 : 21 09 2e          LdaGlobal [9], [46]
+         00000120802DF89D @  205 : 18 e6             Star r20
+         00000120802DF89F @  207 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802DF8A1 @  209 : 18 e5             Star r21
+         00000120802DF8A3 @  211 : 00 0d 30 01       LdaSmi.Wide [304]
+         00000120802DF8A7 @  215 : 18 e4             Star r22
+ 3481 E> 00000120802DF8A9 @  217 : 62 e5 e4 30       CallUndefinedReceiver1 r21, r22, [48]
+ 3480 E> 00000120802DF8AD @  221 : 2f e6 32          GetKeyedProperty r20, [50]
+         00000120802DF8B0 @  224 : 18 e7             Star r19
+         00000120802DF8B2 @  226 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802DF8B4 @  228 : 18 e4             Star r22
+         00000120802DF8B6 @  230 : 00 0d 2e 01       LdaSmi.Wide [302]
+         00000120802DF8BA @  234 : 18 e3             Star r23
+ 3509 E> 00000120802DF8BC @  236 : 62 e4 e3 34       CallUndefinedReceiver1 r22, r23, [52]
+ 3508 E> 00000120802DF8C0 @  240 : 2f f5 36          GetKeyedProperty r5, [54]
+         00000120802DF8C3 @  243 : 18 e5             Star r21
+ 3498 E> 00000120802DF8C5 @  245 : 5e e7 e6 e5 38    CallProperty1 r19, r20, r21, [56]
+         00000120802DF8CA @  250 : 19 f3 e8          Mov r7, r18
+         00000120802DF8CD @  253 : 97 2e             JumpIfToBooleanFalse [46] (00000120802DF8FB @ 299)
+ 3538 E> 00000120802DF8CF @  255 : 2d f3 0a 3a       GetNamedProperty r7, [10], [58]
+         00000120802DF8D3 @  259 : 18 e7             Star r19
+         00000120802DF8D5 @  261 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802DF8D7 @  263 : 18 e6             Star r20
+         00000120802DF8D9 @  265 : 00 0d 31 01       LdaSmi.Wide [305]
+         00000120802DF8DD @  269 : 18 e5             Star r21
+ 3547 E> 00000120802DF8DF @  271 : 62 e6 e5 3c       CallUndefinedReceiver1 r20, r21, [60]
+ 3546 E> 00000120802DF8E3 @  275 : 2f e7 3e          GetKeyedProperty r19, [62]
+         00000120802DF8E6 @  278 : 97 15             JumpIfToBooleanFalse [21] (00000120802DF8FB @ 299)
+         00000120802DF8E8 @  280 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802DF8EA @  282 : 18 e6             Star r20
+         00000120802DF8EC @  284 : 00 0d 2e 01       LdaSmi.Wide [302]
+         00000120802DF8F0 @  288 : 18 e5             Star r21
+ 3575 E> 00000120802DF8F2 @  290 : 62 e6 e5 40       CallUndefinedReceiver1 r20, r21, [64]
+ 3574 E> 00000120802DF8F6 @  294 : 2f f3 42          GetKeyedProperty r7, [66]
+         00000120802DF8F9 @  297 : 8a 06             Jump [6] (00000120802DF8FF @ 303)
+         00000120802DF8FB @  299 : 79 0b 44 25       CreateArrayLiteral [11], [68], #37
+         00000120802DF8FF @  303 : bc                Star8 
+ 3636 S> 00000120802DF900 @  304 : 2d f2 0c 45       GetNamedProperty r8, [12], [69]
+         00000120802DF904 @  308 : 18 e7             Star r19
+ 3648 E> 00000120802DF906 @  310 : 5e e7 f2 f8 47    CallProperty1 r19, r8, r2, [71]
+         00000120802DF90B @  315 : 96 04             JumpIfToBooleanTrue [4] (00000120802DF90F @ 319)
+ 3660 S> 00000120802DF90D @  317 : 8a d2             Jump [210] (00000120802DF9DF @ 527)
+ 3719 S> 00000120802DF90F @  319 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802DF911 @  321 : 18 e6             Star r20
+         00000120802DF913 @  323 : 00 0d 2f 01       LdaSmi.Wide [303]
+         00000120802DF917 @  327 : 18 e5             Star r21
+ 3702 E> 00000120802DF919 @  329 : 62 e6 e5 49       CallUndefinedReceiver1 r20, r21, [73]
+ 3701 E> 00000120802DF91D @  333 : 2f f3 4b          GetKeyedProperty r7, [75]
+         00000120802DF920 @  336 : 96 04             JumpIfToBooleanTrue [4] (00000120802DF924 @ 340)
+         00000120802DF922 @  338 : 7b 4d             CreateEmptyArrayLiteral [77]
+         00000120802DF924 @  340 : 18 e5             Star r21
+         00000120802DF926 @  342 : b1 e5 4e 50       GetIterator r21, [78], [80]
+         00000120802DF92A @  346 : 9f 07             JumpIfJSReceiver [7] (00000120802DF931 @ 353)
+         00000120802DF92C @  348 : 65 c7 00 fa 00    CallRuntime [ThrowSymbolIteratorInvalid], r0-r0
+         00000120802DF931 @  353 : 18 e6             Star r20
+         00000120802DF933 @  355 : 2d e6 06 52       GetNamedProperty r20, [6], [82]
+         00000120802DF937 @  359 : 18 e7             Star r19
+         00000120802DF939 @  361 : 12                LdaFalse 
+         00000120802DF93A @  362 : 18 e5             Star r21
+         00000120802DF93C @  364 : 19 ff e2          Mov <context>, r24
+         00000120802DF93F @  367 : 11                LdaTrue 
+         00000120802DF940 @  368 : 18 e5             Star r21
+ 3679 S> 00000120802DF942 @  370 : 5d e7 e6 54       CallProperty0 r19, r20, [84]
+         00000120802DF946 @  374 : 18 e1             Star r25
+         00000120802DF948 @  376 : 9f 07             JumpIfJSReceiver [7] (00000120802DF94F @ 383)
+         00000120802DF94A @  378 : 65 be 00 e1 01    CallRuntime [ThrowIteratorResultNotAnObject], r25-r25
+         00000120802DF94F @  383 : 2d e1 07 56       GetNamedProperty r25, [7], [86]
+         00000120802DF953 @  387 : 96 39             JumpIfToBooleanTrue [57] (00000120802DF98C @ 444)
+         00000120802DF955 @  389 : 2d e1 08 58       GetNamedProperty r25, [8], [88]
+         00000120802DF959 @  393 : 18 e1             Star r25
+         00000120802DF95B @  395 : 12                LdaFalse 
+         00000120802DF95C @  396 : 18 e5             Star r21
+         00000120802DF95E @  398 : 19 e1 f6          Mov r25, r4
+ 3679 S> 00000120802DF961 @  401 : 19 f6 f0          Mov r4, r10
+ 3725 S> 00000120802DF964 @  404 : 15 ef 07 00       LdaImmutableContextSlot r11, [7], [0]
+         00000120802DF968 @  408 : 18 e0             Star r26
+         00000120802DF96A @  410 : 19 f6 df          Mov r4, r27
+         00000120802DF96D @  413 : 19 f8 de          Mov r2, r28
+         00000120802DF970 @  416 : 19 f7 dd          Mov r3, r29
+ 3728 E> 00000120802DF973 @  419 : 60 e0 df 03 5a    CallUndefinedReceiver r26, r27-r29, [90]
+         00000120802DF978 @  424 : 19 f0 e1          Mov r10, r25
+         00000120802DF97B @  427 : 97 0e             JumpIfToBooleanFalse [14] (00000120802DF989 @ 441)
+ 3770 S> 00000120802DF97D @  429 : 7b 5c             CreateEmptyArrayLiteral [92]
+         00000120802DF97F @  431 : 55                ToBooleanLogicalNot 
+         00000120802DF980 @  432 : 56                LogicalNot 
+         00000120802DF981 @  433 : 18 e3             Star r23
+         00000120802DF983 @  435 : 0d 01             LdaSmi [1]
+         00000120802DF985 @  437 : 18 e4             Star r22
+         00000120802DF987 @  439 : 8a 12             Jump [18] (00000120802DF999 @ 457)
+ 3669 E> 00000120802DF989 @  441 : 89 4a 01          JumpLoop [74], [1] (00000120802DF93F @ 367)
+         00000120802DF98C @  444 : 0d ff             LdaSmi [-1]
+         00000120802DF98E @  446 : 18 e3             Star r23
+         00000120802DF990 @  448 : 18 e4             Star r22
+         00000120802DF992 @  450 : 8a 07             Jump [7] (00000120802DF999 @ 457)
+         00000120802DF994 @  452 : 18 e3             Star r23
+         00000120802DF996 @  454 : 0c                LdaZero 
+         00000120802DF997 @  455 : 18 e4             Star r22
+         00000120802DF999 @  457 : 10                LdaTheHole 
+         00000120802DF99A @  458 : a6                SetPendingMessage 
+         00000120802DF99B @  459 : 18 e2             Star r24
+         00000120802DF99D @  461 : 0b e5             Ldar r21
+         00000120802DF99F @  463 : 96 26             JumpIfToBooleanTrue [38] (00000120802DF9C5 @ 501)
+         00000120802DF9A1 @  465 : 19 ff e0          Mov <context>, r26
+         00000120802DF9A4 @  468 : 2d e6 0d 5d       GetNamedProperty r20, [13], [93]
+         00000120802DF9A8 @  472 : 9e 1d             JumpIfUndefinedOrNull [29] (00000120802DF9C5 @ 501)
+         00000120802DF9AA @  474 : 18 df             Star r27
+         00000120802DF9AC @  476 : 5d df e6 5f       CallProperty0 r27, r20, [95]
+         00000120802DF9B0 @  480 : 9f 15             JumpIfJSReceiver [21] (00000120802DF9C5 @ 501)
+         00000120802DF9B2 @  482 : 18 de             Star r28
+         00000120802DF9B4 @  484 : 65 be 00 de 01    CallRuntime [ThrowIteratorResultNotAnObject], r28-r28
+         00000120802DF9B9 @  489 : 8a 0c             Jump [12] (00000120802DF9C5 @ 501)
+         00000120802DF9BB @  491 : 18 e0             Star r26
+         00000120802DF9BD @  493 : 0c                LdaZero 
+         00000120802DF9BE @  494 : 1c e4             TestReferenceEqual r22
+         00000120802DF9C0 @  496 : 98 05             JumpIfTrue [5] (00000120802DF9C5 @ 501)
+         00000120802DF9C2 @  498 : 0b e0             Ldar r26
+         00000120802DF9C4 @  500 : a8                ReThrow 
+         00000120802DF9C5 @  501 : 0b e2             Ldar r24
+         00000120802DF9C7 @  503 : a6                SetPendingMessage 
+         00000120802DF9C8 @  504 : 0b e4             Ldar r22
+         00000120802DF9CA @  506 : a0 0e 02 00       SwitchOnSmiNoFeedback [14], [2], [0] { 0: @512, 1: @519 }
+         00000120802DF9CE @  510 : 8a 11             Jump [17] (00000120802DF9DF @ 527)
+         00000120802DF9D0 @  512 : 0c                LdaZero 
+         00000120802DF9D1 @  513 : b5                Star15 
+         00000120802DF9D2 @  514 : 19 e3 ea          Mov r23, r16
+         00000120802DF9D5 @  517 : 8a 1b             Jump [27] (00000120802DF9F0 @ 544)
+         00000120802DF9D7 @  519 : 0d 01             LdaSmi [1]
+         00000120802DF9D9 @  521 : b5                Star15 
+         00000120802DF9DA @  522 : 19 e3 ea          Mov r23, r16
+         00000120802DF9DD @  525 : 8a 13             Jump [19] (00000120802DF9F0 @ 544)
+ 3425 E> 00000120802DF9DF @  527 : 00 89 69 01 00 00 JumpLoop.Wide [361], [0] (00000120802DF877 @ 167)
+         00000120802DF9E5 @  533 : 0d ff             LdaSmi [-1]
+         00000120802DF9E7 @  535 : 18 ea             Star r16
+         00000120802DF9E9 @  537 : b5                Star15 
+         00000120802DF9EA @  538 : 8a 06             Jump [6] (00000120802DF9F0 @ 544)
+         00000120802DF9EC @  540 : 18 ea             Star r16
+         00000120802DF9EE @  542 : 0c                LdaZero 
+         00000120802DF9EF @  543 : b5                Star15 
+         00000120802DF9F0 @  544 : 10                LdaTheHole 
+         00000120802DF9F1 @  545 : a6                SetPendingMessage 
+         00000120802DF9F2 @  546 : 18 e9             Star r17
+         00000120802DF9F4 @  548 : 0b ec             Ldar r14
+         00000120802DF9F6 @  550 : 96 26             JumpIfToBooleanTrue [38] (00000120802DFA1C @ 588)
+         00000120802DF9F8 @  552 : 19 ff e7          Mov <context>, r19
+         00000120802DF9FB @  555 : 2d ed 0d 61       GetNamedProperty r13, [13], [97]
+         00000120802DF9FF @  559 : 9e 1d             JumpIfUndefinedOrNull [29] (00000120802DFA1C @ 588)
+         00000120802DFA01 @  561 : 18 e6             Star r20
+         00000120802DFA03 @  563 : 5d e6 ed 63       CallProperty0 r20, r13, [99]
+         00000120802DFA07 @  567 : 9f 15             JumpIfJSReceiver [21] (00000120802DFA1C @ 588)
+         00000120802DFA09 @  569 : 18 e5             Star r21
+         00000120802DFA0B @  571 : 65 be 00 e5 01    CallRuntime [ThrowIteratorResultNotAnObject], r21-r21
+         00000120802DFA10 @  576 : 8a 0c             Jump [12] (00000120802DFA1C @ 588)
+         00000120802DFA12 @  578 : 18 e7             Star r19
+         00000120802DFA14 @  580 : 0c                LdaZero 
+         00000120802DFA15 @  581 : 1c eb             TestReferenceEqual r15
+         00000120802DFA17 @  583 : 98 05             JumpIfTrue [5] (00000120802DFA1C @ 588)
+         00000120802DFA19 @  585 : 0b e7             Ldar r19
+         00000120802DFA1B @  587 : a8                ReThrow 
+         00000120802DFA1C @  588 : 0b e9             Ldar r17
+         00000120802DFA1E @  590 : a6                SetPendingMessage 
+         00000120802DFA1F @  591 : 0b eb             Ldar r15
+         00000120802DFA21 @  593 : a0 11 02 00       SwitchOnSmiNoFeedback [17], [2], [0] { 0: @599, 1: @602 }
+         00000120802DFA25 @  597 : 8a 08             Jump [8] (00000120802DFA2D @ 605)
+         00000120802DFA27 @  599 : 0b ea             Ldar r16
+         00000120802DFA29 @  601 : a8                ReThrow 
+         00000120802DFA2A @  602 : 0b ea             Ldar r16
+         00000120802DFA2C @  604 : a9                Return 
+ 3783 S> 00000120802DFA2D @  605 : 7b 65             CreateEmptyArrayLiteral [101]
+         00000120802DFA2F @  607 : 55                ToBooleanLogicalNot 
+ 3793 S> 00000120802DFA30 @  608 : a9                Return 
+Constant pool (size = 19)
+00000120802DFA39: [FixedArray] in OldSpace
+ - map: 0x02d9ca6012e1 <Map>
+ - length: 19
+           0: 0x0120802dfae1 <ScopeInfo FUNCTION_SCOPE>
+           1: 0x000fcc3c3581 <String[5]: #store>
+           2: 0x000fcc3c1629 <String[6]: #filter>
+           3: 0x0120802dfba9 <SharedFunctionInfo>
+Start SharedFunctionInfo
+00000120802DFBA9: [SharedFunctionInfo] in OldSpace
+ - map: 0x02d9ca601991 <Map[56]>
+ - name: 0x02d9ca6017d1 <String[0]: #>
+ - inferred name: 0x02d9ca6017d1 <String[0]: #>
+ - kind: ArrowFunction
+ - syntax kind: AnonymousExpression
+ - function_map_index: 200
+ - formal_parameter_count: 1
+ - expected_nof_properties: 
+ - language_mode: strict
+ - data: 0x0120802dfbe1 <BytecodeArray[51]>
+ - code (from data): 0x0000c0544301 <Code BUILTIN InterpreterEntryTrampoline>
+ - script: 0x0120802de809 <Script>
+ - function token position: 3189
+ - start position: 3189
+ - end position: 3274
+ - no debug info
+ - scope info: 0x0120802dfc91 <ScopeInfo FUNCTION_SCOPE>
+ - outer scope info: 0x0120802dfae1 <ScopeInfo FUNCTION_SCOPE>
+ - length: 1
+ - feedback_metadata: 00000120802DFCE1: [FeedbackMetadata] in OldSpace
+ - map: 0x02d9ca601f81 <Map>
+ - slot_count: 11
+ - create_closure_slot_count: 0
+ Slot #0 Call
+ Slot #2 LoadKeyed
+ Slot #4 CompareOp
+ Slot #5 Call
+ Slot #7 LoadKeyed
+ Slot #9 Literal
+ Slot #10 CompareOp
+
+
+Start BytecodeArray
+Parameter count 2
+Register count 3
+Frame size 24
+OSR urgency: 0
+Bytecode age: 0
+ 3239 S> 00000120802DFC18 @    0 : 17 03             LdaImmutableCurrentContextSlot [3]
+ 3210 E> 00000120802DFC1A @    2 : aa 00             ThrowReferenceErrorIfHole [0]
+         00000120802DFC1C @    4 : c3                Star1 
+         00000120802DFC1D @    5 : 00 0d 38 01       LdaSmi.Wide [312]
+         00000120802DFC21 @    9 : c2                Star2 
+ 3210 E> 00000120802DFC22 @   10 : 62 f9 f8 00       CallUndefinedReceiver1 r1, r2, [0]
+ 3209 E> 00000120802DFC26 @   14 : 2f 03 02          GetKeyedProperty a0, [2]
+         00000120802DFC29 @   17 : c4                Star0 
+         00000120802DFC2A @   18 : 17 02             LdaImmutableCurrentContextSlot [2]
+ 3227 E> 00000120802DFC2C @   20 : 6c fa 04          TestEqualStrict r0, [4]
+         00000120802DFC2F @   23 : 99 1b             JumpIfFalse [27] (00000120802DFC4A @ 50)
+         00000120802DFC31 @   25 : 17 03             LdaImmutableCurrentContextSlot [3]
+ 3251 E> 00000120802DFC33 @   27 : aa 00             ThrowReferenceErrorIfHole [0]
+         00000120802DFC35 @   29 : c3                Star1 
+         00000120802DFC36 @   30 : 00 0d 2d 01       LdaSmi.Wide [301]
+         00000120802DFC3A @   34 : c2                Star2 
+ 3251 E> 00000120802DFC3B @   35 : 62 f9 f8 05       CallUndefinedReceiver1 r1, r2, [5]
+ 3250 E> 00000120802DFC3F @   39 : 2f 03 07          GetKeyedProperty a0, [7]
+         00000120802DFC42 @   42 : c4                Star0 
+         00000120802DFC43 @   43 : 7b 09             CreateEmptyArrayLiteral [9]
+         00000120802DFC45 @   45 : 55                ToBooleanLogicalNot 
+ 3268 E> 00000120802DFC46 @   46 : 6c fa 0a          TestEqualStrict r0, [10]
+         00000120802DFC49 @   49 : 56                LogicalNot 
+ 3274 S> 00000120802DFC4A @   50 : a9                Return 
+Constant pool (size = 1)
+00000120802DFC51: [FixedArray] in OldSpace
+ - map: 0x02d9ca6012e1 <Map>
+ - length: 1
+           0: 0x0120802dfb71 <String[9]: #_0x10c709>
+Handler Table (size = 0)
+Source Position Table (size = 24)
+0x0120802dfc69 <ByteArray[24]>
+
+End BytecodeArray
+
+End SharedFunctionInfo
+
+           4: 0x02d9ca6055f9 <String[6]: #length>
+           5: 0x000fcc3c28d9 <String[6]: #getDay>
+           6: 0x02d9ca6059b1 <String[4]: #next>
+           7: 0x02d9ca604c71 <String[4]: #done>
+           8: 0x02d9ca606419 <String[5]: #value>
+           9: 0x02d9ca604681 <String[5]: #Array>
+          10: 0x02d9ca604b81 <String[4]: #days>
+          11: 0x0120802dfd11 <ArrayBoilerplateDescription PACKED_SMI_ELEMENTS, 0x0120802dfd29 <FixedArray[7]>
+Start FixedArray
+00000120802DFD29: [FixedArray] in OldSpace
+ - map: 0x02d9ca601829 <Map>
+ - length: 7
+           0: 0
+           1: 1
+           2: 2
+           3: 3
+           4: 4
+           5: 5
+           6: 6
+
+End FixedArray
+>
+          12: 0x000fcc3c1691 <String[8]: #includes>
+          13: 0x02d9ca605e81 <String[6]: #return>
+          14: 6
+          15: 13
+          16: 347
+          17: 6
+          18: 9
+Handler Table (size = 64)
+   from   to       hdlr (prediction,   data)
+  ( 167, 533)  ->   540 (prediction=0, data=17)
+  ( 367, 444)  ->   452 (prediction=0, data=24)
+  ( 468, 489)  ->   491 (prediction=0, data=26)
+  ( 555, 576)  ->   578 (prediction=0, data=19)
+Source Position Table (size = 127)
+0x0120802dfdd9 <ByteArray[127]>
+
+End BytecodeArray
+
+End SharedFunctionInfo
+
+           6: 0x0120802dfec1 <SharedFunctionInfo tick>
+Start SharedFunctionInfo
+00000120802DFEC1: [SharedFunctionInfo] in OldSpace
+ - map: 0x02d9ca601991 <Map[56]>
+ - name: 0x0120802de0b9 <String[4]: #tick>
+ - inferred name: 0x02d9ca6017d1 <String[0]: #>
+ - kind: NormalFunction
+ - syntax kind: Declaration
+ - function_map_index: 197
+ - formal_parameter_count: 0
+ - expected_nof_properties: 
+ - language_mode: strict
+ - data: 0x0120802dfef9 <BytecodeArray[364]>
+ - code (from data): 0x0000c0544301 <Code BUILTIN InterpreterEntryTrampoline>
+ - script: 0x0120802de809 <Script>
+ - function token position: 3809
+ - start position: 3822
+ - end position: 4352
+ - no debug info
+ - scope info: 0x0120802e0209 <ScopeInfo FUNCTION_SCOPE>
+ - outer scope info: 0x0120802ddf09 <ScopeInfo FUNCTION_SCOPE>
+ - length: 0
+ - feedback_metadata: 00000120802E0259: [FeedbackMetadata] in OldSpace
+ - map: 0x02d9ca601f81 <Map>
+ - slot_count: 62
+ - create_closure_slot_count: 0
+ Slot #0 Call
+ Slot #2 LoadKeyed
+ Slot #4 Call
+ Slot #6 LoadGlobalNotInsideTypeof
+ Slot #8 Call
+ Slot #10 Call
+ Slot #12 LoadKeyed
+ Slot #14 LoadProperty
+ Slot #16 Call
+ Slot #18 LoadProperty
+ Slot #20 Call
+ Slot #22 LoadProperty
+ Slot #24 LoadProperty
+ Slot #26 Call
+ Slot #28 LoadKeyed
+ Slot #30 Literal
+ Slot #31 CompareOp
+ Slot #32 Call
+ Slot #34 LoadKeyed
+ Slot #36 LoadProperty
+ Slot #38 Call
+ Slot #40 Call
+ Slot #42 LoadKeyed
+ Slot #44 Call
+ Slot #46 Call
+ Slot #48 LoadKeyed
+ Slot #50 Call
+ Slot #52 Call
+ Slot #54 LoadKeyed
+ Slot #56 Call
+ Slot #58 LoadProperty
+ Slot #60 Call
+
+
+Start BytecodeArray
+Parameter count 1
+Register count 20
+Frame size 160
+OSR urgency: 0
+Bytecode age: 0
+ 3841 S> 00000120802DFF30 @    0 : 17 05             LdaImmutableCurrentContextSlot [5]
+         00000120802DFF32 @    2 : c4                Star0 
+ 3859 S> 00000120802DFF33 @    3 : 17 02             LdaImmutableCurrentContextSlot [2]
+         00000120802DFF35 @    5 : aa 00             ThrowReferenceErrorIfHole [0]
+         00000120802DFF37 @    7 : bb                Star9 
+         00000120802DFF38 @    8 : 00 0d 39 01       LdaSmi.Wide [313]
+         00000120802DFF3C @   12 : b9                Star11 
+ 3865 E> 00000120802DFF3D @   13 : 62 fa ef 00       CallUndefinedReceiver1 r0, r11, [0]
+ 3864 E> 00000120802DFF41 @   17 : 2f f1 02          GetKeyedProperty r9, [2]
+         00000120802DFF44 @   20 : bc                Star8 
+ 3882 E> 00000120802DFF45 @   21 : 5d f2 f1 04       CallProperty0 r8, r9, [4]
+         00000120802DFF49 @   25 : c3                Star1 
+ 3895 S> 00000120802DFF4A @   26 : 21 01 06          LdaGlobal [1], [6]
+         00000120802DFF4D @   29 : bc                Star8 
+ 3895 E> 00000120802DFF4E @   30 : 69 f2 fa 00 08    Construct r8, r0-r0, [8]
+         00000120802DFF53 @   35 : c2                Star2 
+ 3938 S> 00000120802DFF54 @   36 : 00 0d 33 01       LdaSmi.Wide [307]
+         00000120802DFF58 @   40 : ba                Star10 
+ 3939 E> 00000120802DFF59 @   41 : 62 fa f0 0a       CallUndefinedReceiver1 r0, r10, [10]
+ 3938 E> 00000120802DFF5D @   45 : 2f f9 0c          GetKeyedProperty r1, [12]
+         00000120802DFF60 @   48 : ba                Star10 
+         00000120802DFF61 @   49 : b1 f0 0e 10       GetIterator r10, [14], [16]
+         00000120802DFF65 @   53 : 9f 07             JumpIfJSReceiver [7] (00000120802DFF6C @ 60)
+         00000120802DFF67 @   55 : 65 c7 00 fa 00    CallRuntime [ThrowSymbolIteratorInvalid], r0-r0
+         00000120802DFF6C @   60 : bb                Star9 
+         00000120802DFF6D @   61 : 2d f1 02 12       GetNamedProperty r9, [2], [18]
+         00000120802DFF71 @   65 : bc                Star8 
+         00000120802DFF72 @   66 : 12                LdaFalse 
+         00000120802DFF73 @   67 : ba                Star10 
+         00000120802DFF74 @   68 : 19 ff ed          Mov <context>, r13
+         00000120802DFF77 @   71 : 11                LdaTrue 
+         00000120802DFF78 @   72 : ba                Star10 
+ 3916 S> 00000120802DFF79 @   73 : 5d f2 f1 14       CallProperty0 r8, r9, [20]
+         00000120802DFF7D @   77 : b6                Star14 
+         00000120802DFF7E @   78 : 9f 07             JumpIfJSReceiver [7] (00000120802DFF85 @ 85)
+         00000120802DFF80 @   80 : 65 be 00 ec 01    CallRuntime [ThrowIteratorResultNotAnObject], r14-r14
+         00000120802DFF85 @   85 : 2d ec 03 16       GetNamedProperty r14, [3], [22]
+         00000120802DFF89 @   89 : 96 d3             JumpIfToBooleanTrue [211] (00000120802E005C @ 300)
+         00000120802DFF8B @   91 : 2d ec 04 18       GetNamedProperty r14, [4], [24]
+         00000120802DFF8F @   95 : b6                Star14 
+         00000120802DFF90 @   96 : 12                LdaFalse 
+         00000120802DFF91 @   97 : ba                Star10 
+         00000120802DFF92 @   98 : 19 ec f7          Mov r14, r3
+ 3916 S> 00000120802DFF95 @  101 : 19 f7 f5          Mov r3, r5
+ 3958 S> 00000120802DFF98 @  104 : 00 0d 2d 01       LdaSmi.Wide [301]
+         00000120802DFF9C @  108 : 18 e9             Star r17
+ 3971 E> 00000120802DFF9E @  110 : 62 fa e9 1a       CallUndefinedReceiver1 r0, r17, [26]
+ 3970 E> 00000120802DFFA2 @  114 : 2f f5 1c          GetKeyedProperty r5, [28]
+         00000120802DFFA5 @  117 : b5                Star15 
+         00000120802DFFA6 @  118 : 7b 1e             CreateEmptyArrayLiteral [30]
+         00000120802DFFA8 @  120 : 55                ToBooleanLogicalNot 
+ 3988 E> 00000120802DFFA9 @  121 : 6c eb 1f          TestEqualStrict r15, [31]
+         00000120802DFFAC @  124 : 99 04             JumpIfFalse [4] (00000120802DFFB0 @ 128)
+ 3995 S> 00000120802DFFAE @  126 : 8a ab             Jump [171] (00000120802E0059 @ 297)
+ 4004 S> 00000120802DFFB0 @  128 : 00 0d 2c 01       LdaSmi.Wide [300]
+         00000120802DFFB4 @  132 : 18 e9             Star r17
+ 4017 E> 00000120802DFFB6 @  134 : 62 fa e9 20       CallUndefinedReceiver1 r0, r17, [32]
+ 4016 E> 00000120802DFFBA @  138 : 2f f5 22          GetKeyedProperty r5, [34]
+         00000120802DFFBD @  141 : 97 04             JumpIfToBooleanFalse [4] (00000120802DFFC1 @ 145)
+ 4035 S> 00000120802DFFBF @  143 : 8a 9a             Jump [154] (00000120802E0059 @ 297)
+ 4060 S> 00000120802DFFC1 @  145 : 17 08             LdaImmutableCurrentContextSlot [8]
+         00000120802DFFC3 @  147 : b5                Star15 
+ 4082 E> 00000120802DFFC4 @  148 : 2d f5 05 24       GetNamedProperty r5, [5], [36]
+         00000120802DFFC8 @  152 : 18 ea             Star r16
+ 4060 E> 00000120802DFFCA @  154 : 63 eb ea f8 26    CallUndefinedReceiver2 r15, r16, r2, [38]
+         00000120802DFFCF @  159 : be                Star6 
+ 4100 S> 00000120802DFFD0 @  160 : 9b 04             JumpIfNotNull [4] (00000120802DFFD4 @ 164)
+ 4120 S> 00000120802DFFD2 @  162 : 8a 87             Jump [135] (00000120802E0059 @ 297)
+ 4145 S> 00000120802DFFD4 @  164 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802DFFD6 @  166 : aa 06             ThrowReferenceErrorIfHole [6]
+         00000120802DFFD8 @  168 : 18 ea             Star r16
+         00000120802DFFDA @  170 : 00 0d 43 01       LdaSmi.Wide [323]
+         00000120802DFFDE @  174 : 18 e8             Star r18
+ 4152 E> 00000120802DFFE0 @  176 : 62 fa e8 28       CallUndefinedReceiver1 r0, r18, [40]
+ 4151 E> 00000120802DFFE4 @  180 : 2f ea 2a          GetKeyedProperty r16, [42]
+         00000120802DFFE7 @  183 : b5                Star15 
+ 4179 E> 00000120802DFFE8 @  184 : 2d f5 05 24       GetNamedProperty r5, [5], [36]
+         00000120802DFFEC @  188 : 18 e9             Star r17
+ 4169 E> 00000120802DFFEE @  190 : 5e eb ea e9 2c    CallProperty1 r15, r16, r17, [44]
+         00000120802DFFF3 @  195 : bd                Star7 
+         00000120802DFFF4 @  196 : 19 ff eb          Mov <context>, r15
+ 4191 S> 00000120802DFFF7 @  199 : 0b f4             Ldar r6
+         00000120802DFFF9 @  201 : 97 28             JumpIfToBooleanFalse [40] (00000120802E0021 @ 241)
+         00000120802DFFFB @  203 : 0b f3             Ldar r7
+ 4206 E> 00000120802DFFFD @  205 : 96 24             JumpIfToBooleanTrue [36] (00000120802E0021 @ 241)
+ 4216 S> 00000120802DFFFF @  207 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802E0001 @  209 : aa 06             ThrowReferenceErrorIfHole [6]
+         00000120802E0003 @  211 : 18 e9             Star r17
+         00000120802E0005 @  213 : 00 0d 3a 01       LdaSmi.Wide [314]
+         00000120802E0009 @  217 : 18 e7             Star r19
+ 4223 E> 00000120802E000B @  219 : 62 fa e7 2e       CallUndefinedReceiver1 r0, r19, [46]
+ 4222 E> 00000120802E000F @  223 : 2f e9 30          GetKeyedProperty r17, [48]
+         00000120802E0012 @  226 : 18 ea             Star r16
+ 4250 E> 00000120802E0014 @  228 : 2d f5 05 24       GetNamedProperty r5, [5], [36]
+         00000120802E0018 @  232 : 18 e8             Star r18
+ 4240 E> 00000120802E001A @  234 : 5e ea e9 e8 32    CallProperty1 r16, r17, r18, [50]
+         00000120802E001F @  239 : 8a 2a             Jump [42] (00000120802E0049 @ 281)
+ 4263 S> 00000120802E0021 @  241 : 0b f4             Ldar r6
+         00000120802E0023 @  243 : 96 26             JumpIfToBooleanTrue [38] (00000120802E0049 @ 281)
+         00000120802E0025 @  245 : 0b f3             Ldar r7
+ 4278 E> 00000120802E0027 @  247 : 97 22             JumpIfToBooleanFalse [34] (00000120802E0049 @ 281)
+ 4288 S> 00000120802E0029 @  249 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802E002B @  251 : aa 06             ThrowReferenceErrorIfHole [6]
+         00000120802E002D @  253 : 18 e9             Star r17
+         00000120802E002F @  255 : 00 0d 42 01       LdaSmi.Wide [322]
+         00000120802E0033 @  259 : 18 e7             Star r19
+ 4295 E> 00000120802E0035 @  261 : 62 fa e7 34       CallUndefinedReceiver1 r0, r19, [52]
+ 4294 E> 00000120802E0039 @  265 : 2f e9 36          GetKeyedProperty r17, [54]
+         00000120802E003C @  268 : 18 ea             Star r16
+ 4322 E> 00000120802E003E @  270 : 2d f5 05 24       GetNamedProperty r5, [5], [36]
+         00000120802E0042 @  274 : 18 e8             Star r18
+ 4312 E> 00000120802E0044 @  276 : 5e ea e9 e8 38    CallProperty1 r16, r17, r18, [56]
+         00000120802E0049 @  281 : 8a 10             Jump [16] (00000120802E0059 @ 297)
+         00000120802E004B @  283 : 18 ea             Star r16
+         00000120802E004D @  285 : 82 ea 07          CreateCatchContext r16, [7]
+         00000120802E0050 @  288 : b5                Star15 
+         00000120802E0051 @  289 : 10                LdaTheHole 
+         00000120802E0052 @  290 : a6                SetPendingMessage 
+         00000120802E0053 @  291 : 0b eb             Ldar r15
+         00000120802E0055 @  293 : 1a ea             PushContext r16
+         00000120802E0057 @  295 : 1b ea             PopContext r16
+ 3906 E> 00000120802E0059 @  297 : 89 e2 00          JumpLoop [226], [0] (00000120802DFF77 @ 71)
+         00000120802E005C @  300 : 0d ff             LdaSmi [-1]
+         00000120802E005E @  302 : b8                Star12 
+         00000120802E005F @  303 : b9                Star11 
+         00000120802E0060 @  304 : 8a 05             Jump [5] (00000120802E0065 @ 309)
+         00000120802E0062 @  306 : b8                Star12 
+         00000120802E0063 @  307 : 0c                LdaZero 
+         00000120802E0064 @  308 : b9                Star11 
+         00000120802E0065 @  309 : 10                LdaTheHole 
+         00000120802E0066 @  310 : a6                SetPendingMessage 
+         00000120802E0067 @  311 : b7                Star13 
+         00000120802E0068 @  312 : 0b f0             Ldar r10
+         00000120802E006A @  314 : 96 25             JumpIfToBooleanTrue [37] (00000120802E008F @ 351)
+         00000120802E006C @  316 : 19 ff eb          Mov <context>, r15
+         00000120802E006F @  319 : 2d f1 08 3a       GetNamedProperty r9, [8], [58]
+         00000120802E0073 @  323 : 9e 1c             JumpIfUndefinedOrNull [28] (00000120802E008F @ 351)
+         00000120802E0075 @  325 : 18 ea             Star r16
+         00000120802E0077 @  327 : 5d ea f1 3c       CallProperty0 r16, r9, [60]
+         00000120802E007B @  331 : 9f 14             JumpIfJSReceiver [20] (00000120802E008F @ 351)
+         00000120802E007D @  333 : 18 e9             Star r17
+         00000120802E007F @  335 : 65 be 00 e9 01    CallRuntime [ThrowIteratorResultNotAnObject], r17-r17
+         00000120802E0084 @  340 : 8a 0b             Jump [11] (00000120802E008F @ 351)
+         00000120802E0086 @  342 : b5                Star15 
+         00000120802E0087 @  343 : 0c                LdaZero 
+         00000120802E0088 @  344 : 1c ef             TestReferenceEqual r11
+         00000120802E008A @  346 : 98 05             JumpIfTrue [5] (00000120802E008F @ 351)
+         00000120802E008C @  348 : 0b eb             Ldar r15
+         00000120802E008E @  350 : a8                ReThrow 
+         00000120802E008F @  351 : 0b ed             Ldar r13
+         00000120802E0091 @  353 : a6                SetPendingMessage 
+         00000120802E0092 @  354 : 0c                LdaZero 
+         00000120802E0093 @  355 : 1c ef             TestReferenceEqual r11
+         00000120802E0095 @  357 : 99 05             JumpIfFalse [5] (00000120802E009A @ 362)
+         00000120802E0097 @  359 : 0b ee             Ldar r12
+         00000120802E0099 @  361 : a8                ReThrow 
+         00000120802E009A @  362 : 0e                LdaUndefined 
+ 4351 S> 00000120802E009B @  363 : a9                Return 
+Constant pool (size = 9)
+00000120802E00A1: [FixedArray] in OldSpace
+ - map: 0x02d9ca6012e1 <Map>
+ - length: 9
+           0: 0x000fcc3c3581 <String[5]: #store>
+           1: 0x02d9ca604a99 <String[4]: #Date>
+           2: 0x02d9ca6059b1 <String[4]: #next>
+           3: 0x02d9ca604c71 <String[4]: #done>
+           4: 0x02d9ca606419 <String[5]: #value>
+           5: 0x02d9ca6052d9 <String[2]: #id>
+           6: 0x0120802ddff9 <String[6]: #ffmpeg>
+           7: 0x0120802e00f9 <ScopeInfo CATCH_SCOPE>
+           8: 0x02d9ca605e81 <String[6]: #return>
+Handler Table (size = 48)
+   from   to       hdlr (prediction,   data)
+  (  71, 300)  ->   306 (prediction=0, data=13)
+  ( 199, 281)  ->   283 (prediction=1, data=15)
+  ( 319, 340)  ->   342 (prediction=0, data=15)
+Source Position Table (size = 103)
+0x0120802e0191 <ByteArray[103]>
+
+End BytecodeArray
+
+End SharedFunctionInfo
+
+           7: 0x0120802e0299 <SharedFunctionInfo startLoop>
+Start SharedFunctionInfo
+00000120802E0299: [SharedFunctionInfo] in OldSpace
+ - map: 0x02d9ca601991 <Map[56]>
+ - name: 0x0120802e0451 <String[9]: #startLoop>
+ - inferred name: 0x02d9ca6017d1 <String[0]: #>
+ - kind: NormalFunction
+ - syntax kind: Declaration
+ - function_map_index: 197
+ - formal_parameter_count: 0
+ - expected_nof_properties: 
+ - language_mode: strict
+ - data: 0x0120802e02d1 <BytecodeArray[64]>
+ - code (from data): 0x0000c0544301 <Code BUILTIN InterpreterEntryTrampoline>
+ - script: 0x0120802de809 <Script>
+ - function token position: 4352
+ - start position: 4370
+ - end position: 4466
+ - no debug info
+ - scope info: 0x0120802e0401 <ScopeInfo FUNCTION_SCOPE>
+ - outer scope info: 0x0120802ddf09 <ScopeInfo FUNCTION_SCOPE>
+ - length: 0
+ - feedback_metadata: 00000120802E0471: [FeedbackMetadata] in OldSpace
+ - map: 0x02d9ca601f81 <Map>
+ - slot_count: 12
+ - create_closure_slot_count: 0
+ Slot #0 LoadGlobalNotInsideTypeof
+ Slot #2 Call
+ Slot #4 LoadGlobalNotInsideTypeof
+ Slot #6 Call
+ Slot #8 LoadGlobalNotInsideTypeof
+ Slot #10 Call
+
+
+Start BytecodeArray
+Parameter count 1
+Register count 3
+Frame size 24
+OSR urgency: 0
+Bytecode age: 0
+ 4373 S> 00000120802E0308 @    0 : 16 09             LdaCurrentContextSlot [9]
+         00000120802E030A @    2 : aa 00             ThrowReferenceErrorIfHole [0]
+         00000120802E030C @    4 : 97 0f             JumpIfToBooleanFalse [15] (00000120802E031B @ 19)
+ 4382 S> 00000120802E030E @    6 : 21 01 00          LdaGlobal [1], [0]
+         00000120802E0311 @    9 : c4                Star0 
+         00000120802E0312 @   10 : 16 09             LdaCurrentContextSlot [9]
+ 4396 E> 00000120802E0314 @   12 : aa 00             ThrowReferenceErrorIfHole [0]
+         00000120802E0316 @   14 : c3                Star1 
+ 4382 E> 00000120802E0317 @   15 : 62 fa f9 02       CallUndefinedReceiver1 r0, r1, [2]
+ 4403 S> 00000120802E031B @   19 : 21 02 04          LdaGlobal [2], [4]
+         00000120802E031E @   22 : c4                Star0 
+         00000120802E031F @   23 : 17 0a             LdaImmutableCurrentContextSlot [10]
+         00000120802E0321 @   25 : c3                Star1 
+         00000120802E0322 @   26 : 00 0d 30 75       LdaSmi.Wide [30000]
+         00000120802E0326 @   30 : c2                Star2 
+ 4409 E> 00000120802E0327 @   31 : 63 fa f9 f8 06    CallUndefinedReceiver2 r0, r1, r2, [6]
+         00000120802E032C @   36 : c4                Star0 
+         00000120802E032D @   37 : 16 09             LdaCurrentContextSlot [9]
+ 4408 E> 00000120802E032F @   39 : aa 00             ThrowReferenceErrorIfHole [0]
+         00000120802E0331 @   41 : 0b fa             Ldar r0
+         00000120802E0333 @   43 : 25 09             StaCurrentContextSlot [9]
+         00000120802E0335 @   45 : 21 03 08          LdaGlobal [3], [8]
+         00000120802E0338 @   48 : c4                Star0 
+         00000120802E0339 @   49 : 17 0a             LdaImmutableCurrentContextSlot [10]
+         00000120802E033B @   51 : c3                Star1 
+         00000120802E033C @   52 : 00 0d 10 27       LdaSmi.Wide [10000]
+         00000120802E0340 @   56 : c2                Star2 
+ 4438 E> 00000120802E0341 @   57 : 63 fa f9 f8 0a    CallUndefinedReceiver2 r0, r1, r2, [10]
+         00000120802E0346 @   62 : 0e                LdaUndefined 
+ 4465 S> 00000120802E0347 @   63 : a9                Return 
+Constant pool (size = 4)
+00000120802E0349: [FixedArray] in OldSpace
+ - map: 0x02d9ca6012e1 <Map>
+ - length: 4
+           0: 0x0120802de0a1 <String[5]: #timer>
+           1: 0x0120802e0379 <String[13]: #clearInterval>
+           2: 0x0120802e0399 <String[11]: #setInterval>
+           3: 0x0120802e03b9 <String[10]: #setTimeout>
+Handler Table (size = 0)
+Source Position Table (size = 22)
+0x0120802e03d9 <ByteArray[22]>
+
+End BytecodeArray
+
+End SharedFunctionInfo
+
+           8: 0x0120802e0489 <SharedFunctionInfo nextOpenMinutes>
+Start SharedFunctionInfo
+00000120802E0489: [SharedFunctionInfo] in OldSpace
+ - map: 0x02d9ca601991 <Map[56]>
+ - name: 0x0120802e0939 <String[15]: #nextOpenMinutes>
+ - inferred name: 0x02d9ca6017d1 <String[0]: #>
+ - kind: NormalFunction
+ - syntax kind: Declaration
+ - function_map_index: 197
+ - formal_parameter_count: 2
+ - expected_nof_properties: 
+ - language_mode: strict
+ - data: 0x0120802e04c1 <BytecodeArray[758]>
+ - code (from data): 0x0000c0544301 <Code BUILTIN InterpreterEntryTrampoline>
+ - script: 0x0120802de809 <Script>
+ - function token position: 4466
+ - start position: 4490
+ - end position: 5621
+ - no debug info
+ - scope info: 0x0120802e0889 <ScopeInfo FUNCTION_SCOPE>
+ - outer scope info: 0x0120802ddf09 <ScopeInfo FUNCTION_SCOPE>
+ - length: 2
+ - feedback_metadata: 00000120802E0C71: [FeedbackMetadata] in OldSpace
+ - map: 0x02d9ca601f81 <Map>
+ - slot_count: 123
+ - create_closure_slot_count: 1
+ Slot #0 Call
+ Slot #2 LoadKeyed
+ Slot #4 Call
+ Slot #6 LoadProperty
+ Slot #8 LoadProperty
+ Slot #10 Call
+ Slot #12 Call
+ Slot #14 LoadKeyed
+ Slot #16 Call
+ Slot #18 BinaryOp
+ Slot #19 BinaryOp
+ Slot #20 Call
+ Slot #22 LoadKeyed
+ Slot #24 Call
+ Slot #26 Call
+ Slot #28 LoadKeyed
+ Slot #30 Call
+ Slot #32 LoadGlobalNotInsideTypeof
+ Slot #34 CompareOp
+ Slot #35 BinaryOp
+ Slot #36 BinaryOp
+ Slot #37 Call
+ Slot #39 LoadKeyed
+ Slot #41 Call
+ Slot #43 LoadProperty
+ Slot #45 Call
+ Slot #47 LoadProperty
+ Slot #49 Call
+ Slot #51 LoadProperty
+ Slot #53 LoadProperty
+ Slot #55 LoadGlobalNotInsideTypeof
+ Slot #57 LoadProperty
+ Slot #59 Call
+ Slot #61 LoadKeyed
+ Slot #63 Call
+ Slot #65 Call
+ Slot #67 LoadKeyed
+ Slot #69 Call
+ Slot #71 LoadKeyed
+ Slot #73 LoadProperty
+ Slot #75 Literal
+ Slot #76 Call
+ Slot #78 LoadKeyed
+ Slot #80 Call
+ Slot #82 Call
+ Slot #84 LoadKeyed
+ Slot #86 Literal
+ Slot #87 LoadProperty
+ Slot #89 Call
+ Slot #91 LoadProperty
+ Slot #93 Call
+ Slot #95 LoadProperty
+ Slot #97 LoadProperty
+ Slot #99 Call
+ Slot #101 LoadKeyed
+ Slot #103 Call
+ Slot #105 BinaryOp
+ Slot #106 BinaryOp
+ Slot #107 BinaryOp
+ Slot #108 CompareOp
+ Slot #109 CompareOp
+ Slot #110 CompareOp
+ Slot #111 CompareOp
+ Slot #112 CompareOp
+ Slot #113 LoadProperty
+ Slot #115 Call
+ Slot #117 LoadProperty
+ Slot #119 Call
+ Slot #121 BinaryOp
+ Slot #122 CompareOp
+
+
+Start BytecodeArray
+Parameter count 3
+Register count 34
+Frame size 272
+OSR urgency: 0
+Bytecode age: 0
+ 4490 E> 00000120802E04F8 @    0 : 83 00 02          CreateFunctionContext [0], [2]
+         00000120802E04FB @    3 : 1a eb             PushContext r15
+         00000120802E04FD @    5 : 0b 03             Ldar a0
+         00000120802E04FF @    7 : 25 02             StaCurrentContextSlot [2]
+         00000120802E0501 @    9 : 10                LdaTheHole 
+         00000120802E0502 @   10 : 25 03             StaCurrentContextSlot [3]
+ 4528 S> 00000120802E0504 @   12 : 15 eb 05 00       LdaImmutableContextSlot r15, [5], [0]
+ 4528 E> 00000120802E0508 @   16 : 25 03             StaCurrentContextSlot [3]
+ 4546 S> 00000120802E050A @   18 : 15 eb 02 00       LdaImmutableContextSlot r15, [2], [0]
+         00000120802E050E @   22 : aa 01             ThrowReferenceErrorIfHole [1]
+         00000120802E0510 @   24 : 18 e9             Star r17
+         00000120802E0512 @   26 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802E0514 @   28 : 18 e8             Star r18
+         00000120802E0516 @   30 : 00 0d 39 01       LdaSmi.Wide [313]
+         00000120802E051A @   34 : 18 e7             Star r19
+ 4552 E> 00000120802E051C @   36 : 62 e8 e7 00       CallUndefinedReceiver1 r18, r19, [0]
+ 4551 E> 00000120802E0520 @   40 : 2f e9 02          GetKeyedProperty r17, [2]
+         00000120802E0523 @   43 : 18 ea             Star r16
+ 4569 E> 00000120802E0525 @   45 : 5d ea e9 04       CallProperty0 r16, r17, [4]
+         00000120802E0529 @   49 : c4                Star0 
+ 4591 S> 00000120802E052A @   50 : 2d fa 02 06       GetNamedProperty r0, [2], [6]
+         00000120802E052E @   54 : 18 e9             Star r17
+ 4604 E> 00000120802E0530 @   56 : 2d e9 03 08       GetNamedProperty r17, [3], [8]
+         00000120802E0534 @   60 : 18 ea             Star r16
+         00000120802E0536 @   62 : 80 04 00 02       CreateClosure [4], [0], #2
+         00000120802E053A @   66 : 18 e8             Star r18
+ 4614 E> 00000120802E053C @   68 : 5e ea e9 e8 0a    CallProperty1 r16, r17, r18, [10]
+         00000120802E0541 @   73 : c3                Star1 
+ 4702 S> 00000120802E0542 @   74 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802E0544 @   76 : 18 e9             Star r17
+         00000120802E0546 @   78 : 00 0d 31 01       LdaSmi.Wide [305]
+         00000120802E054A @   82 : 18 e8             Star r18
+ 4716 E> 00000120802E054C @   84 : 62 e9 e8 0c       CallUndefinedReceiver1 r17, r18, [12]
+ 4715 E> 00000120802E0550 @   88 : 2f f9 0e          GetKeyedProperty r1, [14]
+         00000120802E0553 @   91 : 96 04             JumpIfToBooleanTrue [4] (00000120802E0557 @ 95)
+ 4734 S> 00000120802E0555 @   93 : 0f                LdaNull 
+ 4746 S> 00000120802E0556 @   94 : a9                Return 
+ 4746 S> 00000120802E0557 @   95 : 15 eb 08 00       LdaImmutableContextSlot r15, [8], [0]
+         00000120802E055B @   99 : 18 ea             Star r16
+         00000120802E055D @  101 : 17 02             LdaImmutableCurrentContextSlot [2]
+         00000120802E055F @  103 : 18 e9             Star r17
+ 4749 E> 00000120802E0561 @  105 : 63 ea e9 04 10    CallUndefinedReceiver2 r16, r17, a1, [16]
+         00000120802E0566 @  110 : 97 04             JumpIfToBooleanFalse [4] (00000120802E056A @ 114)
+ 4783 S> 00000120802E0568 @  112 : 0c                LdaZero 
+ 4794 S> 00000120802E0569 @  113 : a9                Return 
+ 4810 S> 00000120802E056A @  114 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802E056C @  116 : 18 e8             Star r18
+         00000120802E056E @  118 : 00 0d 2a 01       LdaSmi.Wide [298]
+         00000120802E0572 @  122 : 18 e7             Star r19
+ 4820 E> 00000120802E0574 @  124 : 62 e8 e7 14       CallUndefinedReceiver1 r18, r19, [20]
+ 4819 E> 00000120802E0578 @  128 : 2f 04 16          GetKeyedProperty a1, [22]
+         00000120802E057B @  131 : 18 ea             Star r16
+ 4837 E> 00000120802E057D @  133 : 5d ea 04 18       CallProperty0 r16, a1, [24]
+ 4839 E> 00000120802E0581 @  137 : 47 3c 13          MulSmi [60], [19]
+         00000120802E0584 @  140 : 18 ea             Star r16
+         00000120802E0586 @  142 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802E0588 @  144 : 18 e7             Star r19
+         00000120802E058A @  146 : 00 0d 35 01       LdaSmi.Wide [309]
+         00000120802E058E @  150 : 18 e6             Star r20
+ 4855 E> 00000120802E0590 @  152 : 62 e7 e6 1a       CallUndefinedReceiver1 r19, r20, [26]
+ 4854 E> 00000120802E0594 @  156 : 2f 04 1c          GetKeyedProperty a1, [28]
+         00000120802E0597 @  159 : 18 e9             Star r17
+ 4872 E> 00000120802E0599 @  161 : 5d e9 04 1e       CallProperty0 r17, a1, [30]
+ 4844 E> 00000120802E059D @  165 : 39 ea 12          Add r16, [18]
+         00000120802E05A0 @  168 : c2                Star2 
+ 4889 S> 00000120802E05A1 @  169 : 21 05 20          LdaGlobal [5], [32]
+         00000120802E05A4 @  172 : c1                Star3 
+ 4916 S> 00000120802E05A5 @  173 : 0c                LdaZero 
+         00000120802E05A6 @  174 : be                Star6 
+ 4929 S> 00000120802E05A7 @  175 : 0d 08             LdaSmi [8]
+ 4929 E> 00000120802E05A9 @  177 : 6d f4 22          TestLessThan r6, [34]
+         00000120802E05AC @  180 : 92 10             JumpIfFalseConstant [16] (00000120802E07E0 @ 744)
+ 4963 S> 00000120802E05AE @  182 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802E05B0 @  184 : 18 e8             Star r18
+         00000120802E05B2 @  186 : 00 0d 41 01       LdaSmi.Wide [321]
+         00000120802E05B6 @  190 : 18 e7             Star r19
+ 4974 E> 00000120802E05B8 @  192 : 62 e8 e7 25       CallUndefinedReceiver1 r18, r19, [37]
+ 4973 E> 00000120802E05BC @  196 : 2f 04 27          GetKeyedProperty a1, [39]
+         00000120802E05BF @  199 : 18 ea             Star r16
+ 4991 E> 00000120802E05C1 @  201 : 5d ea 04 29       CallProperty0 r16, a1, [41]
+         00000120802E05C5 @  205 : 18 ea             Star r16
+         00000120802E05C7 @  207 : 0b f4             Ldar r6
+ 4993 E> 00000120802E05C9 @  209 : 39 ea 24          Add r16, [36]
+ 5004 E> 00000120802E05CC @  212 : 49 07 23          ModSmi [7], [35]
+         00000120802E05CF @  215 : bd                Star7 
+ 5032 S> 00000120802E05D0 @  216 : b1 f9 2b 2d       GetIterator r1, [43], [45]
+         00000120802E05D4 @  220 : 9f 07             JumpIfJSReceiver [7] (00000120802E05DB @ 227)
+         00000120802E05D6 @  222 : 65 c7 00 fa 00    CallRuntime [ThrowSymbolIteratorInvalid], r0-r0
+         00000120802E05DB @  227 : 18 e9             Star r17
+         00000120802E05DD @  229 : 2d e9 06 2f       GetNamedProperty r17, [6], [47]
+         00000120802E05E1 @  233 : 18 ea             Star r16
+         00000120802E05E3 @  235 : 12                LdaFalse 
+         00000120802E05E4 @  236 : 18 e8             Star r18
+         00000120802E05E6 @  238 : 19 ff e5          Mov <context>, r21
+         00000120802E05E9 @  241 : 11                LdaTrue 
+         00000120802E05EA @  242 : 18 e8             Star r18
+ 5019 S> 00000120802E05EC @  244 : 5d ea e9 31       CallProperty0 r16, r17, [49]
+         00000120802E05F0 @  248 : 18 e4             Star r22
+         00000120802E05F2 @  250 : 9f 07             JumpIfJSReceiver [7] (00000120802E05F9 @ 257)
+         00000120802E05F4 @  252 : 65 be 00 e4 01    CallRuntime [ThrowIteratorResultNotAnObject], r22-r22
+         00000120802E05F9 @  257 : 2d e4 07 33       GetNamedProperty r22, [7], [51]
+         00000120802E05FD @  261 : 94 0f             JumpIfToBooleanTrueConstant [15] (00000120802E0791 @ 665)
+         00000120802E05FF @  263 : 2d e4 08 35       GetNamedProperty r22, [8], [53]
+         00000120802E0603 @  267 : 18 e4             Star r22
+         00000120802E0605 @  269 : 12                LdaFalse 
+         00000120802E0606 @  270 : 18 e8             Star r18
+         00000120802E0608 @  272 : 19 e4 f5          Mov r22, r5
+ 5019 S> 00000120802E060B @  275 : 19 f5 f1          Mov r5, r9
+ 5059 S> 00000120802E060E @  278 : 21 09 37          LdaGlobal [9], [55]
+         00000120802E0611 @  281 : 18 e2             Star r24
+ 5064 E> 00000120802E0613 @  283 : 2d e2 0a 39       GetNamedProperty r24, [10], [57]
+         00000120802E0617 @  287 : 18 e3             Star r23
+         00000120802E0619 @  289 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802E061B @  291 : 18 e0             Star r26
+         00000120802E061D @  293 : 00 0d 2e 01       LdaSmi.Wide [302]
+         00000120802E0621 @  297 : 18 df             Star r27
+ 5086 E> 00000120802E0623 @  299 : 62 e0 df 3b       CallUndefinedReceiver1 r26, r27, [59]
+ 5085 E> 00000120802E0627 @  303 : 2f f5 3d          GetKeyedProperty r5, [61]
+         00000120802E062A @  306 : 18 e1             Star r25
+ 5075 E> 00000120802E062C @  308 : 5e e3 e2 e1 3f    CallProperty1 r23, r24, r25, [63]
+         00000120802E0631 @  313 : 19 f1 e4          Mov r9, r22
+         00000120802E0634 @  316 : 97 2e             JumpIfToBooleanFalse [46] (00000120802E0662 @ 362)
+         00000120802E0636 @  318 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802E0638 @  320 : 18 e2             Star r24
+         00000120802E063A @  322 : 00 0d 2e 01       LdaSmi.Wide [302]
+         00000120802E063E @  326 : 18 e1             Star r25
+ 5116 E> 00000120802E0640 @  328 : 62 e2 e1 41       CallUndefinedReceiver1 r24, r25, [65]
+ 5115 E> 00000120802E0644 @  332 : 2f f1 43          GetKeyedProperty r9, [67]
+         00000120802E0647 @  335 : 18 e3             Star r23
+         00000120802E0649 @  337 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802E064B @  339 : 18 e2             Star r24
+         00000120802E064D @  341 : 00 0d 31 01       LdaSmi.Wide [305]
+         00000120802E0651 @  345 : 18 e1             Star r25
+ 5134 E> 00000120802E0653 @  347 : 62 e2 e1 45       CallUndefinedReceiver1 r24, r25, [69]
+ 5133 E> 00000120802E0657 @  351 : 2f e3 47          GetKeyedProperty r23, [71]
+         00000120802E065A @  354 : 97 08             JumpIfToBooleanFalse [8] (00000120802E0662 @ 362)
+ 5161 E> 00000120802E065C @  356 : 2d f1 0b 49       GetNamedProperty r9, [11], [73]
+         00000120802E0660 @  360 : 8a 06             Jump [6] (00000120802E0666 @ 366)
+         00000120802E0662 @  362 : 79 0c 4b 25       CreateArrayLiteral [12], [75], #37
+         00000120802E0666 @  366 : ba                Star10 
+ 5200 S> 00000120802E0667 @  367 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802E0669 @  369 : 18 e1             Star r25
+         00000120802E066B @  371 : 00 0d 48 01       LdaSmi.Wide [328]
+         00000120802E066F @  375 : 18 e0             Star r26
+ 5214 E> 00000120802E0671 @  377 : 62 e1 e0 4c       CallUndefinedReceiver1 r25, r26, [76]
+ 5213 E> 00000120802E0675 @  381 : 2f f0 4e          GetKeyedProperty r10, [78]
+         00000120802E0678 @  384 : 18 e3             Star r23
+ 5231 E> 00000120802E067A @  386 : 5e e3 f0 f3 50    CallProperty1 r23, r10, r7, [80]
+         00000120802E067F @  391 : 96 04             JumpIfToBooleanTrue [4] (00000120802E0683 @ 395)
+ 5243 S> 00000120802E0681 @  393 : 8b 0e             JumpConstant [14] (00000120802E078B @ 659)
+ 5302 S> 00000120802E0683 @  395 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802E0685 @  397 : 18 e2             Star r24
+         00000120802E0687 @  399 : 00 0d 2f 01       LdaSmi.Wide [303]
+         00000120802E068B @  403 : 18 e1             Star r25
+ 5285 E> 00000120802E068D @  405 : 62 e2 e1 52       CallUndefinedReceiver1 r24, r25, [82]
+ 5284 E> 00000120802E0691 @  409 : 2f f1 54          GetKeyedProperty r9, [84]
+         00000120802E0694 @  412 : 96 04             JumpIfToBooleanTrue [4] (00000120802E0698 @ 416)
+         00000120802E0696 @  414 : 7b 56             CreateEmptyArrayLiteral [86]
+         00000120802E0698 @  416 : 18 e1             Star r25
+         00000120802E069A @  418 : b1 e1 57 59       GetIterator r25, [87], [89]
+         00000120802E069E @  422 : 9f 07             JumpIfJSReceiver [7] (00000120802E06A5 @ 429)
+         00000120802E06A0 @  424 : 65 c7 00 fa 00    CallRuntime [ThrowSymbolIteratorInvalid], r0-r0
+         00000120802E06A5 @  429 : 18 e2             Star r24
+         00000120802E06A7 @  431 : 2d e2 06 5b       GetNamedProperty r24, [6], [91]
+         00000120802E06AB @  435 : 18 e3             Star r23
+         00000120802E06AD @  437 : 12                LdaFalse 
+         00000120802E06AE @  438 : 18 e1             Star r25
+         00000120802E06B0 @  440 : 19 ff de          Mov <context>, r28
+         00000120802E06B3 @  443 : 11                LdaTrue 
+         00000120802E06B4 @  444 : 18 e1             Star r25
+ 5262 S> 00000120802E06B6 @  446 : 5d e3 e2 5d       CallProperty0 r23, r24, [93]
+         00000120802E06BA @  450 : 18 dd             Star r29
+         00000120802E06BC @  452 : 9f 07             JumpIfJSReceiver [7] (00000120802E06C3 @ 459)
+         00000120802E06BE @  454 : 65 be 00 dd 01    CallRuntime [ThrowIteratorResultNotAnObject], r29-r29
+         00000120802E06C3 @  459 : 2d dd 07 5f       GetNamedProperty r29, [7], [95]
+         00000120802E06C7 @  463 : 96 7b             JumpIfToBooleanTrue [123] (00000120802E0742 @ 586)
+         00000120802E06C9 @  465 : 2d dd 08 61       GetNamedProperty r29, [8], [97]
+         00000120802E06CD @  469 : 18 dd             Star r29
+         00000120802E06CF @  471 : 12                LdaFalse 
+         00000120802E06D0 @  472 : 18 e1             Star r25
+         00000120802E06D2 @  474 : 19 dd f6          Mov r29, r4
+ 5262 S> 00000120802E06D5 @  477 : 19 f6 ee          Mov r4, r12
+ 5324 S> 00000120802E06D8 @  480 : 15 eb 06 00       LdaImmutableContextSlot r15, [6], [0]
+         00000120802E06DC @  484 : 18 dc             Star r30
+         00000120802E06DE @  486 : 17 03             LdaImmutableCurrentContextSlot [3]
+         00000120802E06E0 @  488 : 18 da             Star r32
+         00000120802E06E2 @  490 : 00 0d 3a 01       LdaSmi.Wide [314]
+         00000120802E06E6 @  494 : 18 d9             Star r33
+ 5344 E> 00000120802E06E8 @  496 : 62 da d9 63       CallUndefinedReceiver1 r32, r33, [99]
+ 5343 E> 00000120802E06EC @  500 : 2f f6 65          GetKeyedProperty r4, [101]
+         00000120802E06EF @  503 : 18 db             Star r31
+ 5324 E> 00000120802E06F1 @  505 : 62 dc db 67       CallUndefinedReceiver1 r30, r31, [103]
+         00000120802E06F5 @  509 : b7                Star13 
+ 5363 S> 00000120802E06F6 @  510 : 1d                TestUndetectable 
+         00000120802E06F7 @  511 : 19 ee dd          Mov r12, r29
+         00000120802E06FA @  514 : 99 04             JumpIfFalse [4] (00000120802E06FE @ 518)
+ 5382 S> 00000120802E06FC @  516 : 8a 43             Jump [67] (00000120802E073F @ 583)
+ 5407 S> 00000120802E06FE @  518 : 0b f4             Ldar r6
+ 5416 E> 00000120802E0700 @  520 : 00 47 a0 05 6b 00 MulSmi.Wide [1440], [107]
+         00000120802E0706 @  526 : 18 dc             Star r30
+         00000120802E0708 @  528 : 0b ed             Ldar r13
+ 5422 E> 00000120802E070A @  530 : 39 dc 6a          Add r30, [106]
+         00000120802E070D @  533 : 18 dc             Star r30
+         00000120802E070F @  535 : 0c                LdaZero 
+ 5443 E> 00000120802E0710 @  536 : 6c f4 6c          TestEqualStrict r6, [108]
+         00000120802E0713 @  539 : 99 06             JumpIfFalse [6] (00000120802E0719 @ 545)
+         00000120802E0715 @  541 : 0b f8             Ldar r2
+         00000120802E0717 @  543 : 8a 03             Jump [3] (00000120802E071A @ 546)
+         00000120802E0719 @  545 : 0c                LdaZero 
+ 5432 E> 00000120802E071A @  546 : 3a dc 69          Sub r30, [105]
+         00000120802E071D @  549 : b6                Star14 
+ 5465 S> 00000120802E071E @  550 : 0c                LdaZero 
+ 5477 E> 00000120802E071F @  551 : 6c f4 6d          TestEqualStrict r6, [109]
+         00000120802E0722 @  554 : 99 0b             JumpIfFalse [11] (00000120802E072D @ 565)
+         00000120802E0724 @  556 : 0b f8             Ldar r2
+ 5494 E> 00000120802E0726 @  558 : 6f ed 6e          TestLessThanOrEqual r13, [110]
+         00000120802E0729 @  561 : 99 04             JumpIfFalse [4] (00000120802E072D @ 565)
+ 5506 S> 00000120802E072B @  563 : 8a 14             Jump [20] (00000120802E073F @ 583)
+ 5515 S> 00000120802E072D @  565 : 0c                LdaZero 
+ 5527 E> 00000120802E072E @  566 : 70 ec 6f          TestGreaterThanOrEqual r14, [111]
+         00000120802E0731 @  569 : 99 0e             JumpIfFalse [14] (00000120802E073F @ 583)
+         00000120802E0733 @  571 : 0b f7             Ldar r3
+ 5543 E> 00000120802E0735 @  573 : 6d ec 70          TestLessThan r14, [112]
+         00000120802E0738 @  576 : 99 07             JumpIfFalse [7] (00000120802E073F @ 583)
+ 5554 S> 00000120802E073A @  578 : 19 ec f7          Mov r14, r3
+         00000120802E073D @  581 : 0b f7             Ldar r3
+ 5252 E> 00000120802E073F @  583 : 89 8c 02          JumpLoop [140], [2] (00000120802E06B3 @ 443)
+         00000120802E0742 @  586 : 0d ff             LdaSmi [-1]
+         00000120802E0744 @  588 : 18 df             Star r27
+         00000120802E0746 @  590 : 18 e0             Star r26
+         00000120802E0748 @  592 : 8a 07             Jump [7] (00000120802E074F @ 599)
+         00000120802E074A @  594 : 18 df             Star r27
+         00000120802E074C @  596 : 0c                LdaZero 
+         00000120802E074D @  597 : 18 e0             Star r26
+         00000120802E074F @  599 : 10                LdaTheHole 
+         00000120802E0750 @  600 : a6                SetPendingMessage 
+         00000120802E0751 @  601 : 18 de             Star r28
+         00000120802E0753 @  603 : 0b e1             Ldar r25
+         00000120802E0755 @  605 : 96 26             JumpIfToBooleanTrue [38] (00000120802E077B @ 643)
+         00000120802E0757 @  607 : 19 ff dc          Mov <context>, r30
+         00000120802E075A @  610 : 2d e2 0d 71       GetNamedProperty r24, [13], [113]
+         00000120802E075E @  614 : 9e 1d             JumpIfUndefinedOrNull [29] (00000120802E077B @ 643)
+         00000120802E0760 @  616 : 18 db             Star r31
+         00000120802E0762 @  618 : 5d db e2 73       CallProperty0 r31, r24, [115]
+         00000120802E0766 @  622 : 9f 15             JumpIfJSReceiver [21] (00000120802E077B @ 643)
+         00000120802E0768 @  624 : 18 da             Star r32
+         00000120802E076A @  626 : 65 be 00 da 01    CallRuntime [ThrowIteratorResultNotAnObject], r32-r32
+         00000120802E076F @  631 : 8a 0c             Jump [12] (00000120802E077B @ 643)
+         00000120802E0771 @  633 : 18 dc             Star r30
+         00000120802E0773 @  635 : 0c                LdaZero 
+         00000120802E0774 @  636 : 1c e0             TestReferenceEqual r26
+         00000120802E0776 @  638 : 98 05             JumpIfTrue [5] (00000120802E077B @ 643)
+         00000120802E0778 @  640 : 0b dc             Ldar r30
+         00000120802E077A @  642 : a8                ReThrow 
+         00000120802E077B @  643 : 0b de             Ldar r28
+         00000120802E077D @  645 : a6                SetPendingMessage 
+         00000120802E077E @  646 : 0c                LdaZero 
+         00000120802E077F @  647 : 1c e0             TestReferenceEqual r26
+         00000120802E0781 @  649 : 99 0a             JumpIfFalse [10] (00000120802E078B @ 659)
+         00000120802E0783 @  651 : 0c                LdaZero 
+         00000120802E0784 @  652 : 18 e7             Star r19
+         00000120802E0786 @  654 : 19 df e6          Mov r27, r20
+         00000120802E0789 @  657 : 8a 15             Jump [21] (00000120802E079E @ 678)
+ 5009 E> 00000120802E078B @  659 : 00 89 a3 01 01 00 JumpLoop.Wide [419], [1] (00000120802E05E9 @ 241)
+         00000120802E0791 @  665 : 0d ff             LdaSmi [-1]
+         00000120802E0793 @  667 : 18 e6             Star r20
+         00000120802E0795 @  669 : 18 e7             Star r19
+         00000120802E0797 @  671 : 8a 07             Jump [7] (00000120802E079E @ 678)
+         00000120802E0799 @  673 : 18 e6             Star r20
+         00000120802E079B @  675 : 0c                LdaZero 
+         00000120802E079C @  676 : 18 e7             Star r19
+         00000120802E079E @  678 : 10                LdaTheHole 
+         00000120802E079F @  679 : a6                SetPendingMessage 
+         00000120802E07A0 @  680 : 18 e5             Star r21
+         00000120802E07A2 @  682 : 0b e8             Ldar r18
+         00000120802E07A4 @  684 : 96 26             JumpIfToBooleanTrue [38] (00000120802E07CA @ 722)
+         00000120802E07A6 @  686 : 19 ff e3          Mov <context>, r23
+         00000120802E07A9 @  689 : 2d e9 0d 75       GetNamedProperty r17, [13], [117]
+         00000120802E07AD @  693 : 9e 1d             JumpIfUndefinedOrNull [29] (00000120802E07CA @ 722)
+         00000120802E07AF @  695 : 18 e2             Star r24
+         00000120802E07B1 @  697 : 5d e2 e9 77       CallProperty0 r24, r17, [119]
+         00000120802E07B5 @  701 : 9f 15             JumpIfJSReceiver [21] (00000120802E07CA @ 722)
+         00000120802E07B7 @  703 : 18 e1             Star r25
+         00000120802E07B9 @  705 : 65 be 00 e1 01    CallRuntime [ThrowIteratorResultNotAnObject], r25-r25
+         00000120802E07BE @  710 : 8a 0c             Jump [12] (00000120802E07CA @ 722)
+         00000120802E07C0 @  712 : 18 e3             Star r23
+         00000120802E07C2 @  714 : 0c                LdaZero 
+         00000120802E07C3 @  715 : 1c e7             TestReferenceEqual r19
+         00000120802E07C5 @  717 : 98 05             JumpIfTrue [5] (00000120802E07CA @ 722)
+         00000120802E07C7 @  719 : 0b e3             Ldar r23
+         00000120802E07C9 @  721 : a8                ReThrow 
+         00000120802E07CA @  722 : 0b e5             Ldar r21
+         00000120802E07CC @  724 : a6                SetPendingMessage 
+         00000120802E07CD @  725 : 0c                LdaZero 
+         00000120802E07CE @  726 : 1c e7             TestReferenceEqual r19
+         00000120802E07D0 @  728 : 99 05             JumpIfFalse [5] (00000120802E07D5 @ 733)
+         00000120802E07D2 @  730 : 0b e6             Ldar r20
+         00000120802E07D4 @  732 : a8                ReThrow 
+ 4943 S> 00000120802E07D5 @  733 : 0b f4             Ldar r6
+         00000120802E07D7 @  735 : 51 79             Inc [121]
+         00000120802E07D9 @  737 : be                Star6 
+ 4898 E> 00000120802E07DA @  738 : 00 89 34 02 00 00 JumpLoop.Wide [564], [0] (00000120802E05A7 @ 175)
+ 5596 S> 00000120802E07E0 @  744 : 21 05 20          LdaGlobal [5], [32]
+ 5593 E> 00000120802E07E3 @  747 : 6c f7 7a          TestEqualStrict r3, [122]
+         00000120802E07E6 @  750 : 99 05             JumpIfFalse [5] (00000120802E07EB @ 755)
+         00000120802E07E8 @  752 : 0f                LdaNull 
+         00000120802E07E9 @  753 : 8a 04             Jump [4] (00000120802E07ED @ 757)
+         00000120802E07EB @  755 : 0b f7             Ldar r3
+ 5620 S> 00000120802E07ED @  757 : a9                Return 
+Constant pool (size = 17)
+00000120802E07F1: [FixedArray] in OldSpace
+ - map: 0x02d9ca6012e1 <Map>
+ - length: 17
+           0: 0x0120802e0889 <ScopeInfo FUNCTION_SCOPE>
+           1: 0x000fcc3c3581 <String[5]: #store>
+           2: 0x0120802e0959 <String[9]: #schedules>
+           3: 0x000fcc3c1629 <String[6]: #filter>
+           4: 0x0120802e0979 <SharedFunctionInfo>
+Start SharedFunctionInfo
+00000120802E0979: [SharedFunctionInfo] in OldSpace
+ - map: 0x02d9ca601991 <Map[56]>
+ - name: 0x02d9ca6017d1 <String[0]: #>
+ - inferred name: 0x02d9ca6017d1 <String[0]: #>
+ - kind: ArrowFunction
+ - syntax kind: AnonymousExpression
+ - function_map_index: 200
+ - formal_parameter_count: 1
+ - expected_nof_properties: 
+ - language_mode: strict
+ - data: 0x0120802e09b1 <BytecodeArray[51]>
+ - code (from data): 0x0000c0544301 <Code BUILTIN InterpreterEntryTrampoline>
+ - script: 0x0120802de809 <Script>
+ - function token position: 4615
+ - start position: 4615
+ - end position: 4700
+ - no debug info
+ - scope info: 0x0120802e0a69 <ScopeInfo FUNCTION_SCOPE>
+ - outer scope info: 0x0120802e0889 <ScopeInfo FUNCTION_SCOPE>
+ - length: 1
+ - feedback_metadata: 00000120802E0AB9: [FeedbackMetadata] in OldSpace
+ - map: 0x02d9ca601f81 <Map>
+ - slot_count: 11
+ - create_closure_slot_count: 0
+ Slot #0 Call
+ Slot #2 LoadKeyed
+ Slot #4 CompareOp
+ Slot #5 Call
+ Slot #7 LoadKeyed
+ Slot #9 Literal
+ Slot #10 CompareOp
+
+
+Start BytecodeArray
+Parameter count 2
+Register count 3
+Frame size 24
+OSR urgency: 0
+Bytecode age: 0
+ 4665 S> 00000120802E09E8 @    0 : 17 03             LdaImmutableCurrentContextSlot [3]
+ 4636 E> 00000120802E09EA @    2 : aa 00             ThrowReferenceErrorIfHole [0]
+         00000120802E09EC @    4 : c3                Star1 
+         00000120802E09ED @    5 : 00 0d 38 01       LdaSmi.Wide [312]
+         00000120802E09F1 @    9 : c2                Star2 
+ 4636 E> 00000120802E09F2 @   10 : 62 f9 f8 00       CallUndefinedReceiver1 r1, r2, [0]
+ 4635 E> 00000120802E09F6 @   14 : 2f 03 02          GetKeyedProperty a0, [2]
+         00000120802E09F9 @   17 : c4                Star0 
+         00000120802E09FA @   18 : 17 02             LdaImmutableCurrentContextSlot [2]
+ 4653 E> 00000120802E09FC @   20 : 6c fa 04          TestEqualStrict r0, [4]
+         00000120802E09FF @   23 : 99 1b             JumpIfFalse [27] (00000120802E0A1A @ 50)
+         00000120802E0A01 @   25 : 17 03             LdaImmutableCurrentContextSlot [3]
+ 4677 E> 00000120802E0A03 @   27 : aa 00             ThrowReferenceErrorIfHole [0]
+         00000120802E0A05 @   29 : c3                Star1 
+         00000120802E0A06 @   30 : 00 0d 2d 01       LdaSmi.Wide [301]
+         00000120802E0A0A @   34 : c2                Star2 
+ 4677 E> 00000120802E0A0B @   35 : 62 f9 f8 05       CallUndefinedReceiver1 r1, r2, [5]
+ 4676 E> 00000120802E0A0F @   39 : 2f 03 07          GetKeyedProperty a0, [7]
+         00000120802E0A12 @   42 : c4                Star0 
+         00000120802E0A13 @   43 : 7b 09             CreateEmptyArrayLiteral [9]
+         00000120802E0A15 @   45 : 55                ToBooleanLogicalNot 
+ 4694 E> 00000120802E0A16 @   46 : 6c fa 0a          TestEqualStrict r0, [10]
+         00000120802E0A19 @   49 : 56                LogicalNot 
+ 4700 S> 00000120802E0A1A @   50 : a9                Return 
+Constant pool (size = 1)
+00000120802E0A21: [FixedArray] in OldSpace
+ - map: 0x02d9ca6012e1 <Map>
+ - length: 1
+           0: 0x0120802e0919 <String[9]: #_0x931d11>
+Handler Table (size = 0)
+Source Position Table (size = 25)
+0x0120802e0a39 <ByteArray[25]>
+
+End BytecodeArray
+
+End SharedFunctionInfo
+
+           5: 0x02d9ca605381 <String[8]: #Infinity>
+           6: 0x02d9ca6059b1 <String[4]: #next>
+           7: 0x02d9ca604c71 <String[4]: #done>
+           8: 0x02d9ca606419 <String[5]: #value>
+           9: 0x02d9ca604681 <String[5]: #Array>
+          10: 0x000fcc3c33a1 <String[7]: #isArray>
+          11: 0x02d9ca604b81 <String[4]: #days>
+          12: 0x0120802e0ae9 <ArrayBoilerplateDescription PACKED_SMI_ELEMENTS, 0x0120802e0b01 <FixedArray[7]>
+Start FixedArray
+00000120802E0B01: [FixedArray] in OldSpace
+ - map: 0x02d9ca601829 <Map>
+ - length: 7
+           0: 0
+           1: 1
+           2: 2
+           3: 3
+           4: 4
+           5: 5
+           6: 6
+
+End FixedArray
+>
+          13: 0x02d9ca605e81 <String[6]: #return>
+          14: 266
+          15: 404
+          16: 564
+Handler Table (size = 64)
+   from   to       hdlr (prediction,   data)
+  ( 241, 665)  ->   673 (prediction=0, data=21)
+  ( 443, 586)  ->   594 (prediction=0, data=28)
+  ( 610, 631)  ->   633 (prediction=0, data=30)
+  ( 689, 710)  ->   712 (prediction=0, data=23)
+Source Position Table (size = 197)
+0x0120802e0b99 <ByteArray[197]>
+
+End BytecodeArray
+
+End SharedFunctionInfo
+
+           9: 0x0120802de959 <SharedFunctionInfo>
+Start SharedFunctionInfo
+00000120802DE959: [SharedFunctionInfo] in OldSpace
+ - map: 0x02d9ca601991 <Map[56]>
+ - name: 0x02d9ca6017d1 <String[0]: #>
+ - inferred name: 0x02d9ca6017d1 <String[0]: #>
+ - kind: NormalFunction
+ - syntax kind: AnonymousExpression
+ - function_map_index: 197
+ - formal_parameter_count: 2
+ - expected_nof_properties: 
+ - language_mode: strict
+ - data: 0x0120802de991 <BytecodeArray[393]>
+ - code (from data): 0x0000c0544301 <Code BUILTIN InterpreterEntryTrampoline>
+ - script: 0x0120802de809 <Script>
+ - function token position: 100
+ - start position: 108
+ - end position: 732
+ - no debug info
+ - scope info: 0x0120802decf9 <ScopeInfo FUNCTION_SCOPE>
+ - outer scope info: 0x0120802ddf09 <ScopeInfo FUNCTION_SCOPE>
+ - length: 2
+ - feedback_metadata: 00000120802DED49: [FeedbackMetadata] in OldSpace
+ - map: 0x02d9ca601f81 <Map>
+ - slot_count: 94
+ - create_closure_slot_count: 0
+ Slot #0 Call
+ Slot #2 Literal
+ Slot #3 BinaryOp
+ Slot #4 BinaryOp
+ Slot #5 LoadGlobalNotInsideTypeof
+ Slot #7 Call
+ Slot #9 Call
+ Slot #11 BinaryOp
+ Slot #12 Call
+ Slot #14 Call
+ Slot #16 BinaryOp
+ Slot #17 BinaryOp
+ Slot #18 BinaryOp
+ Slot #19 Call
+ Slot #21 Call
+ Slot #23 BinaryOp
+ Slot #24 BinaryOp
+ Slot #25 Call
+ Slot #27 Call
+ Slot #29 BinaryOp
+ Slot #30 BinaryOp
+ Slot #31 BinaryOp
+ Slot #32 BinaryOp
+ Slot #33 Call
+ Slot #35 Call
+ Slot #37 BinaryOp
+ Slot #38 Call
+ Slot #40 Call
+ Slot #42 BinaryOp
+ Slot #43 BinaryOp
+ Slot #44 BinaryOp
+ Slot #45 Call
+ Slot #47 Call
+ Slot #49 BinaryOp
+ Slot #50 Call
+ Slot #52 Call
+ Slot #54 BinaryOp
+ Slot #55 BinaryOp
+ Slot #56 Call
+ Slot #58 Call
+ Slot #60 BinaryOp
+ Slot #61 BinaryOp
+ Slot #62 BinaryOp
+ Slot #63 Call
+ Slot #65 Call
+ Slot #67 BinaryOp
+ Slot #68 BinaryOp
+ Slot #69 BinaryOp
+ Slot #70 Call
+ Slot #72 Call
+ Slot #74 BinaryOp
+ Slot #75 Call
+ Slot #77 Call
+ Slot #79 BinaryOp
+ Slot #80 BinaryOp
+ Slot #81 CompareOp
+ Slot #82 LoadProperty
+ Slot #84 LoadProperty
+ Slot #86 Call
+ Slot #88 Call
+ Slot #90 Call
+ Slot #92 Call
+
+
+Start BytecodeArray
+Parameter count 3
+Register count 9
+Frame size 72
+OSR urgency: 0
+Bytecode age: 0
+  146 S> 00000120802DE9C8 @    0 : 17 05             LdaImmutableCurrentContextSlot [5]
+         00000120802DE9CA @    2 : c4                Star0 
+  164 S> 00000120802DE9CB @    3 : 61 03 00          CallUndefinedReceiver0 a0, [0]
+         00000120802DE9CE @    6 : c3                Star1 
+  182 S> 00000120802DE9CF @    7 : 7b 02             CreateEmptyArrayLiteral [2]
+         00000120802DE9D1 @    9 : 95 04             JumpIfToBooleanFalseConstant [4] (00000120802DEB4F @ 391)
+         00000120802DE9D3 @   11 : 19 ff f7          Mov <context>, r3
+  208 S> 00000120802DE9D6 @   14 : 21 00 05          LdaGlobal [0], [5]
+         00000120802DE9D9 @   17 : c0                Star4 
+         00000120802DE9DA @   18 : 00 0d 46 01       LdaSmi.Wide [326]
+         00000120802DE9DE @   22 : be                Star6 
+  217 E> 00000120802DE9DF @   23 : 62 fa f4 07       CallUndefinedReceiver1 r0, r6, [7]
+         00000120802DE9E3 @   27 : bf                Star5 
+  208 E> 00000120802DE9E4 @   28 : 62 f6 f5 09       CallUndefinedReceiver1 r4, r5, [9]
+  234 E> 00000120802DE9E8 @   32 : 48 01 04          DivSmi [1], [4]
+         00000120802DE9EB @   35 : c0                Star4 
+         00000120802DE9EC @   36 : 21 00 05          LdaGlobal [0], [5]
+         00000120802DE9EF @   39 : bf                Star5 
+         00000120802DE9F0 @   40 : 00 0d 40 01       LdaSmi.Wide [320]
+         00000120802DE9F4 @   44 : bd                Star7 
+  250 E> 00000120802DE9F5 @   45 : 62 fa f3 0c       CallUndefinedReceiver1 r0, r7, [12]
+         00000120802DE9F9 @   49 : be                Star6 
+  241 E> 00000120802DE9FA @   50 : 62 f5 f4 0e       CallUndefinedReceiver1 r5, r6, [14]
+  240 E> 00000120802DE9FE @   54 : 53 10             Negate [16]
+  267 E> 00000120802DEA00 @   56 : 48 02 0b          DivSmi [2], [11]
+  238 E> 00000120802DEA03 @   59 : 3b f6 03          Mul r4, [3]
+         00000120802DEA06 @   62 : c0                Star4 
+         00000120802DEA07 @   63 : 21 00 05          LdaGlobal [0], [5]
+         00000120802DEA0A @   66 : bf                Star5 
+         00000120802DEA0B @   67 : 00 0d 3e 01       LdaSmi.Wide [318]
+         00000120802DEA0F @   71 : bd                Star7 
+  283 E> 00000120802DEA10 @   72 : 62 fa f3 13       CallUndefinedReceiver1 r0, r7, [19]
+         00000120802DEA14 @   76 : be                Star6 
+  274 E> 00000120802DEA15 @   77 : 62 f5 f4 15       CallUndefinedReceiver1 r5, r6, [21]
+  273 E> 00000120802DEA19 @   81 : 53 17             Negate [23]
+  300 E> 00000120802DEA1B @   83 : 48 03 12          DivSmi [3], [18]
+         00000120802DEA1E @   86 : bf                Star5 
+         00000120802DEA1F @   87 : 21 00 05          LdaGlobal [0], [5]
+         00000120802DEA22 @   90 : be                Star6 
+         00000120802DEA23 @   91 : 00 0d 3c 01       LdaSmi.Wide [316]
+         00000120802DEA27 @   95 : bc                Star8 
+  316 E> 00000120802DEA28 @   96 : 62 fa f2 19       CallUndefinedReceiver1 r0, r8, [25]
+         00000120802DEA2C @  100 : bd                Star7 
+  307 E> 00000120802DEA2D @  101 : 62 f4 f3 1b       CallUndefinedReceiver1 r6, r7, [27]
+  306 E> 00000120802DEA31 @  105 : 53 1d             Negate [29]
+  333 E> 00000120802DEA33 @  107 : 48 04 18          DivSmi [4], [24]
+  304 E> 00000120802DEA36 @  110 : 3b f5 11          Mul r5, [17]
+  272 E> 00000120802DEA39 @  113 : 39 f6 1e          Add r4, [30]
+         00000120802DEA3C @  116 : c0                Star4 
+         00000120802DEA3D @  117 : 21 00 05          LdaGlobal [0], [5]
+         00000120802DEA40 @  120 : bf                Star5 
+         00000120802DEA41 @  121 : 00 0d 47 01       LdaSmi.Wide [327]
+         00000120802DEA45 @  125 : bd                Star7 
+  348 E> 00000120802DEA46 @  126 : 62 fa f3 21       CallUndefinedReceiver1 r0, r7, [33]
+         00000120802DEA4A @  130 : be                Star6 
+  339 E> 00000120802DEA4B @  131 : 62 f5 f4 23       CallUndefinedReceiver1 r5, r6, [35]
+  365 E> 00000120802DEA4F @  135 : 48 05 20          DivSmi [5], [32]
+         00000120802DEA52 @  138 : bf                Star5 
+         00000120802DEA53 @  139 : 21 00 05          LdaGlobal [0], [5]
+         00000120802DEA56 @  142 : be                Star6 
+         00000120802DEA57 @  143 : 00 0d 34 01       LdaSmi.Wide [308]
+         00000120802DEA5B @  147 : bc                Star8 
+  380 E> 00000120802DEA5C @  148 : 62 fa f2 26       CallUndefinedReceiver1 r0, r8, [38]
+         00000120802DEA60 @  152 : bd                Star7 
+  371 E> 00000120802DEA61 @  153 : 62 f4 f3 28       CallUndefinedReceiver1 r6, r7, [40]
+  397 E> 00000120802DEA65 @  157 : 48 06 25          DivSmi [6], [37]
+  369 E> 00000120802DEA68 @  160 : 3b f5 1f          Mul r5, [31]
+  338 E> 00000120802DEA6B @  163 : 39 f6 2a          Add r4, [42]
+         00000120802DEA6E @  166 : c0                Star4 
+         00000120802DEA6F @  167 : 21 00 05          LdaGlobal [0], [5]
+         00000120802DEA72 @  170 : bf                Star5 
+         00000120802DEA73 @  171 : 00 0d 3f 01       LdaSmi.Wide [319]
+         00000120802DEA77 @  175 : bd                Star7 
+  412 E> 00000120802DEA78 @  176 : 62 fa f3 2d       CallUndefinedReceiver1 r0, r7, [45]
+         00000120802DEA7C @  180 : be                Star6 
+  403 E> 00000120802DEA7D @  181 : 62 f5 f4 2f       CallUndefinedReceiver1 r5, r6, [47]
+  429 E> 00000120802DEA81 @  185 : 48 07 2c          DivSmi [7], [44]
+         00000120802DEA84 @  188 : bf                Star5 
+         00000120802DEA85 @  189 : 21 00 05          LdaGlobal [0], [5]
+         00000120802DEA88 @  192 : be                Star6 
+         00000120802DEA89 @  193 : 00 0d 36 01       LdaSmi.Wide [310]
+         00000120802DEA8D @  197 : bc                Star8 
+  444 E> 00000120802DEA8E @  198 : 62 fa f2 32       CallUndefinedReceiver1 r0, r8, [50]
+         00000120802DEA92 @  202 : bd                Star7 
+  435 E> 00000120802DEA93 @  203 : 62 f4 f3 34       CallUndefinedReceiver1 r6, r7, [52]
+  461 E> 00000120802DEA97 @  207 : 48 08 31          DivSmi [8], [49]
+  433 E> 00000120802DEA9A @  210 : 3b f5 2b          Mul r5, [43]
+  402 E> 00000120802DEA9D @  213 : 39 f6 36          Add r4, [54]
+         00000120802DEAA0 @  216 : c0                Star4 
+         00000120802DEAA1 @  217 : 21 00 05          LdaGlobal [0], [5]
+         00000120802DEAA4 @  220 : bf                Star5 
+         00000120802DEAA5 @  221 : 00 0d 44 01       LdaSmi.Wide [324]
+         00000120802DEAA9 @  225 : bd                Star7 
+  477 E> 00000120802DEAAA @  226 : 62 fa f3 38       CallUndefinedReceiver1 r0, r7, [56]
+         00000120802DEAAE @  230 : be                Star6 
+  468 E> 00000120802DEAAF @  231 : 62 f5 f4 3a       CallUndefinedReceiver1 r5, r6, [58]
+  467 E> 00000120802DEAB3 @  235 : 53 3c             Negate [60]
+  494 E> 00000120802DEAB5 @  237 : 48 09 37          DivSmi [9], [55]
+  466 E> 00000120802DEAB8 @  240 : 39 f6 3d          Add r4, [61]
+         00000120802DEABB @  243 : c0                Star4 
+         00000120802DEABC @  244 : 21 00 05          LdaGlobal [0], [5]
+         00000120802DEABF @  247 : bf                Star5 
+         00000120802DEAC0 @  248 : 00 0d 49 01       LdaSmi.Wide [329]
+         00000120802DEAC4 @  252 : bd                Star7 
+  508 E> 00000120802DEAC5 @  253 : 62 fa f3 3f       CallUndefinedReceiver1 r0, r7, [63]
+         00000120802DEAC9 @  257 : be                Star6 
+  499 E> 00000120802DEACA @  258 : 62 f5 f4 41       CallUndefinedReceiver1 r5, r6, [65]
+  525 E> 00000120802DEACE @  262 : 48 0a 3e          DivSmi [10], [62]
+  498 E> 00000120802DEAD1 @  265 : 39 f6 43          Add r4, [67]
+         00000120802DEAD4 @  268 : c0                Star4 
+         00000120802DEAD5 @  269 : 21 00 05          LdaGlobal [0], [5]
+         00000120802DEAD8 @  272 : bf                Star5 
+         00000120802DEAD9 @  273 : 00 0d 2b 01       LdaSmi.Wide [299]
+         00000120802DEADD @  277 : bd                Star7 
+  539 E> 00000120802DEADE @  278 : 62 fa f3 46       CallUndefinedReceiver1 r0, r7, [70]
+         00000120802DEAE2 @  282 : be                Star6 
+  530 E> 00000120802DEAE3 @  283 : 62 f5 f4 48       CallUndefinedReceiver1 r5, r6, [72]
+  556 E> 00000120802DEAE7 @  287 : 48 0b 45          DivSmi [11], [69]
+         00000120802DEAEA @  290 : bf                Star5 
+         00000120802DEAEB @  291 : 21 00 05          LdaGlobal [0], [5]
+         00000120802DEAEE @  294 : be                Star6 
+         00000120802DEAEF @  295 : 00 0d 45 01       LdaSmi.Wide [325]
+         00000120802DEAF3 @  299 : bc                Star8 
+  572 E> 00000120802DEAF4 @  300 : 62 fa f2 4b       CallUndefinedReceiver1 r0, r8, [75]
+         00000120802DEAF8 @  304 : bd                Star7 
+  563 E> 00000120802DEAF9 @  305 : 62 f4 f3 4d       CallUndefinedReceiver1 r6, r7, [77]
+  562 E> 00000120802DEAFD @  309 : 53 4f             Negate [79]
+  589 E> 00000120802DEAFF @  311 : 48 0c 4a          DivSmi [12], [74]
+  560 E> 00000120802DEB02 @  314 : 3b f5 44          Mul r5, [68]
+  529 E> 00000120802DEB05 @  317 : 39 f6 50          Add r4, [80]
+         00000120802DEB08 @  320 : c2                Star2 
+  595 S> 00000120802DEB09 @  321 : 0b 04             Ldar a1
+  607 E> 00000120802DEB0B @  323 : 6c f8 51          TestEqualStrict r2, [81]
+         00000120802DEB0E @  326 : 99 04             JumpIfFalse [4] (00000120802DEB12 @ 330)
+  620 S> 00000120802DEB10 @  328 : 8a 3f             Jump [63] (00000120802DEB4F @ 391)
+  640 S> 00000120802DEB12 @  330 : 2d f9 01 52       GetNamedProperty r1, [1], [82]
+         00000120802DEB16 @  334 : c0                Star4 
+  658 E> 00000120802DEB17 @  335 : 2d f9 02 54       GetNamedProperty r1, [2], [84]
+         00000120802DEB1B @  339 : be                Star6 
+  667 E> 00000120802DEB1C @  340 : 5d f4 f9 56       CallProperty0 r6, r1, [86]
+         00000120802DEB20 @  344 : be                Star6 
+  648 E> 00000120802DEB21 @  345 : 5e f6 f9 f4 58    CallProperty1 r4, r1, r6, [88]
+         00000120802DEB26 @  350 : 8a 23             Jump [35] (00000120802DEB49 @ 385)
+         00000120802DEB28 @  352 : c0                Star4 
+         00000120802DEB29 @  353 : 82 f6 03          CreateCatchContext r4, [3]
+         00000120802DEB2C @  356 : c1                Star3 
+         00000120802DEB2D @  357 : 10                LdaTheHole 
+         00000120802DEB2E @  358 : a6                SetPendingMessage 
+         00000120802DEB2F @  359 : 0b f7             Ldar r3
+         00000120802DEB31 @  361 : 1a f6             PushContext r4
+  698 S> 00000120802DEB33 @  363 : 2d f9 01 52       GetNamedProperty r1, [1], [82]
+         00000120802DEB37 @  367 : bf                Star5 
+  716 E> 00000120802DEB38 @  368 : 2d f9 02 54       GetNamedProperty r1, [2], [84]
+         00000120802DEB3C @  372 : bd                Star7 
+  725 E> 00000120802DEB3D @  373 : 5d f3 f9 5a       CallProperty0 r7, r1, [90]
+         00000120802DEB41 @  377 : bd                Star7 
+  706 E> 00000120802DEB42 @  378 : 5e f5 f9 f3 5c    CallProperty1 r5, r1, r7, [92]
+         00000120802DEB47 @  383 : 1b f6             PopContext r4
+  176 E> 00000120802DEB49 @  385 : 00 89 7b 01 00 00 JumpLoop.Wide [379], [0] (00000120802DE9CF @ 7)
+         00000120802DEB4F @  391 : 0e                LdaUndefined 
+  731 S> 00000120802DEB50 @  392 : a9                Return 
+Constant pool (size = 5)
+00000120802DEB59: [FixedArray] in OldSpace
+ - map: 0x02d9ca6012e1 <Map>
+ - length: 5
+           0: 0x000fcc3c27d9 <String[8]: #parseInt>
+           1: 0x000fcc3c33d1 <String[4]: #push>
+           2: 0x000fcc3c33e9 <String[5]: #shift>
+           3: 0x0120802debd9 <ScopeInfo CATCH_SCOPE>
+           4: 382
+Handler Table (size = 16)
+   from   to       hdlr (prediction,   data)
+  (  14, 350)  ->   352 (prediction=1, data=3)
+Source Position Table (size = 152)
+0x0120802dec51 <ByteArray[152]>
+
+End BytecodeArray
+
+End SharedFunctionInfo
+
+          10: 0x0120802e0d19 <String[7]: #./store>
+          11: 0x0120802e0d31 <String[8]: #./ffmpeg>
+          12: 0x0120802e0d49 <ObjectBoilerplateDescription[9]>
+Start ObjectBoilerplateDescription
+00000120802E0D49: [ObjectBoilerplateDescription] in OldSpace
+ - map: 0x02d9ca602059 <Map>
+ - length: 9
+           0: 8
+           1: 0x0120802e0451 <String[9]: #startLoop>
+           2: 0x02d9ca601501 <Odd Oddball: uninitialized>
+           3: 0x0120802de0b9 <String[4]: #tick>
+           4: 0x02d9ca601501 <Odd Oddball: uninitialized>
+           5: 0x0120802de081 <String[12]: #shouldRunNow>
+           6: 0x02d9ca601501 <Odd Oddball: uninitialized>
+           7: 0x0120802e0939 <String[15]: #nextOpenMinutes>
+           8: 0x02d9ca601501 <Odd Oddball: uninitialized>
+
+End ObjectBoilerplateDescription
+
+          13: 0x0120802e0451 <String[9]: #startLoop>
+          14: 0x0120802de0b9 <String[4]: #tick>
+          15: 0x0120802de081 <String[12]: #shouldRunNow>
+          16: 0x0120802e0939 <String[15]: #nextOpenMinutes>
+Handler Table (size = 0)
+Source Position Table (size = 48)
+0x0120802e0da1 <ByteArray[48]>
+
+End BytecodeArray
+
+End SharedFunctionInfo
+
+Handler Table (size = 0)
+Source Position Table (size = 8)
+0x0120802e0e01 <ByteArray[8]>
+
+End SharedFunctionInfo
