@@ -33,6 +33,7 @@
 
     "idleStopEnabled": true,
     "idleStopMinutes": 2,
+    "autoStartOnDemand": true,
     "viewerWindowSeconds": 20,
 
     "deviceWatchSeconds": 5,
