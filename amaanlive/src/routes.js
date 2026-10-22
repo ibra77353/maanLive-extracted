@@ -141,7 +141,7 @@ function createRouter() {
   r.post('/api/login', async (req, res) => {
     const body = await readJson(req);
     if (auth.login(req, res, body.user, body.pass)) return ok(res, { user: store.get().admin.user });
-    return fail(res, 401, 'اسم المستخدم أو كلمة المرور غير صحيحة');
+    return fail(res, 401, 'كلمة المرور غير صحيحة');
   });
 
   r.post('/api/logout', async (req, res) => {

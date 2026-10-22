@@ -52,7 +52,9 @@ async function api(path, opts) {
     opts.body = JSON.stringify(opts.body);
   }
   const r = await fetch('/api' + path, opts);
-  if (r.status === 401) {
+  // في طلب تسجيل الدخول يعني 401 بيانات دخول خاطئة، لا انتهاء جلسة،
+  // فنترك رسالة الخادم تُعرض كما هي على النموذج.
+  if (r.status === 401 && !opts.isLogin) {
     showLogin();
     throw new Error('انتهت الجلسة، سجّل الدخول مجدداً');
   }
@@ -157,7 +159,7 @@ $('#loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   $('#loginError').textContent = '';
   try {
-    await api('/login', { method: 'POST', body: { user: $('#loginUser').value, pass: $('#loginPass').value } });
+    await api('/login', { method: 'POST', body: { user: $('#loginUser').value, pass: $('#loginPass').value }, isLogin: true });
     showApp();
     await boot();
   } catch (err) {
