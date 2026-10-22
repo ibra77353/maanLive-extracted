@@ -5,8 +5,9 @@ rem ============================================================================
 rem  Start My Live on Windows:
 rem   1) Check Node.js and ffmpeg.exe
 rem   2) Write nginx.conf and read the real ports from the program itself (no guessing)
-rem   3) Start the server (it starts Nginx and verifies its response)
-rem   4) On exit: stop only the Nginx of our own folder
+rem   3) Clean the temporary streaming folder (srv\hls) for a fresh start
+rem   4) Start the server (it starts Nginx and verifies its response)
+rem   5) On exit: stop only the Nginx of our own folder
 rem  No other Nginx or process on the machine is touched.
 rem ============================================================================
 setlocal enabledelayedexpansion
@@ -32,13 +33,13 @@ if not defined NODE (
   exit /b 1
 )
 for /f "tokens=*" %%v in ('"%NODE%" -v 2^>nul') do set "NODEVER=%%v"
-echo [1/4] Node.js: %NODEVER%
+echo [1/5] Node.js: %NODEVER%
 
 rem ---- 2) ffmpeg ----
 if exist "ffmpeg.exe" (
-  echo [2/4] ffmpeg.exe: found
+  echo [2/5] ffmpeg.exe: found
 ) else (
-  echo [2/4] [WARNING] ffmpeg.exe is missing in this folder - streaming will not work.
+  echo [2/5] [WARNING] ffmpeg.exe is missing in this folder - streaming will not work.
 )
 if not exist "config" mkdir "config"
 if not exist "srv\hls" mkdir "srv\hls"
@@ -51,7 +52,7 @@ set "NG_PORT="
 set "ND_PORT="
 set "NGINX_ON=0"
 if exist "nginx\nginx.exe" (
-  echo [3/4] Preparing nginx.conf and reading the ports from the settings...
+  echo [3/5] Preparing nginx.conf and reading the ports from the settings...
   for /f "usebackq delims=" %%L in (`"%NODE%" server.js --write-nginx-conf`) do (
     echo    %%L
     for /f "tokens=1,2 delims==" %%A in ("%%L") do (
@@ -61,7 +62,7 @@ if exist "nginx\nginx.exe" (
   )
   set "NGINX_ON=1"
 ) else (
-  echo [3/4] [INFO] No nginx folder - streams are served by Node directly.
+  echo [3/5] [INFO] No nginx folder - streams are served by Node directly.
   for /f "usebackq delims=" %%L in (`"%NODE%" server.js --write-nginx-conf`) do (
     for /f "tokens=1,2 delims==" %%A in ("%%L") do (
       if "%%A"=="NGINX_PORT" set "NG_PORT=%%B"
@@ -81,6 +82,16 @@ if "%NGINX_ON%"=="1" (
   timeout /t 1 >nul
 )
 
+rem ---- 4) Clean the temporary streaming folder (srv\hls) for a fresh start ----
+rem Runs after our own nginx is stopped, so no open .ts/playlist file blocks the delete.
+if exist "srv\hls" rd /s /q "srv\hls" >nul 2>&1
+if exist "srv\hls" (
+  echo [4/5] [WARNING] srv\hls could not be fully cleaned - another server may still be running.
+) else (
+  mkdir "srv\hls"
+  echo [4/5] srv\hls: cleaned
+)
+
 echo.
 echo ==============================================
 echo   Addresses:
@@ -94,7 +105,7 @@ echo   To stop: run "stop.bat" or press Ctrl+C
 echo ==============================================
 echo.
 
-rem ---- 4) Start the server (it starts and verifies Nginx itself) ----
+rem ---- 5) Start the server (it starts and verifies Nginx itself) ----
 "%NODE%" server.js
 set "EXITCODE=%errorlevel%"
 
