@@ -1,19 +1,19 @@
 @echo off
 chcp 65001 >nul
-title بثي المحلي — تشغيل السيرفر
+title My Live - Start Server
 rem ============================================================================
-rem  تشغيل بثي المحلي على Windows:
-rem   1) التحقق من Node.js و ffmpeg.exe
-rem   2) كتابة nginx.conf وقراءة المنافذ الفعلية من البرنامج نفسه (لا تخمين)
-rem   3) تشغيل الخادم (وهو يشغّل Nginx ويتحقق من استجابته)
-rem   4) عند الإغلاق: إيقاف Nginx الخاص بمجلدنا فقط
-rem  لا يُلمس أي Nginx أو أي عملية أخرى على الجهاز.
+rem  Start My Live on Windows:
+rem   1) Check Node.js and ffmpeg.exe
+rem   2) Write nginx.conf and read the real ports from the program itself (no guessing)
+rem   3) Start the server (it starts Nginx and verifies its response)
+rem   4) On exit: stop only the Nginx of our own folder
+rem  No other Nginx or process on the machine is touched.
 rem ============================================================================
 setlocal enabledelayedexpansion
 cd /d "%~dp0"
 
 echo ==============================================
-echo   بثي المحلي — تشغيل
+echo   My Live - Start
 echo ==============================================
 
 rem ---- 1) Node.js ----
@@ -24,9 +24,9 @@ if not defined NODE (
   if not errorlevel 1 set "NODE=node"
 )
 if not defined NODE (
-  echo [خطأ] لم يُعثر على Node.js.
-  echo        ثبّت Node.js 18 أو أحدث من نسخة محمولة بلا إنترنت،
-  echo        أو ضع مجلد node كاملاً بجانب هذا الملف (node\node.exe).
+  echo [ERROR] Node.js was not found.
+  echo         Install Node.js 18 or newer (an offline portable copy works),
+  echo         or place the whole node folder next to this file (node\node.exe).
   echo.
   pause
   exit /b 1
@@ -36,9 +36,9 @@ echo [1/4] Node.js: %NODEVER%
 
 rem ---- 2) ffmpeg ----
 if exist "ffmpeg.exe" (
-  echo [2/4] ffmpeg.exe: موجود
+  echo [2/4] ffmpeg.exe: found
 ) else (
-  echo [2/4] [تنبيه] ffmpeg.exe غير موجود في هذا المجلد — لن يعمل البث.
+  echo [2/4] [WARNING] ffmpeg.exe is missing in this folder - streaming will not work.
 )
 if not exist "config" mkdir "config"
 if not exist "srv\hls" mkdir "srv\hls"
@@ -46,12 +46,12 @@ if not exist "srv\uploads" mkdir "srv\uploads"
 if not exist "logs" mkdir "logs"
 if not exist "run" mkdir "run"
 
-rem ---- 3) كتابة nginx.conf وقراءة المنافذ ----
+rem ---- 3) Write nginx.conf and read the ports ----
 set "NG_PORT="
 set "ND_PORT="
 set "NGINX_ON=0"
 if exist "nginx\nginx.exe" (
-  echo [3/4] تجهيز nginx.conf وقراءة المنافذ من الإعدادات...
+  echo [3/4] Preparing nginx.conf and reading the ports from the settings...
   for /f "usebackq delims=" %%L in (`"%NODE%" server.js --write-nginx-conf`) do (
     echo    %%L
     for /f "tokens=1,2 delims==" %%A in ("%%L") do (
@@ -61,7 +61,7 @@ if exist "nginx\nginx.exe" (
   )
   set "NGINX_ON=1"
 ) else (
-  echo [3/4] [معلومة] لا يوجد مجلد nginx — سيُخدَم البث من Node مباشرة.
+  echo [3/4] [INFO] No nginx folder - streams are served by Node directly.
   for /f "usebackq delims=" %%L in (`"%NODE%" server.js --write-nginx-conf`) do (
     for /f "tokens=1,2 delims==" %%A in ("%%L") do (
       if "%%A"=="NGINX_PORT" set "NG_PORT=%%B"
@@ -72,7 +72,7 @@ if exist "nginx\nginx.exe" (
 if not defined NG_PORT set "NG_PORT=801"
 if not defined ND_PORT set "ND_PORT=3001"
 
-rem أوقف أي نسخة nginx قديمة من مجلدنا (تبقى من جلسة سابقة) قبل التشغيل
+rem Stop any old nginx from our own folder (left over from a previous session) first
 if "%NGINX_ON%"=="1" (
   pushd "%~dp0nginx"
   nginx.exe -p . -c conf\nginx.conf -s stop >nul 2>&1
@@ -83,35 +83,35 @@ if "%NGINX_ON%"=="1" (
 
 echo.
 echo ==============================================
-echo   العنوانات:
-echo     لوحة التحكم  : http://localhost:%NG_PORT%/admin
-echo     صفحة المشاهدين: http://localhost:%NG_PORT%/
+echo   Addresses:
+echo     Control panel : http://localhost:%NG_PORT%/admin
+echo     Viewer page   : http://localhost:%NG_PORT%/
 if "%NGINX_ON%"=="0" (
-  echo     ^(بدون Nginx^): http://localhost:%ND_PORT%/admin
+  echo     ^(without Nginx^): http://localhost:%ND_PORT%/admin
 )
-echo     الدخول الأول : admin / admin123  ^(غيّرها من الإعدادات^)
-echo   للإيقاف: نفّذ «ايقاف السيرفر.bat» أو اضغط Ctrl+C
+echo     First login   : admin / admin123  ^(change it in Settings^)
+echo   To stop: run "stop.bat" or press Ctrl+C
 echo ==============================================
 echo.
 
-rem ---- 4) تشغيل الخادم (يشغّل Nginx ويتحقق منه بنفسه) ----
+rem ---- 4) Start the server (it starts and verifies Nginx itself) ----
 "%NODE%" server.js
 set "EXITCODE=%errorlevel%"
 
 echo.
 if not "%EXITCODE%"=="0" (
-  echo [خطأ] خرج الخادم برمز %EXITCODE% — راجع الرسائل أعلاه.
+  echo [ERROR] The server exited with code %EXITCODE% - check the messages above.
 ) else (
-  echo [معلومة] أُوقف الخادم.
+  echo [INFO] The server was stopped.
 )
 
-rem إنهاء Nginx الخاص بنا فقط
+rem Stop only our own Nginx
 if "%NGINX_ON%"=="1" (
   pushd "%~dp0nginx"
   nginx.exe -p . -c conf\nginx.conf -s stop >nul 2>&1
   popd
   powershell -NoProfile -Command "$p='%~dp0nginx'; Get-CimInstance Win32_Process -Filter \"Name='nginx.exe'\" -ErrorAction SilentlyContinue | Where-Object { $_.ExecutablePath -and $_.ExecutablePath.StartsWith($p,[System.StringComparison]::OrdinalIgnoreCase) } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }" >nul 2>&1
-  echo [معلومة] أُوقف Nginx الخاص بالمشروع.
+  echo [INFO] The project Nginx was stopped.
 )
 
 echo.

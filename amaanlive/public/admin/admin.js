@@ -781,7 +781,7 @@ async function saveSettings() {
     toast('حُفظت الإعدادات');
     await loadSettings();
     if (r.restartRequired && r.restartRequired.length) {
-      sysMsg('تغيّر: ' + r.restartRequired.join('، ') + ' — أعد تشغيل البرنامج بتشغيل «ايقاف السيرفر.bat» ثم «تشغيل السيرفر.bat» لتطبيق منفذ Node.', 'warn');
+      sysMsg('تغيّر: ' + r.restartRequired.join('، ') + ' — أعد تشغيل البرنامج بتشغيل «stop.bat» ثم «start.bat» لتطبيق منفذ Node.', 'warn');
     }
     if (r.notes && r.notes.length) sysMsg(r.notes.join(' | '));
     loadNginxStatus();

@@ -52,7 +52,7 @@ function banner(port, nginxPort, nginxOn) {
   console.log('  لوحة التحكم  : http://localhost:' + (nginxOn ? nginxPort : port) + '/admin');
   console.log('  صفحة المشاهدين: http://localhost:' + (nginxOn ? nginxPort : port) + '/');
   console.log('  على الشبكة   : http://' + ip + ':' + (nginxOn ? nginxPort : port) + '/');
-  console.log('  الإيقاف      : نفّذ «ايقاف السيرفر.bat» أو Ctrl+C');
+  console.log('  الإيقاف      : نفّذ «stop.bat» أو Ctrl+C');
   console.log('==============================================');
 }
 
@@ -74,7 +74,7 @@ if (!gotLock.ok && !FLAGS.has('--force')) {
   console.error('[خطأ] نسخة أخرى من البرنامج تعمل بالفعل على نفس مجلد البيانات (pid ' + gotLock.holder.pid + '):');
   console.error('       ' + store.ROOT);
   console.error('       تشغيل نسختين معاً يجعل كل مشاهد يرى محتوى مختلفاً لنفس القناة.');
-  console.error('       أوقف النسخة الأخرى بـ «ايقاف السيرفر.bat» ثم أعد المحاولة.');
+  console.error('       أوقف النسخة الأخرى بـ «stop.bat» ثم أعد المحاولة.');
   process.exit(1);
 }
 
