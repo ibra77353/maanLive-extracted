@@ -1,0 +1,25 @@
+{
+  "name": "@amaan-live/core",
+  "version": "1.0.0",
+  "description": "Amaan Live shared core — cross-platform live streaming engine (Node + FFmpeg + HLS). Runs under nodejs-mobile on Android and as a packaged EXE on Windows.",
+  "main": "server.js",
+  "bin": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1"
+  },
+  "pkg": {
+    "assets": [
+      "public/**/*",
+      "config/config.default.json"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ],
+    "outputPath": "dist"
+  }
+}

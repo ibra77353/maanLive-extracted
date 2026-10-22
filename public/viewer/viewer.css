@@ -1,0 +1,154 @@
+/* أمان لايف — صفحة المشاهدين */
+:root{
+  --bg:#0E141B; --panel:#151E27; --line:#22303D; --accent:#E8A33D; --live:#E2493B;
+  --text:#ECF1F5; --muted:#90A2AF; --font:"Tajawal","Segoe UI",Tahoma,Arial,sans-serif;
+}
+body.worldcup{ --accent:#2FB46A; --panel:#13211A; --line:#1F3A2B; --bg:#0C1410; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;
+  display:flex;flex-direction:column}
+a{color:var(--accent);text-decoration:none}
+.hidden{display:none!important}
+
+/* ticker */
+.ticker-bar{display:flex;align-items:center;background:var(--panel);border-bottom:1px solid var(--line);overflow:hidden}
+.ticker-label{background:var(--accent);color:#13202B;font-weight:800;font-size:13px;padding:7px 14px;flex-shrink:0}
+.ticker-track{flex:1;overflow:hidden;white-space:nowrap}
+.ticker-track span{display:inline-block;padding-right:100%;animation:tick 80s linear infinite;font-size:14px}
+.ticker-track:hover span{animation-play-state:paused}
+@keyframes tick{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+@media (prefers-reduced-motion: reduce){.ticker-track span{animation:none;padding-right:0}}
+
+/* header */
+.site-head{text-align:center;padding:26px 16px 0}
+.site-logo{max-height:64px;margin-bottom:6px}
+.site-head h1{margin:0;font-size:clamp(26px,5vw,40px);font-weight:800;letter-spacing:.5px}
+.site-phone{display:inline-block;margin-top:6px;color:var(--muted);font-size:15px;direction:ltr}
+.site-phone::before{content:"📞 "}
+.tabs{margin-top:18px;display:flex;justify-content:center;gap:8px;border-bottom:1px solid var(--line);padding-bottom:0}
+.tab{background:none;border:0;color:var(--muted);font-family:inherit;font-size:15px;padding:10px 18px;
+  cursor:pointer;border-bottom:3px solid transparent}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:700}
+
+/* player */
+.player-section{position:sticky;top:0;z-index:20;background:rgba(8,12,16,.97);padding:10px;
+  border-bottom:1px solid var(--line)}
+.player-shell{max-width:1100px;margin:0 auto;position:relative}
+#video{width:100%;aspect-ratio:16/9;background:#000;border-radius:10px;display:block;
+  transform:translateZ(0);will-change:transform}
+/* شاشة تجهيز البث (overlay) */
+.player-loading{position:absolute;top:0;left:0;right:0;aspect-ratio:16/9;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:16px;background:rgba(8,12,18,.72);backdrop-filter:blur(2px);
+  border-radius:10px;z-index:5;transition:opacity .35s ease;pointer-events:none}
+.player-loading.hidden{opacity:0;visibility:hidden}
+.pl-spinner{width:54px;height:54px;border-radius:50%;border:4px solid rgba(255,255,255,.15);
+  border-top-color:var(--accent);animation:plspin .8s linear infinite}
+.pl-text{color:#fff;font-size:15px;font-weight:600;letter-spacing:.3px;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+@keyframes plspin{to{transform:rotate(360deg)}}
+/* شاشة حالة القناة (متوقفة بالجدولة / من المدير) */
+.player-status{position:absolute;top:0;left:0;right:0;aspect-ratio:16/9;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:14px;background:linear-gradient(135deg,#0E141B,#1a2530);
+  border-radius:10px;z-index:6;padding:20px;text-align:center}
+.player-status.hidden{display:none}
+.ps-icon{font-size:54px;line-height:1}
+.ps-title{color:#fff;font-size:19px;font-weight:700}
+.ps-sub{color:var(--accent);font-size:15px;font-weight:600}
+.player-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 4px;flex-wrap:wrap}
+.np{display:flex;align-items:center;gap:10px;font-weight:700}
+.np-live{color:var(--live);font-size:13px;animation:blink 1.6s infinite}
+@keyframes blink{50%{opacity:.35}}
+/* ===== الإعلانات ===== */
+.promo-bar{display:flex;align-items:center;background:rgba(232,163,61,.10);border:1px solid var(--accent);
+  border-radius:8px;overflow:hidden;margin:8px auto;max-width:1100px;padding:0 4px}
+.promo-track{flex:1;overflow:hidden;white-space:nowrap}
+.promo-track span{display:inline-block;padding:7px 0;padding-right:100%;animation:adtick 30s linear infinite;
+  font-size:14px;font-weight:600;color:var(--accent)}
+.promo-bar:hover .promo-track span{animation-play-state:paused}
+@keyframes adtick{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.promo-box{position:relative;max-width:50vw;margin:12px auto;border-radius:12px;overflow:hidden}
+.promo-item{display:none;width:100%}
+.promo-item.active{display:block;animation:adfade .5s ease}
+.promo-item>a{display:block}
+.promo-item img{width:100%;max-height:50vh;height:auto;display:block;border-radius:12px;object-fit:contain;margin:0 auto}
+.promo-nav{position:absolute;bottom:10px;left:0;right:0;display:flex;justify-content:center;gap:7px}
+.promo-pip{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.45);cursor:pointer;transition:.2s}
+.promo-pip.active{background:var(--accent);width:18px;border-radius:5px}
+@keyframes adfade{from{opacity:.3}to{opacity:1}}
+/* على الجوال: 50vw ضيّق جداً، فنسمح بعرض أكبر مع إبقاء الارتفاع محدوداً */
+@media (max-width:768px){.promo-box{max-width:92vw}}
+@media (prefers-reduced-motion: reduce){.promo-track span{animation:none;padding-right:0}}
+@media (prefers-reduced-motion: reduce){.np-live{animation:none}}
+.player-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pbtn{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:8px;
+  padding:7px 11px;cursor:pointer;font-size:14px}
+.pbtn:hover{border-color:var(--accent)}
+.pbtn-refresh{font-size:13px;font-weight:700}
+#closePlayer{background:#E2493B;border-color:#E2493B;color:#fff;font-weight:800}
+#closePlayer:hover{background:#c93a2d;border-color:#c93a2d}
+.cpu-saver{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+.cpu-saver input{accent-color:var(--accent)}
+.player-msg{position:absolute;top:12px;left:12px;background:rgba(0,0,0,.75);border:1px solid var(--line);
+  border-radius:8px;padding:8px 14px;font-size:13px;color:#FFD9A8}
+
+/* grid */
+.container{flex:1;max-width:1200px;width:100%;margin:0 auto;padding:22px 16px 40px}
+.cat-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;justify-content:center}
+.cat-btn{background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:99px;
+  padding:7px 16px;font-family:inherit;font-size:13.5px;cursor:pointer}
+.cat-btn.active{color:#13202B;background:var(--accent);border-color:var(--accent);font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;
+  transition:transform .15s,border-color .15s;text-align:right}
+.card:hover,.card:focus-visible{transform:translateY(-3px);border-color:var(--accent);outline:none}
+.card-cover{width:100%;aspect-ratio:16/10;object-fit:cover;background:#0A0F14;display:block}
+.card-cover.ph{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:30px}
+.card-body{padding:10px 12px 12px}
+.card-name{font-weight:700;font-size:15px;margin:0 0 4px}
+.card-meta{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted)}
+.badge-live{color:#fff;background:var(--live);border-radius:99px;padding:2px 9px;font-size:11px;font-weight:700}
+.badge-off{color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:2px 9px;font-size:11px}
+.badge-sched{color:#13202B;background:#E0A82E;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:700}
+.card{position:relative}
+.card.scheduled .card-cover{filter:brightness(.55)}
+.card-sched{position:absolute;top:8px;right:8px;background:rgba(224,168,46,.92);color:#13202B;font-weight:800;font-size:12px;padding:4px 10px;border-radius:99px;backdrop-filter:blur(4px);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.empty{text-align:center;color:var(--muted);padding:50px 0}
+
+/* world cup */
+.wc-title{text-align:center;margin:6px 0 2px;font-size:24px}
+.wc-sub{text-align:center;color:var(--muted);margin:0 0 22px;font-size:13.5px}
+.matches{display:flex;flex-direction:column;gap:12px;max-width:740px;margin:0 auto}
+.match{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:var(--panel);
+  border:1px solid var(--line);border-radius:12px;padding:16px 18px;gap:10px}
+.match .team{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+.match .team.away{justify-content:flex-end}
+.match .flag{font-size:26px}
+.match .mid{text-align:center}
+.match .mid .time{font-size:20px;font-weight:800;color:var(--accent);direction:ltr}
+.match .mid .grp{font-size:12px;color:var(--muted)}
+.match .watch{grid-column:1/-1;text-align:center}
+.watch-btn{display:inline-block;background:var(--accent);color:#0E1B13;font-weight:700;border:0;
+  border-radius:8px;padding:7px 20px;cursor:pointer;font-family:inherit;font-size:14px}
+.wc-news-title{max-width:740px;margin:34px auto 10px}
+.wc-news{list-style:none;max-width:740px;margin:0 auto;padding:0}
+.wc-news li{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.wc-news .src{color:var(--muted);font-size:12px;margin-inline-start:8px}
+
+#wcFullWrap{width:100%;height:calc(100vh - 130px);min-height:560px}
+#wcFrame{width:100%;height:100%;border:0;border-radius:12px;background:#0a0e1a;display:block}
+@media (max-width:680px){
+  /* اجعل الإطار يملأ عرض الشاشة كاملاً على الهاتف (يكسر حشو الحاوية) */
+  #tab-matches:has(#wcFullWrap:not(.hidden)){padding-left:0;padding-right:0;max-width:100%}
+  #wcFullWrap{height:calc(100vh - 110px);border-radius:0}
+  #wcFrame{border-radius:0}
+}
+.site-foot{text-align:center;color:var(--muted);font-size:13px;padding:18px;border-top:1px solid var(--line);margin-top:auto;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+.site-foot .foot-copy{opacity:.8}
+.site-foot .foot-brand{color:var(--accent,#3FA66A);text-decoration:none;font-weight:700;transition:color .2s,opacity .2s}
+.site-foot .foot-brand:hover{opacity:.85;text-decoration:underline}
+
+@media (max-width:560px){
+  .grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+  .player-section{padding:6px}
+  .match{grid-template-columns:1fr;text-align:center}
+  .match .team,.match .team.away{justify-content:center}
+}

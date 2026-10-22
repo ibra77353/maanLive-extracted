@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>لوحة التحكم — أمان لايف</title>
+<link rel="icon" type="image/png" href="/admin/favicon.png">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- ======== Login ======== -->
+<div id="loginScreen" class="login-screen hidden">
+  <form id="loginForm" class="login-card">
+    <div class="login-mark">أمان <span>لايف</span></div>
+    <p class="login-sub">لوحة تحكم البث المباشر</p>
+    <label>اسم المستخدم<input id="loginUser" autocomplete="username" required></label>
+    <label>كلمة المرور<input id="loginPass" type="password" autocomplete="current-password" required></label>
+    <button class="btn btn-primary btn-block" type="submit">دخول</button>
+    <p id="loginError" class="form-error"></p>
+  </form>
+</div>
+
+<!-- شاشة الإعداد الأول -->
+<div id="setupScreen" class="login-screen hidden">
+  <form id="setupForm" class="login-card" style="max-width:440px">
+    <div class="login-mark">أمان <span>لايف</span></div>
+    <p class="login-sub">مرحباً! أكمل إعداد نظامك للمرة الأولى</p>
+    <label>اسمك<input id="suName" required></label>
+    <label>اسم الشبكة<input id="suNetwork" required></label>
+    <label>رقم الهاتف<input id="suPhone" dir="ltr" required></label>
+    <label>المدينة<input id="suCity" required></label>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <label>كلمة مرور جديدة للوحة التحكم<input id="suPass" type="password" minlength="6" required></label>
+    <label>تأكيد كلمة المرور<input id="suPass2" type="password" minlength="6" required></label>
+    <button class="btn btn-primary btn-block" type="submit">حفظ وبدء الاستخدام</button>
+    <p id="setupError" class="form-error"></p>
+  </form>
+</div>
+
+<!-- ======== App shell ======== -->
+<div id="app" class="app hidden">
+  <aside class="sidebar">
+    <div class="brand" id="brandBox">
+      <img id="brandLogo" class="brand-logo hidden" alt="">
+      <div class="brand-name" id="brandName">أمان لايف</div>
+      <div class="onair-strip" id="onairStrip">OFF AIR</div>
+    </div>
+    <nav class="nav">
+      <button data-view="dashboard" class="nav-btn active">المراقبة والسجلات</button>
+      <button data-view="channels" class="nav-btn">القنوات</button>
+      <button data-view="online" class="nav-btn">قنوات أونلاين</button>
+      <button data-view="sources" class="nav-btn">مصادر البث</button>
+      <button data-view="iptv" class="nav-btn">IPTV</button>
+      <button data-view="scheduler" class="nav-btn">الجدولة</button>
+      <button data-view="ads" class="nav-btn">الإعلانات</button>
+      <button data-view="worldcup" class="nav-btn">كأس العالم 2026</button>
+      <button data-view="settings" class="nav-btn">الإعدادات</button>
+      <button data-view="license" class="nav-btn">الاشتراك والترخيص</button>
+    </nav>
+    <div class="sidebar-foot">
+      <a href="/" target="_blank" class="btn btn-ghost btn-block">صفحة المشاهدين ↗</a>
+      <button id="logoutBtn" class="btn btn-ghost btn-block">تسجيل الخروج</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div id="sysMsgBar" class="hidden"></div>
+    <div id="nginxBindBar" class="hidden sys-msg-wrap"></div>
+    <!-- ===== Dashboard ===== -->
+    <section id="view-dashboard" class="view">
+      <header class="view-head"><h1>المراقبة والسجلات</h1>
+        <div class="head-stats" id="sysStats"></div>
+      </header>
+      <div class="dash-grid" id="dashGrid"></div>
+      <div class="table-wrap">
+        <table class="table" id="statusTable">
+          <thead><tr>
+            <th>القناة</th><th>الحالة</th><th>المشاهدون</th><th>البيانات</th><th>إعادة التشغيل</th><th>آخر الأخطاء</th><th>إجراءات</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="card log-card hidden" id="logCard">
+        <div class="card-head"><h3 id="logTitle">سجل القناة</h3>
+          <div class="row-actions">
+            <button class="btn btn-sm" onclick="downloadLog()">⬇ حفظ كملف</button>
+            <button class="btn btn-sm btn-danger" onclick="clearLog()">🗑 تصفير</button>
+            <button class="btn btn-ghost" onclick="hideLog()">إغلاق</button>
+          </div></div>
+        <pre id="logBody" class="log-body"></pre>
+      </div>
+    </section>
+
+    <!-- ===== Channels ===== -->
+    <section id="view-channels" class="view hidden">
+      <header class="view-head"><h1>القنوات</h1>
+        <button class="btn btn-primary" onclick="openChannelModal()">+ إضافة قناة</button></header>
+      <div class="table-wrap">
+        <table class="table" id="channelsTable">
+          <thead><tr><th>الترتيب</th><th>القناة</th><th>المعرّف</th><th>التصنيف</th><th>المصدر</th><th>الجودات</th><th>تشغيل تلقائي</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== Online Channels ===== -->
+    <section id="view-online" class="view hidden">
+      <header class="view-head"><h1>قنوات أونلاين</h1>
+        <div class="head-actions">
+          <button class="btn" onclick="loadOnline()">تحديث القائمة</button>
+          <button class="btn btn-primary" onclick="importOnline()">استيراد المحدد</button>
+        </div>
+      </header>
+      <p class="hint">هذه قنوات جاهزة سمح بها مزود الخدمة لاشتراكك. اختر ما تريد ثم اضغط «استيراد المحدد» لإضافتها تلقائياً إلى قنواتك. الروابط فريدة لاشتراكك.</p>
+      <div class="table-wrap">
+        <table class="table" id="onlineTable">
+          <thead><tr><th><input type="checkbox" id="onlineAll" onchange="toggleAllOnline(this)"></th><th>الغلاف</th><th>القناة</th><th>التصنيف</th><th>الجودات</th><th>الحالة</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== Sources ===== -->
+    <section id="view-sources" class="view hidden">
+      <header class="view-head"><h1>مصادر البث</h1>
+        <button class="btn btn-primary" onclick="openSourceModal()">+ إضافة مصدر</button></header>
+      <div class="table-wrap">
+        <table class="table" id="sourcesTable">
+          <thead><tr><th>الاسم</th><th>النوع</th><th>التفاصيل</th><th>إجراءات</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== IPTV (مكتبة القنوات + Xtream Codes + اشتراك MH في نافذة واحدة) =====
+         الدمج واجهةٌ فقط: محتوى الأقسام الثلاثة القديمة نُقل كما هو بنفس المعرّفات
+         والدوال، فكل منطق admin.js يعمل دون أي تعديل. -->
+    <section id="view-iptv" class="view hidden">
+      <header class="view-head"><h1>IPTV</h1></header>
+      <div class="subtabs">
+        <button class="subtab active" data-itab="lib" onclick="iptvTab('lib')">مكتبة القنوات</button>
+        <button class="subtab" data-itab="xtream" onclick="iptvTab('xtream')">Xtream Codes</button>
+        <button class="subtab" data-itab="mh" onclick="iptvTab('mh')">اشتراك MH</button>
+      </div>
+
+      <!-- --- تبويب: مكتبة القنوات --- -->
+      <div id="itab-lib">
+      <div class="head-actions" style="margin-bottom:10px">
+        <button class="btn" onclick="openIptvManual()">+ قناة يدوياً</button>
+        <button class="btn" onclick="openIptvUrl()">استيراد من رابط</button>
+        <label class="btn btn-primary file-btn">استيراد ملف M3U
+          <input type="file" id="m3uFile" accept=".m3u,.m3u8,.txt" hidden></label>
+      </div>
+      <input id="iptvFilter" class="input filter-input" placeholder="بحث في القنوات...">
+      <div class="table-wrap">
+        <table class="table" id="iptvTable">
+          <thead><tr><th>الشعار</th><th>الاسم</th><th>المجموعة</th><th>الرابط</th><th>إجراءات</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      </div>
+
+      <!-- --- تبويب: Xtream Codes --- -->
+      <div id="itab-xtream" class="hidden">
+      <div class="card">
+        <div class="grid-2">
+          <label>Server URL<input class="input" id="xtServer" dir="ltr" placeholder="http://host:port"></label>
+          <label>Username<input class="input" id="xtUser" dir="ltr"></label>
+          <label>Password<input class="input" id="xtPass" dir="ltr"></label>
+          <label>Output
+            <select class="input" id="xtOutput"><option value="ts">ts</option><option value="m3u8">m3u8</option></select></label>
+          <label>User-Agent (اختياري)<input class="input" id="xtUA" dir="ltr" placeholder="IPTVSmartersPro/1.0"></label>
+        </div>
+        <button class="btn btn-primary" onclick="xtFetch()">جلب القنوات</button>
+        <p class="hint">يحاول الاتصال المباشر أولاً، وإن حجب مزوّد Xtream جهازك يجلب تلقائياً عبر وسيط xtream2m3u.</p>
+        <p id="xtMsg" class="form-error"></p>
+        <hr class="sep">
+        <details>
+          <summary class="hint" style="cursor:pointer">خيارات متقدمة (وسيط مخصص / رابط M3U جاهز)</summary>
+          <label style="margin-top:10px">رابط وسيط xtream2m3u مخصص (اتركه فارغاً لاستخدام العام)
+            <input class="input" id="xtProxy" dir="ltr" placeholder="https://your-vps:5000"></label>
+          <p class="hint">للخصوصية الكاملة شغّل نسختك من xtream2m3u وضع رابطها هنا (بياناتك لن تمر عبر خادم عام).</p>
+          <label>أو الصق رابط M3U جاهز مباشرة
+            <span class="with-browse">
+              <input class="input" id="xtM3uUrl" dir="ltr" placeholder="https://.../playlist.m3u">
+              <button class="btn" onclick="xtFetchM3u()">جلب من رابط M3U</button>
+            </span></label>
+        </details>
+      </div>
+      <input id="xtFilter" class="input filter-input" placeholder="بحث بالاسم أو القسم..." oninput="xtRender()">
+      <p class="hint" id="xtCount"></p>
+      <div class="table-wrap">
+        <table class="table" id="xtTable">
+          <thead><tr><th>الشعار</th><th>القناة</th><th>القسم</th><th>إجراء</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      </div>
+
+      <!-- --- تبويب: اشتراك MH --- -->
+      <div id="itab-mh" class="hidden">
+      <div class="card">
+        <p class="hint">اشتراك MH يستخدم آلية إعادة توجيه: الرابط الظاهري للقناة يعيد التوجيه للرابط الحقيقي على خادم CDN مستقر. النظام يكتشف الروابط الحقيقية تلقائياً ويبثّها مباشرة — ما يحل مشكلة القنوات التي يفشل خادمها الظاهري.</p>
+        <div class="grid-2">
+          <label>الهوست (Host)<input class="input" id="mhServer" dir="ltr" placeholder="http://mh-tv.info:8080"></label>
+          <label>اسم المستخدم (Username)<input class="input" id="mhUser" dir="ltr"></label>
+          <label>كلمة المرور (Password)<input class="input" id="mhPass" dir="ltr"></label>
+          <label>User-Agent (اختياري)<input class="input" id="mhUA" dir="ltr" placeholder="IPTVSmartersPro/1.0"></label>
+        </div>
+        <button class="btn btn-primary" onclick="mhFetch()">جلب القنوات</button>
+        <p id="mhMsg" class="form-error"></p>
+        <p id="mhStatus" class="hint"></p>
+      </div>
+      <input id="mhFilter" class="input filter-input" placeholder="بحث بالاسم أو القسم..." oninput="mhRender()">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0">
+        <p class="hint" id="mhCount" style="margin:0"></p>
+        <span style="flex:1"></span>
+        <button class="btn btn-sm" type="button" onclick="mhSelectAllVisible()">تحديد المعروض</button>
+        <button class="btn btn-sm" type="button" onclick="mhClearSel()">إلغاء التحديد</button>
+        <button class="btn btn-sm" type="button" onclick="mhResolveSelected()">🔗 حل الروابط الحقيقية للمحددة</button>
+        <button class="btn btn-sm btn-primary" type="button" onclick="mhAddSelected()">➕ إضافة المحددة دفعة واحدة</button>
+      </div>
+      <div class="table-wrap">
+        <table class="table" id="mhTable">
+          <thead><tr><th style="width:34px"><input type="checkbox" id="mhChkAll" onchange="mhToggleAll(this.checked)"></th><th>الشعار</th><th>القناة</th><th>القسم</th><th>الرابط الحقيقي</th><th>إجراء</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      </div>
+    </section>
+
+    <!-- ===== Scheduler ===== -->
+    <section id="view-scheduler" class="view hidden">
+      <header class="view-head"><h1>الجدولة</h1>
+        <button class="btn btn-primary" onclick="openScheduleModal()">+ إضافة جدولة</button></header>
+      <p class="hint">أي قناة بدون جدولة تُعتبر <b>بثاً مستمراً</b> ولا يتحكم بها المجدول. القنوات المجدولة تعمل وتتوقف تلقائياً حسب الفترات.</p>
+      <div class="table-wrap">
+        <table class="table" id="schedulesTable">
+          <thead><tr><th>القناة</th><th>الأيام</th><th>الفترات</th><th>مفعّلة</th><th>إجراءات</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== الإعلانات ===== -->
+    <section id="view-ads" class="view hidden">
+      <header class="view-head"><h1>الإعلانات</h1>
+        <button class="btn btn-primary" onclick="openAdModal()">+ إضافة إعلان</button></header>
+      <p class="hint">الإعلانات النصّية تظهر كشريط متحرك (ماركيه) تحت رقم الهاتف في صفحة المشاهدين. إعلانات الصور تظهر كسلايدر — تختار مكانه: تحت رقم الهاتف أو أسفل أزرار القنوات.</p>
+      <div class="table-wrap">
+        <table class="table" id="adsTable">
+          <thead><tr><th>النوع</th><th>المحتوى</th><th>المكان</th><th>مفعّل</th><th>إجراءات</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== World Cup ===== -->
+    <section id="view-worldcup" class="view hidden">
+      <header class="view-head"><h1>كأس العالم 2026</h1></header>
+      <div class="card">
+        <label class="switch-row"><input type="checkbox" id="wcThemeToggle">
+          تفعيل ثيم كأس العالم في صفحة المشاهدين</label>
+        <label class="switch-row"><input type="checkbox" id="wcFullPage">
+          عرض صفحة كأس العالم 2026 الكاملة (نتائج مباشرة، ترتيب، إحصائيات، عدّ تنازلي) بدلاً من القائمة المبسّطة</label>
+        <p class="hint">عند تفعيل الصفحة الكاملة تُجلب البيانات مباشرة من مصدر خارجي. يمكنك تخصيص روابط المصدر أدناه (اتركها فارغة لاستخدام المصدر الافتراضي).</p>
+        <label>رابط مصدر المباريات (API Games)<input class="input" id="wcApiGames" dir="ltr" placeholder="https://worldcup26.ir/get/games"></label>
+        <label>رابط مصدر الملاعب (API Stadiums)<input class="input" id="wcApiStadiums" dir="ltr" placeholder="https://worldcup26.ir/get/stadiums"></label>
+        <button class="btn btn-primary" onclick="saveWcSettings()">حفظ إعدادات كأس العالم</button>
+      </div>
+
+      <div id="wcSimpleAdmin">
+        <div class="view-head" style="margin-top:10px"><h3 class="sec-title" style="margin:0">المباريات اليدوية (تظهر في الوضع المبسّط فقط)</h3>
+          <button class="btn" onclick="openMatchModal()">+ إضافة مباراة</button></div>
+        <div class="table-wrap">
+          <table class="table" id="matchesTable">
+            <thead><tr><th>المباراة</th><th>المجموعة</th><th>الانطلاق (الرياض)</th><th>قناة البث</th><th>إجراءات</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <h3 class="sec-title">الأخبار (مصادر عامة مع تخزين محلي مؤقت)</h3>
+        <button class="btn" onclick="refreshNews()">تحديث الأخبار الآن</button>
+        <ul id="newsList" class="news-list"></ul>
+      </div>
+    </section>
+
+    <!-- ===== Settings ===== -->
+    <section id="view-settings" class="view hidden">
+      <header class="view-head"><h1>الإعدادات العامة</h1>
+        <button class="btn btn-primary" onclick="saveSettings()">حفظ الإعدادات</button></header>
+      <div class="grid-2">
+        <div class="card">
+          <h3>المنصة</h3>
+          <label>اسم المنصة<input class="input" id="s_siteName"></label>
+          <label>الاسم اللاتيني<input class="input" id="s_siteNameLatin"></label>
+          <label>الشعار
+            <span class="with-browse">
+              <input class="input" id="s_logo" placeholder="srv/uploads/logo.png">
+              <button class="btn" onclick="browseUpload('s_logo')">استعراض / رفع</button>
+            </span></label>
+          <label>رقم التواصل (يظهر تحت العنوان)<input class="input" id="s_phone"></label>
+          <label class="switch-row"><input type="checkbox" id="s_tickerEnabled"> تفعيل الشريط الإخباري</label>
+          <label>نص الشريط الإخباري<textarea class="input" id="s_ticker" rows="2"></textarea></label>
+        </div>
+        <div class="card">
+          <h3>الأداء والبث</h3>
+          <label>x264 Preset
+            <select class="input" id="s_x264Preset">
+              <option>ultrafast</option><option>superfast</option><option>veryfast</option>
+              <option>faster</option><option>fast</option><option>medium</option><option>slow</option>
+            </select></label>
+          <label>عدد الـ Threads لكل قناة<input class="input" id="s_x264Threads" type="number" min="1" max="16"></label>
+          <label class="switch-row"><input type="checkbox" id="s_x264QualityMode"> وضع الجودة: ضغط أفضل واستقرار أعلى (يزيد تأخير البث ثوانٍ)</label>
+          <p class="sub" style="margin-top:-4px">يعطّل «البث الفوري» (zerolatency) فيستفيد المرمّز من B-frames وlookahead: نفس الجودة بحجم بيانات أقل بـ10–15٪ تقريباً، وجودة أثبت في المشاهد الصعبة. مناسب عندما يكون الاستقرار أهم من التأخير. يُطبَّق على القنوات عند تشغيلها التالي.</p>
+          <label>طول مقطع HLS بالثواني (hls_time)<input class="input" id="s_hlsTime" type="number" min="1" max="10"></label>
+          <label>عدد المقاطع في القائمة (hls_list_size)<input class="input" id="s_hlsListSize" type="number" min="3" max="20"></label>
+          <label>GOP بالثواني<input class="input" id="s_gopSeconds" type="number" min="1" max="10"></label>
+          <label>تأخير طابور التشغيل عند الإقلاع (مللي ثانية)<input class="input" id="s_startupQueueDelayMs" type="number" min="0" step="1000"></label>
+          <label class="switch-row"><input type="checkbox" id="s_autoRestartCrashed"> إعادة تشغيل القناة تلقائياً عند الانهيار</label>
+          <label class="switch-row"><input type="checkbox" id="s_idleStopEnabled"> إيقاف القنوات المستمرة تلقائياً عند عدم وجود مشاهدين (توفير الموارد)</label>
+          <label>إيقاف بعد (دقائق بلا مشاهدين)<input class="input" id="s_idleStopMinutes" type="number" min="1" max="60"></label>
+          <p class="sub" style="margin-top:-4px">تنطبق فقط على القنوات المستمرة (بلا جدولة وقتية) والمفعّلة. تعمل القناة تلقائياً من جديد فور فتح أحد المشاهدين لها.</p>
+          <label>إيقاف عند فشل تام في المصدر — إعادة المحاولة بعد (دقائق)<input class="input" id="s_sourceFailStopMinutes" type="number" min="1" max="120"></label>
+          <p class="sub" style="margin-top:-4px">عند فشل تشغيل القناة بسبب مشكلة في المصدر، تتوقف هذه المدة ثم يُعاد تشغيلها تلقائياً.</p>
+          <label>إيقاف عند الحظر / عدم استجابة سيرفر IPTV — إعادة المحاولة بعد (دقائق)<input class="input" id="s_blockedStopMinutes" type="number" min="1" max="120"></label>
+          <p class="sub" style="margin-top:-4px">عند رفض المصدر (403) أو عدم استجابته، يحاول النظام كشف الطريقة الصحيحة وإصلاح المصدر تلقائياً؛ وإن فشلت كل المحاولات يتوقف هذه المدة ثم يعيد المحاولة.</p>
+        </div>
+        <div class="card">
+          <h3>المشغّل (صفحة المشاهدين)</h3>
+          <label>حجم البفر الأقصى بالثواني<input class="input" id="s_playerMaxBufferLength" type="number" min="5" max="120"></label>
+          <label>البفر الخلفي بالثواني<input class="input" id="s_playerBackBufferLength" type="number" min="0" max="120"></label>
+          <label>تأخير البث المباشر بالثواني (live sync)<input class="input" id="s_playerLiveSyncDuration" type="number" min="2" max="60"></label>
+          <p class="sub" style="margin-top:-4px">يُرفَع تلقائياً إلى (طول مقطع HLS × 2 + 1) كحد أدنى — قيمة أقصر تجعل المشغّل يلتصق بحافة البث فيتقطع.</p>
+          <label class="switch-row"><input type="checkbox" id="s_capLevelToPlayerSize"> منع اختيار جودة أعلى من حجم المشغّل</label>
+          <label class="switch-row"><input type="checkbox" id="s_cpuSaverDefault"> تفعيل وضع توفير المعالج افتراضياً</label>
+        </div>
+        <!-- شعار القنوات: معطَّل مؤقتاً بالكامل (من packages/core/src/ffmpeg.js:
+             LOGO_FEATURE_ENABLED) لضمان أفضل أداء بث دون مشاكل، بعد بلاغات
+             تهنيج/تجمّد وتضارب محتوى بين الأجهزة عند تفعيله. أُخفيت عناصر
+             التحكّم هنا لتطابق الواجهة سلوك الخادم. لإعادة التفعيل مستقبلاً:
+             أعد هذا القسم واضبط LOGO_FEATURE_ENABLED=true. -->
+        <div class="card" style="display:none">
+          <h3>شعار القنوات</h3>
+          <p class="hint">إعدادات عامة تنطبق على شعار كل القنوات المُطبوع فوق البث. الشعار موحّد لكل القنوات؛ ويُفعّل لكل قناة من خيار «تفعيل الشعار» في نافذة القناة.</p>
+          <label>صورة الشعار (موحّدة لجميع القنوات)
+            <span class="with-browse">
+              <input class="input" id="s_logoImage" placeholder="srv/uploads/logo.png">
+              <button class="btn" type="button" onclick="browseUpload('s_logoImage','image/png')">استعراض / رفع</button>
+            </span></label>
+          <label>الموقع
+            <select class="input" id="s_logoPosition">
+              <option value="top-right">أعلى اليمين</option>
+              <option value="top-left">أعلى اليسار</option>
+              <option value="bottom-right">أسفل اليمين</option>
+              <option value="bottom-left">أسفل اليسار</option>
+            </select></label>
+          <label>الحجم (٪ من عرض الشاشة): <span id="logoSizeVal" dir="ltr"></span>
+            <input type="range" id="s_logoSizePct" min="2" max="40" step="1" oninput="document.getElementById('logoSizeVal').textContent=this.value+'٪'"></label>
+          <label>الشفافية (٪): <span id="logoOpacityVal" dir="ltr"></span>
+            <input type="range" id="s_logoOpacityPct" min="0" max="100" step="5" oninput="document.getElementById('logoOpacityVal').textContent=this.value+'٪'"></label>
+        </div>
+        <div class="card">
+          <h3>المنافذ والشبكة</h3>
+          <p class="hint">إن حدث تعارض على المنفذ (خطأ 80 مشغول)، غيّر منفذ Nginx هنا. منفذ النظام الداخلي (Node) نادراً ما يحتاج تغييراً.</p>
+          <label>منفذ Nginx (المنفذ الذي يفتحه المشاهدون، الافتراضي 80)
+            <input class="input" id="s_nginxPort" type="number" min="1" max="65535" placeholder="80"></label>
+          <label>منفذ النظام الداخلي Node (الافتراضي 3000)
+            <input class="input" id="s_port" type="number" min="1" max="65535" placeholder="3000"></label>
+          <button class="btn" onclick="regenerateNginx()">تحديث ملف nginx.conf بالمنافذ الحالية</button>
+          <p class="hint">بعد تغيير المنافذ: احفظ الإعدادات، اضغط الزر أعلاه لتحديث ملف الإعداد، ثم أعد تشغيل النظام و Nginx. إن غيّرت منفذ Nginx فالعنوان يصبح مثل <span dir="ltr">http://SERVER_IP:المنفذ</span></p>
+        </div>
+        <div class="card">
+          <h3>المسارات وكلمة المرور</h3>
+          <label>مسار FFmpeg<input class="input" id="s_ffmpegPath"></label>
+          <label>مسار Nginx<input class="input" id="s_nginxPath"></label>
+          <label>User-Agent للبث (لقنوات Xtream/IPTV التي ترفض بـ 403)<input class="input" id="s_streamUserAgent" dir="ltr" placeholder="VLC/3.0.20 LibVLC/3.0.20"></label>
+          <hr class="sep">
+          <label>كلمة المرور الحالية<input class="input" id="pw_current" type="password"></label>
+          <label>كلمة المرور الجديدة<input class="input" id="pw_next" type="password"></label>
+          <button class="btn" onclick="changePassword()">تغيير كلمة المرور</button>
+        </div>
+        <div class="card">
+          <h3>النسخ الاحتياطي</h3>
+          <p class="hint">احفظ نسخة من كل الإعدادات (القنوات، المصادر، الإعلانات، الصور، إعدادات النظام) في ملف واحد، أو استرجع نسخة سابقة.</p>
+          <button class="btn btn-primary" onclick="downloadBackup()">⬇ حفظ نسخة احتياطية</button>
+          <hr class="sep">
+          <label>استرجاع من ملف نسخة احتياطية (.zip)
+            <span class="with-browse">
+              <input class="input" id="restoreFileName" placeholder="اختر ملف النسخة..." readonly>
+              <button class="btn" onclick="document.getElementById('restoreFileInput').click()">اختيار ملف</button>
+            </span>
+          </label>
+          <input type="file" id="restoreFileInput" accept=".zip" style="display:none" onchange="restoreFileChosen(this)">
+          <button class="btn btn-danger" id="restoreBtn" onclick="doRestore()" disabled>♻ استرجاع النسخة المختارة</button>
+          <p class="hint" style="color:var(--accent)">تنبيه: الاسترجاع يستبدل كل الإعدادات الحالية ويعيد تشغيل النظام.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== License ===== -->
+    <section id="view-license" class="view hidden">
+      <header class="view-head"><h1>الاشتراك والترخيص</h1></header>
+      <div class="grid-2">
+        <div class="card">
+          <h3>حالة الاشتراك</h3>
+          <div id="licenseStatus" class="license-status"></div>
+        </div>
+        <div class="card">
+          <h3>تفعيل الاشتراك</h3>
+          <p class="hint">أدخل مفتاح الترخيص الذي حصلت عليه من مزود الخدمة. يُربط الترخيص بهذا الجهاز فقط، وعند انتهاء الاشتراك تتوقف القنوات حتى التجديد.</p>
+          <label>مفتاح الترخيص<input class="input" id="lic_key" dir="ltr" placeholder="XXXX-XXXX-XXXX-XXXX"></label>
+          <button class="btn btn-primary" onclick="activateLicense()">تفعيل</button>
+          <p id="licMsg" class="form-error"></p>
+        </div>
+        <div class="card">
+          <h3>تحديث النظام</h3>
+          <div id="updateStatus" class="license-status"><div class="lbl">جارٍ الفحص...</div></div>
+          <div class="row-actions" style="margin-top:10px">
+            <button class="btn" onclick="checkUpdate(true)">التحقق من وجود تحديث</button>
+            <button class="btn btn-primary hidden" id="applyUpdateBtn" onclick="applyUpdate()">تحديث الآن</button>
+          </div>
+          <p id="updMsg" class="form-error"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ======== Modals ======== -->
+<div id="modalOverlay" class="modal-overlay hidden">
+  <div class="modal" id="modalBox">
+    <div class="modal-head"><h3 id="modalTitle"></h3>
+      <button class="modal-x" onclick="closeModal()">✕</button></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+      <button class="btn btn-primary" id="modalSave">حفظ</button>
+    </div>
+    <p id="modalError" class="form-error"></p>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+<footer class="admin-footer" id="adminFooter"></footer>
+
+<script src="admin.js"></script>
+</body>
+</html>
