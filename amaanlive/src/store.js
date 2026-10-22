@@ -63,8 +63,10 @@ function save() {
 
 // ---------------------------------------------------------------- password
 
+// آلية التجزئة الأصلية لتطبيق AmaanLive: scrypt بمخرج 32 بايت ومعاملات Node الافتراضية
+// (N=16384, r=8, p=1)، وهي المتوافقة مع قيم salt/hash المحفوظة في ملف الإعدادات.
 function hashPassword(password, salt) {
-  return crypto.scryptSync(String(password), salt, 64, { N: 16384, r: 8, p: 1 }).toString('hex');
+  return crypto.scryptSync(String(password), salt, 32, { N: 16384, r: 8, p: 1 }).toString('hex');
 }
 
 function setPassword(password) {
@@ -72,6 +74,7 @@ function setPassword(password) {
   data.admin.salt = salt;
   data.admin.hash = hashPassword(password, salt);
   data.admin.passwordIsDefault = false;
+  delete data.admin.defaultPassword;
   save();
   return true;
 }

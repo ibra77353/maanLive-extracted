@@ -52,8 +52,9 @@
 
   "admin": {
     "user": "admin",
-    "salt": "",
-    "hash": "",
+    "salt": "a4de5a37f77da8b545055a7d4063315e",
+    "hash": "f2f000e7e006205e258f191259de520c863830de5129ad01c57dcba01d1444e4",
+    "defaultPassword": "admin123",
     "passwordIsDefault": true
   },
 
