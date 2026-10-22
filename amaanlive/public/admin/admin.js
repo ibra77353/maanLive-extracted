@@ -111,6 +111,13 @@ function restartBadge(n) {
   return '<span class="restart-badge' + (n ? ' hot' : '') + '" title="' + title + '">↻ إعادة تلقائية: ' + n + '</span>';
 }
 
+/** نفس العدّاد لكن كرقم مختصر — يُستخدم في عمود «إعادة التشغيل» بلوحة المراقبة. */
+function restartCount(n) {
+  n = Number(n) || 0;
+  const title = 'مرات الإعادة التلقائية منذ آخر تشغيل يدوي (مراقب ffmpeg)';
+  return '<span class="restart-badge' + (n ? ' hot' : '') + '" title="' + title + '">' + n + '</span>';
+}
+
 function errClass(text) {
   if (!text) return '';
   if (/could not|no such|busy|cannot|not found|invalid|end of file|i\/o/i.test(text)) return 'err-high';
@@ -229,13 +236,14 @@ async function refreshStats() {
 
 function renderHeadStats(s) {
   $('#sysStats').innerHTML = [
-    '<span class="stat-chip good">القنوات <b>' + s.channels.running + '/' + s.channels.total + '</b></span>',
-    '<span class="stat-chip">المشاهدون <b>' + s.viewers + '</b></span>',
-    '<span class="stat-chip">الذاكرة <b>' + s.memoryMb + ' م.ب</b></span>',
-    '<span class="stat-chip">مدة التشغيل <b>' + fmtDur(s.uptimeSeconds) + '</b></span>',
-    '<span class="stat-chip ' + (s.nginx && s.nginx.running ? 'good' : 'bad') + '">Nginx <b>' +
+    '<span class="stat-chip ' + (s.channels.running > 0 ? 'good' : '') + '">القنوات: <b>' +
+      s.channels.running + '/' + s.channels.total + '</b></span>',
+    '<span class="stat-chip">المشاهدون: <b>' + s.viewers + '</b></span>',
+    '<span class="stat-chip">الذاكرة: <b>' + s.memoryMb + ' م.ب</b></span>',
+    '<span class="stat-chip">مدة التشغيل: <b>' + fmtDur(s.uptimeSeconds) + '</b></span>',
+    '<span class="stat-chip ' + (s.nginx && s.nginx.running ? 'good' : 'bad') + '">Nginx: <b>' +
       (s.nginx ? (s.nginx.running ? 'يعمل (' + s.nginx.port + ')' : 'متوقف') : '—') + '</b></span>',
-    '<span class="stat-chip ' + (s.devices && s.devices.present ? 'good' : 'bad') + '">الأجهزة <b>' +
+    '<span class="stat-chip ' + (s.devices && s.devices.present ? 'good' : 'bad') + '">الأجهزة: <b>' +
       (s.devices ? s.devices.present + '/' + s.devices.total : '—') + '</b></span>'
   ].join('');
 }
@@ -270,17 +278,18 @@ function renderStatusTable(channels) {
   }
   tb.innerHTML = channels.map((c) => {
     const err = c.lastError || '';
+    const upTitle = c.uptimeMs ? ' title="مدة التشغيل: ' + fmtDur(c.uptimeMs / 1000) + '"' : '';
     return '<tr>' +
       '<td><b>' + esc(c.name) + '</b><div class="cell-muted">' + esc(c.device || '') + '</div></td>' +
-      '<td><div class="cell-status">' + chip(c.state) + restartBadge(c.restarts) + '</div></td>' +
+      '<td><div class="cell-status"' + upTitle + '>' + chip(c.state) + '</div></td>' +
       '<td>' + (c.viewers || 0) + '</td>' +
       '<td>' + fmtBytes(c.bytesOut) + '</td>' +
-      '<td>' + (c.uptimeMs ? fmtDur(c.uptimeMs / 1000) : '—') + '</td>' +
+      '<td class="cell-restarts">' + restartCount(c.restarts) + '</td>' +
       '<td><div class="err-lines ' + errClass(err) + '" title="' + esc(err) + '">' + (err ? esc(err) : '—') + '</div></td>' +
       '<td><div class="row-actions">' +
         '<button class="btn btn-sm" data-act="start" data-id="' + c.id + '">تشغيل</button>' +
         '<button class="btn btn-sm" data-act="stop" data-id="' + c.id + '">إيقاف</button>' +
-        '<button class="btn btn-sm" data-act="restart" data-id="' + c.id + '">إعادة تشغيل القناة</button>' +
+        '<button class="btn btn-sm" data-act="restart" data-id="' + c.id + '">إعادة</button>' +
         '<button class="btn btn-sm" data-act="log" data-id="' + c.id + '">السجل</button>' +
       '</div></td></tr>';
   }).join('');
