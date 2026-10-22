@@ -33,6 +33,11 @@ docker run --rm node:18.5.0 node -e 'const vm=require("vm");const c=new vm.Scrip
 | `test_emit_source.py` | regression fixtures for the five emitter defects and a temporary-output syntax audit of all 18 modules |
 | `load_bytecode.js` | runs the original caches as CommonJS modules under Node 18.5.0 (ground truth for verification) |
 
+The structure and name checks live one directory over, in `tools/verify/`: `structure.py` compares every
+recovered loop and `switch` statement with the bytecode listings, and `crosscheck.py` compares the
+recovered names with the names the running caches expose (Node 18.5.0 container). *Verification status*
+below records what they report.
+
 ## Manual pipeline
 
 1. **Disassemble** each binary with View8's patched-V8 disassembler for V8 10.2.
@@ -130,15 +135,17 @@ removes them afterwards. Only synthetic fixtures are executed in the behavioural
 recovered application modules. A passing syntax check is **not** proof of runtime equivalence.
 Node-dependent tests are marked skipped if Node is unavailable; that is not a successful audit.
 
-**Verification status:** the 30 tests pass, including the 18-module syntax audit, and `recovered/`
+**Verification status:** the 30 emitter tests pass, including the 18-module syntax audit, and `recovered/`
 has been regenerated from the listings — all **18/18** modules are emitted and each one passes
 `node --check`. `tools/verify/crosscheck.py` still reports 18/18 modules whose every `require()` name
 the running bytecode produced is present in the output, and all 44 such names appear in
 `recovered/` as well. The loop and switch structure restored by `normalize_listing.py` **is** verified
 at bytecode level: `tools/verify/structure.py` reports **18/18** modules in which every one of the
-**142** loop back edges and all **8** jump tables — plus the strict-comparison `switch` chains and
-the `async` resume dispatches — is backed by the committed listings, and its 9 regression tests
-pass. RegExp flags, flattened exception handlers and V8 context lifetimes still require
+**142** loop back edges (with matching per-function loop multisets over the **587** compared
+functions), all **8** jump tables, the single strict-comparison `switch` chain and all **55** `async`
+resume dispatches is backed by the committed listings — its own last line, `modules whose every loop
+and switch construct is backed by the bytecode: 18/18`, is the pass condition — and its 9 regression
+tests pass as well. RegExp flags, flattened exception handlers and V8 context lifetimes still require
 bytecode-level verification:
 a passing syntax check is not runtime equivalence. The original `server.js`, `src/` binaries and
 `decompiled/` listings are left untouched.

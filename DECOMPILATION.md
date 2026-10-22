@@ -84,7 +84,9 @@ giving a unique solution for **18/18** modules.
 | bytecode listing | View8's patched-V8 disassembler for V8 10.2 (`suleram/View8`) — Windows binary run under Wine, since only Windows builds are published | the only disassembler that supports V8 10.2 |
 | bytecode → JavaScript | View8 (`python3 view8.py -f disassembled …`) | purpose-built V8-bytecode decompiler |
 | obfuscated strings | `tools/decompile/resolve_strings.py` | resolves accessor calls to literal strings |
-| verification | `tools/decompile/load_bytecode.js` | runs the original caches as CommonJS modules in node 18.5.0 to obtain ground truth |
+| verification (ground truth) | `tools/decompile/load_bytecode.js` | runs the original caches as CommonJS modules in node 18.5.0 to obtain ground truth |
+| verification (structure) | `tools/verify/structure.py` | compares every recovered loop and `switch` against the committed bytecode listings |
+| verification (names) | `tools/verify/crosscheck.py` | compares the recovered names with the names the running bytecode exposes |
 
 ## 5. Result
 
@@ -109,10 +111,21 @@ Recovered content is the real application logic, e.g.
    string array across the modules are exactly the module specifiers the bytecode requested at runtime;
    for 12 modules the recovered and observed sets are identical.
 4. **Loop / switch structure cross-check**: `tools/verify/structure.py` compares `recovered/` against the
-   bytecode listings (`decompiled/bytecode/*.disasm.txt`) and reports **18/18** modules whose every loop
-   back edge (**142**), `switch` jump table (**8**), strict-comparison `switch` chain and `async` resume
-   dispatch is backed by the bytecode, with matching per-function loop multisets (587 functions). 9
-   regression tests cover the checker itself.
+   bytecode listings (`decompiled/bytecode/*.disasm.txt`) and reports **18/18** modules whose every
+   construct is backed by the bytecode, with matching per-function loop multisets (**587** functions
+   compared):
+
+   | construct in `recovered/` | bytecode it is checked against | count | result |
+   |---|---|---:|---|
+   | `while (…)` statements and their nesting depth | `JumpLoop` / `JumpLoop.Wide` back edges | 142 | 18/18 ok |
+   | `switch (rN)` with `case (0)` labels | `SwitchOnSmiNoFeedback` jump tables | 8 | 18/18 ok |
+   | `switch (void 0)` strict-comparison chains | `TestEqualStrict` chains ending in a `Jump` | 1 | 18/18 ok |
+   | `async function` resume dispatch | `SwitchOnGeneratorState` | 55 | 18/18 ok |
+
+   The report's last line — `modules whose every loop and switch construct is backed by the bytecode:
+   18/18` — is the pass condition: a construct printed in `recovered/` that no listing instruction
+   supports (or a listing construct missing from it) fails that module. 9 regression tests cover the
+   checker itself, and `--json FILE` writes the full per-module result for auditing.
 
 ### Lowering to JavaScript (`recovered/`)
 
@@ -191,4 +204,10 @@ String-array statistics per module (offset, solved rotation, calls resolved):
 ## 7. Reproducing the conversion
 
 See `tools/decompile/README.md`; the pipeline is
-`disassemble (Wine + View8's V8 10.2 disassembler) → view8.py → resolve_strings.py`.
+`disassemble (Wine + View8's V8 10.2 disassembler) → view8.py → resolve_strings.py → emit_source.py`.
+
+Verification then runs from the repository alone (no Wine, no original runtime) with
+`python3 tools/verify/structure.py` — the loop and `switch` structure against the committed listings,
+18/18 — and the two regression suites (`tools/verify/test_structure.py`,
+`tools/decompile/test_emit_source.py`). `python3 tools/verify/crosscheck.py` additionally loads the
+caches in a Node 18.5.0 container and compares the recovered names with the names they expose.
