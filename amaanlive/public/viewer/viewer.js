@@ -235,6 +235,7 @@ async function loadSettings() {
   SETTINGS = r.settings || {};
   document.title = (SETTINGS.siteName || 'البث المباشر') + ' — البث المباشر';
   $('#siteTitle').textContent = SETTINGS.siteName || 'البث المباشر';
+  $('#footName').textContent = SETTINGS.siteName || 'بثي المحلي';
   if (SETTINGS.logo) {
     const logo = $('#siteLogo');
     logo.src = '/' + String(SETTINGS.logo).replace(/^\//, '').replace(/^srv\/uploads\//, 'uploads/');

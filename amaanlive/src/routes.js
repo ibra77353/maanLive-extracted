@@ -106,6 +106,11 @@ function sanitizeAd(body, existing) {
   return ad;
 }
 
+/** اسم الجهاز كما يراه المشاهد: التسمية المحفوظة بدل المعرّف الخام (@device_pnp_…). */
+function viewerDevice(src) {
+  return /^@device_/i.test(src.videoDevice) ? (src.videoDeviceLabel || 'جهاز التقاط') : src.videoDevice;
+}
+
 function publicChannel(ch) {
   const src = store.findSource(ch.sourceId);
   const st = ffmpeg.statusOf(ch.id);
@@ -123,7 +128,7 @@ function publicChannel(ch) {
     live: st.state === 'running',
     status,
     viewers: st.viewers || 0,
-    device: src && src.type === 'usb' ? src.videoDevice : 'الشاشة',
+    device: src && src.type === 'usb' ? viewerDevice(src) : 'الشاشة',
     nextOpen: scheduler.nextOpenMinutes(ch.schedule),
     url: '/hls/' + ch.id + '/index.m3u8'
   };

@@ -886,6 +886,7 @@ async function loadSettings() {
     else el.value = DATA.settings[k] == null ? '' : DATA.settings[k];
   }
   $('#brandName').textContent = DATA.settings.siteName || 'بثي المحلي';
+  $('#adminFooter').textContent = (DATA.settings.siteName || 'بثي المحلي') + ' — يعمل بلا إنترنت · بلا تراخيص';
   const logo = $('#brandLogo');
   if (DATA.settings.logo) {
     logo.src = '/' + String(DATA.settings.logo).replace(/^\//, '').replace(/^srv\/uploads\//, 'uploads/');
@@ -1189,4 +1190,3 @@ $('#nginxStop').addEventListener('click', () => nginxAction('stop'));
 $('#nginxReload').addEventListener('click', () => nginxAction('reload'));
 $('#nginxRegen').addEventListener('click', () => nginxAction('regen'));
 
-$('#adminFooter').textContent = 'بثي المحلي — يعمل بلا إنترنت · بلا تراخيص';
