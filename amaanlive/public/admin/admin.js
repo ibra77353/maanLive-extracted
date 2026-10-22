@@ -505,6 +505,12 @@ async function loadDevices(force) {
   renderDevices();
 }
 
+/** المصادر المحفوظة التي تستعمل هذا الجهاز فعلاً. */
+function deviceUsers(d) {
+  return (DATA.sources || []).filter((s) =>
+    d.kind === 'video' ? s.videoDevice === d.name : s.audioDevice === d.name);
+}
+
 function deviceRow(d) {
   const caps = d.caps || {};
   const res = (caps.resolutions || []).slice(0, 8).map((x) => '<span class="caps-tag">' + esc(x) + '</span>').join('');
@@ -516,13 +522,34 @@ function deviceRow(d) {
       ((caps.audio && caps.audio.channels) || []).map((x) => '<span class="caps-tag">' + x + 'ch</span>').join('') +
       '</div>'
     : '<div class="caps-list">' + res + fmts + fps + '</div>';
+  // «استخدام كمصدر»: يظهر تلقائياً أي مصدر/قناة يعتمد على هذه القطعة الآن.
+  const users = deviceUsers(d);
+  const chans = [];
+  for (const u of users) for (const c of (u.usedByChannels || [])) if (!chans.includes(c)) chans.push(c);
+  const usage = users.length
+    ? '<div class="dev-use">مستخدم كمصدر في: <b>' + users.map((u) => esc(u.name)).join('، ') + '</b>' +
+      (chans.length ? ' · القنوات: ' + esc(chans.join('، ')) : '') + '</div>'
+    : '<div class="dev-use">غير مستخدم في أي مصدر</div>';
+  const id = d.altName || d.key;
   return '<div class="dev-row' + (d.present ? '' : ' gone') + '">' +
     '<div style="flex:1;min-width:0">' +
       '<div class="dev-name">' + esc(d.name) + (d.present ? '' : ' — مفصول') + '</div>' +
-      '<div class="dev-meta">' + esc(d.altName || d.key) + '</div>' + audio +
+      usage +
+      '<button class="link-btn" data-devid aria-expanded="false">إظهار المعرّف</button>' +
+      '<div class="dev-id hidden">' + esc(id) + '</div>' + audio +
     '</div>' +
     '<button class="btn btn-sm" data-newsrc="' + esc(d.name) + '" data-kind="' + d.kind + '">استخدام كمصدر</button>' +
     '</div>';
+}
+
+/** إخفاء/إظهار معرّف الجهاز الخام داخل بطاقة الجهاز. */
+function toggleDeviceId(btn) {
+  const block = btn.parentElement.querySelector('.dev-id');
+  if (!block) return;
+  const show = block.classList.contains('hidden');
+  block.classList.toggle('hidden', !show);
+  btn.textContent = show ? 'إخفاء المعرّف' : 'إظهار المعرّف';
+  btn.setAttribute('aria-expanded', show ? 'true' : 'false');
 }
 
 function renderDevices() {
@@ -588,6 +615,8 @@ $('#sourcesTable').addEventListener('click', async (e) => {
 });
 
 $('#videoDevices').addEventListener('click', (e) => {
+  const idBtn = e.target.closest('button[data-devid]');
+  if (idBtn) return toggleDeviceId(idBtn);
   const btn = e.target.closest('button[data-newsrc]');
   if (!btn) return;
   openSourceModal(null);
@@ -601,7 +630,14 @@ async function loadSources() {
   const r = await api('/sources');
   DATA.sources = r.sources || [];
   renderSourcesTable();
+  renderDevices();
 }
+
+// نفس زر الإخفاء/الإظهار لأجهزة الصوت.
+$('#audioDevices').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-devid]');
+  if (btn) toggleDeviceId(btn);
+});
 
 function renderSourcesTable() {
   const tb = $('#sourcesTable tbody');
