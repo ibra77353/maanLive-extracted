@@ -346,15 +346,14 @@
       <label>التصنيف<input class="input" id="ch_category" placeholder="مثال: رياضة"></label>
       <div class="grid-3">
         <label>جودة الإخراج
-          <select class="input" id="ch_quality">
-            <option value="copy">نسخ المصدر (بلا ترميز — لمصادر H.264 فقط)</option>
-            <option value="240p">240p</option><option value="360p">360p</option>
-            <option value="480p">480p</option><option value="720p">720p</option><option value="1080p">1080p</option>
-          </select>
+          <!-- الخيارات تُبنى من جدول الخادم (src/quality.js) عند فتح النافذة -->
+          <select class="input" id="ch_quality"></select>
         </label>
-        <label>معدل الإطارات (اختياري)<input class="input" id="ch_fps" type="number" min="1" max="60" placeholder="تلقائي"></label>
+        <label>معدل الإطارات (اختياري)<input class="input" id="ch_fps" type="number" min="1" max="120" placeholder="تلقائي"></label>
         <label>الترتيب<input class="input" id="ch_sort" type="number" value="0"></label>
       </div>
+      <label>معدّل البت Bitrate (اختياري — مثال 1500k، فارغ = افتراضي الجودة، ويُطبَّق عند الترميز فقط)
+        <input class="input" id="ch_bitrate" dir="ltr" placeholder="افتراضي الجودة"></label>
       <p class="hint" id="ch_outSummary">اختر مصدراً لعرض ملخص الالتقاط والإخراج.</p>
       <label>غلاف القناة
         <span class="with-browse">
@@ -364,6 +363,7 @@
       </label>
       <div class="switch-row"><input type="checkbox" id="ch_enabled" checked><span>مفعّلة (تظهر للمشاهدين)</span></div>
       <div class="switch-row"><input type="checkbox" id="ch_autoStart"><span>تشغيل تلقائي عند بدء البرنامج</span></div>
+      <div class="switch-row"><input type="checkbox" id="ch_alwaysOn"><span>تشغيل دائم 24/7 (لا تتوقف عند غياب المشاهدين)</span></div>
       <hr class="sep">
       <div class="switch-row"><input type="checkbox" id="ch_schedEnabled"><span>تشغيل بجدولة زمنية</span></div>
       <div class="days-checks" id="ch_days"></div>

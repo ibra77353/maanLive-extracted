@@ -15,12 +15,29 @@ const ffmpeg = require('./ffmpeg');
 const nginx = require('./nginx');
 const stats = require('./stats');
 const scheduler = require('./scheduler');
+const quality = require('./quality');
 
 const { ok, fail, readJson, readMultipart, clientIp } = http;
 
 const STARTED_AT = Date.now();
 
 // ---------------------------------------------------------------- helpers
+
+/** رقم صحيح داخل مدى، أو null إن كانت القيمة فارغة (فلا تُكتب NaN في ملف الإعدادات). */
+function intOrNull(value, min, max, message) {
+  if (value === null || value === undefined || value === '') return null;
+  const n = Number(value);
+  if (!Number.isInteger(n) || n < min || n > max) throw new Error(message);
+  return n;
+}
+
+/** معدل بت القناة: «1500k» أو «1500» → «1500k»؛ والفارغ يعني افتراضي الجودة. */
+function normalizeBitrate(value) {
+  const s = String(value == null ? '' : value).trim().toLowerCase();
+  if (!s) return '';
+  if (!/^\d{2,6}k?$/.test(s)) throw new Error('معدل البت غير صحيح (مثال: 1500k)');
+  return s.endsWith('k') ? s : s + 'k';
+}
 
 function sanitizeSource(body, existing) {
   const src = existing ? Object.assign({}, existing) : { id: store.newId('src') };
@@ -30,6 +47,17 @@ function sanitizeSource(body, existing) {
   src.type = ['usb', 'screen'].includes(pick('type', 'usb')) ? pick('type', 'usb') : 'usb';
   src.videoDevice = String(pick('videoDevice', '') || '').slice(0, 200);
   src.audioDevice = String(pick('audioDevice', '') || '').slice(0, 200);
+  // الجهاز المكتشف الآن: نحلّ الاسم المحفوظ (وقد يكون اسماً بديلاً/معرّفاً خاماً) إلى
+  // اسمه المعروض ثم نستخدمه للتسمية ولحفظ صورة القدرات أدناه.
+  const devName = src.type === 'usb' ? devices.resolveDeviceName(src.videoDevice, 'video') : '';
+  const audName = src.type === 'usb' && src.audioDevice ? devices.resolveDeviceName(src.audioDevice, 'audio') : '';
+  const dev = devName ? devices.find(devName, 'video') : null;
+  const aud = audName ? devices.find(audName, 'audio') : null;
+  // تسمية الجهاز المألوفة («USB Video») تُحفظ مع المصدر ليُعرض للمشاهدين وفي اللوحة
+  // بدل المعرّف الخام (moniker) — حقل النظام الأصلي `videoDeviceLabel` الذي كانت
+  // الواجهة تقرأه ولا يجد ما يقرأه لأن الموجّه لم يكن يحفظه أصلاً.
+  src.videoDeviceLabel = String(body.videoDeviceLabel || (dev ? dev.name : '') || src.videoDeviceLabel || '').slice(0, 120);
+  src.audioDeviceLabel = String(body.audioDeviceLabel || (aud ? aud.name : '') || src.audioDeviceLabel || '').slice(0, 120);
   src.videoSize = String(pick('videoSize', '') || '').slice(0, 20);
   src.fps = pick('fps', null) === null || pick('fps', null) === '' ? null : Number(pick('fps', null));
   src.pixelFormat = String(pick('pixelFormat', '') || '').slice(0, 40);
@@ -44,10 +72,7 @@ function sanitizeSource(body, existing) {
   if (src.fps !== null && (!Number.isFinite(src.fps) || src.fps < 1 || src.fps > 240)) throw new Error('معدل الإطارات غير صحيح');
 
   // نحفظ صورة القدرات المقروءة فعلاً من الجهاز وقت الإنشاء (مرجع للواجهة)
-  if (src.type === 'usb' && !existing) {
-    const dev = devices.find(src.videoDevice, 'video');
-    if (dev && dev.caps) src.caps = dev.caps;
-  }
+  if (!existing && dev && dev.caps) src.caps = dev.caps;
   if (!src.createdAt) src.createdAt = Date.now();
   return src;
 }
@@ -63,11 +88,17 @@ function sanitizeChannel(body, existing) {
   ch.sort = Number(pick('sort', 0)) || 0;
   ch.enabled = Boolean(pick('enabled', true));
   ch.autoStart = Boolean(pick('autoStart', false));
+  // «تشغيل دائم 24/7»: يمنع إيقاف القناة عند خمول المشاهدين (انظر src/idle.js) —
+  // حقل النظام الأصلي نفسه، ويُحفظ كما هو فلا يفقد الإعداد المستورد معناه.
+  ch.alwaysOn = Boolean(pick('alwaysOn', false));
   ch.manualStopped = existing ? Boolean(existing.manualStopped) : false;
-  ch.quality = String(pick('quality', 'copy'));
-  if (!['copy', '240p', '360p', '480p', '720p', '1080p'].includes(ch.quality)) throw new Error('الجودة المطلوبة غير مدعومة');
-  ch.fps = pick('fps', null) === null || pick('fps', null) === '' ? null : Number(pick('fps', null));
-  ch.threads = pick('threads', null) === null || pick('threads', null) === '' ? null : Number(pick('threads', null));
+  // الجودة من جدول واحد (src/quality.js) يبنيه محرّك البث نفسه، فلا تختلف الواجهة عن التنفيذ.
+  ch.quality = String(pick('quality', quality.COPY));
+  if (!quality.get(ch.quality)) throw new Error('الجودة المطلوبة غير مدعومة');
+  // تجاوزات القناة على الإخراج (النظام الأصلي كان يطبّقها: fps · bitrate · threads).
+  ch.fps = intOrNull(pick('fps', null), 1, 120, 'معدل إطارات القناة غير صحيح (1–120)');
+  ch.bitrate = normalizeBitrate(pick('bitrate', ''));
+  ch.threads = intOrNull(pick('threads', null), 0, 32, 'عدد خيوط الترميز غير صحيح (0–32)');
 
   const sched = pick('schedule', null) || {};
   ch.schedule = {
@@ -243,7 +274,9 @@ function createRouter() {
   r.use('/api', auth.requireAuth);
 
   // ---------------- الإعدادات ----------------
-  r.get('/api/settings', async (req, res) => ok(res, { settings: store.get().settings }));
+  // الجدول يُرسَل مع الإعدادات فتبني الواجهة منه قائمة الجودات وأسماءها وملخص
+  // «الالتقاط ← الإخراج» من نفس المصدر الذي يبني به محرّك البث وسائطه (src/quality.js).
+  r.get('/api/settings', async (req, res) => ok(res, { settings: store.get().settings, quality: quality.publicTable() }));
 
   r.put('/api/settings', async (req, res) => {
     const body = await readJson(req);
@@ -424,7 +457,9 @@ function createRouter() {
           // خيارات الجودة الصدقية بدل عرض خيار لا يعمل.
           videoCodec: ffmpeg.sourceVideoCodec(s),
           copySupported: ffmpeg.copySupported(s),
-          usedByChannels: data.channels.filter((c) => c.sourceId === s.id).map((c) => c.name)
+          // القنوات المستعملة للمصدر بمعرّفها واسمها: الربط من جدول المصادر يتم
+          // بالمعرّف (source.id ← channel.sourceId) فلا يفتح اسمُ قناةٍ مكرّر قناةً أخرى.
+          usedByChannels: data.channels.filter((c) => c.sourceId === s.id).map((c) => ({ id: c.id, name: c.name }))
         });
       })
     });
@@ -510,9 +545,19 @@ function createRouter() {
     data.channels[idx] = ch;
     store.save();
 
+    // تعطيل القناة يوقف بثّها فعلاً (كما كان في النظام الأصلي): بلا هذا السطر تبقى
+    // ffmpeg تكتب مقاطع لقناة مخفية عن المشاهدين، ولا حارس يوقفها (الخمول والمراقب
+    // والجدولة يتخطّون القنوات المعطّلة).
+    if (!ch.enabled && ffmpeg.isRunning(ch.id)) {
+      await ffmpeg.stop(ch.id, 'disabled');
+      return ok(res, { channel: ch, restarted: false, stopped: 'disabled' });
+    }
+
+    // تغيير أي إعداد يؤثر على الإخراج يعيد تشغيل القناة العاملة بالإعدادات الجديدة.
     const needsRestart =
       ffmpeg.isRunning(ch.id) &&
-      (before.sourceId !== ch.sourceId || before.quality !== ch.quality || before.fps !== ch.fps);
+      (before.sourceId !== ch.sourceId || before.quality !== ch.quality ||
+       before.fps !== ch.fps || before.bitrate !== ch.bitrate || before.threads !== ch.threads);
     if (needsRestart) await ffmpeg.restart(ch.id);
     return ok(res, { channel: ch, restarted: needsRestart });
   });

@@ -16,6 +16,9 @@ function tick() {
   const idleMs = Math.max(1, Number(settings.idleStopMinutes) || 2) * 60 * 1000;
   for (const ch of store.get().channels) {
     if (!ch.enabled) continue;
+    // «تشغيل دائم 24/7»: القناة لا تُدار بالخمول أصلاً — نفس شرط isIdleManaged في
+    // النظام الأصلي، فالقناة المستوردة بهذا الحقل لا توقفها حلقة الخمول.
+    if (ch.alwaysOn) continue;
     if (!ffmpeg.isRunning(ch.id)) continue;
     const last = ffmpeg.lastViewerAt(ch.id);
     if (!last) continue; // لا مشاهدين مسجّلين بعد: لا نوقف (قد يكون البث لم يبدأ)

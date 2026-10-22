@@ -38,7 +38,7 @@ const S_KEYS = [
   'ownerName', 'networkName', 'city'
 ];
 
-const DATA = { settings: {}, sources: [], channels: [], statusChannels: [], ads: [], devices: { devices: [] }, nginx: null };
+const DATA = { settings: {}, quality: [], sources: [], channels: [], statusChannels: [], ads: [], devices: { devices: [] }, nginx: null };
 let statusTimer = null;
 let logChannelId = null;
 let editingChannelId = null;
@@ -397,7 +397,7 @@ async function loadChannels() {
  */
 function qualityCell(c) {
   const q = c.quality || 'copy';
-  if (q !== 'copy') return esc(QUALITY_LABELS[q] || q);
+  if (q !== 'copy') return esc(qualityLabel(q));
   if (c.copySupported === false) {
     return 'نسخ المصدر <span class="tag-warn" title="المصدر لا يخرج H.264 — نسخه لا يعمل في HLS">غير ممكن · ' +
       esc(c.sourceCodec || '—') + '</span>';
@@ -489,12 +489,24 @@ function channelSourceDevice() {
       : '');
 }
 
-/** أسماء جودة الإخراج كما تُعرض في الجداول، وبنفس مصدرها في src/ffmpeg.js. */
-const QUALITY_LABELS = {
-  copy: 'نسخ المصدر', '240p': '240p', '360p': '360p', '480p': '480p', '720p': '720p', '1080p': '1080p'
-};
-const QUALITY_HEIGHTS = { '240p': 240, '360p': 360, '480p': 480, '720p': 720, '1080p': 1080 };
-const QUALITY_BITRATES = { 240: '400k', 360: '800k', 480: '1400k', 720: '2500k', 1080: '4500k' };
+/**
+ * جدول جودات الإخراج يصل من الخادم (`/api/settings` → `quality`) وهو الجدول نفسه
+ * (src/quality.js) الذي يبني به محرّك البث وسائط الترميز، فلا نسخة ثانية في الواجهة
+ * تختلف عن التنفيذ الفعلي (المقاس ومعدل البت والتسمية من مكان واحد).
+ */
+function qualityList() {
+  return DATA.quality || [];
+}
+
+function qualityInfo(key) {
+  return qualityList().find((q) => q.key === key) || null;
+}
+
+/** اسم الجودة كما يُعرض في الجداول والنموذج (وإلا المفتاح نفسه). */
+function qualityLabel(key) {
+  const q = qualityInfo(key);
+  return q ? q.label : key;
+}
 
 /**
  * هل مصدر هذه القناة يخرج H.264؟ «نسخ المصدر بلا ترميز» لا يفتحه متصفح المشاهد في HLS
@@ -514,8 +526,9 @@ function defaultQualityFor(source) {
   if (sourceCopySupported(source)) return 'copy';
   const m = /^(\d+)x(\d+)$/.exec((source && source.videoSize) || '');
   const h = m ? Number(m[2]) : 720;
-  const pick = [240, 360, 480, 720, 1080].filter((x) => x <= h).pop() || 480;
-  return pick + 'p';
+  const heights = qualityList().map((q) => q.height).filter(Boolean);
+  const fit = heights.filter((x) => x <= h).pop() || heights[0] || 480;
+  return fit + 'p';
 }
 
 /**
@@ -526,12 +539,11 @@ function applyQualityOptions(source, desired) {
   const sel = $('#ch_quality');
   const copyOk = sourceCopySupported(source);
   const codec = source ? (source.vcodec || source.pixelFormat || (source.type === 'screen' ? 'الشاشة' : '—')) : '—';
-  sel.innerHTML = ['copy', '240p', '360p', '480p', '720p', '1080p'].map((q) => {
-    const isCopy = q === 'copy';
-    const label = isCopy
-      ? (copyOk ? 'نسخ المصدر (بلا ترميز — المصدر H.264)' : 'نسخ المصدر — غير ممكن (المصدر ' + codec + ')')
-      : QUALITY_LABELS[q];
-    return '<option value="' + q + '"' + (isCopy && !copyOk ? ' disabled' : '') + '>' + esc(label) + '</option>';
+  sel.innerHTML = qualityList().map((q) => {
+    const label = q.copy
+      ? q.label + (copyOk ? ' — المصدر H.264' : ' — غير ممكن (المصدر ' + codec + ')')
+      : q.label;
+    return '<option value="' + esc(q.key) + '"' + (q.copy && !copyOk ? ' disabled' : '') + '>' + esc(label) + '</option>';
   }).join('');
   sel.value = (desired && (desired !== 'copy' || copyOk)) ? desired : defaultQualityFor(source);
   return sel.value;
@@ -558,8 +570,11 @@ function updateChannelOutputSummary() {
       ? 'نسخ المصدر بلا ترميز (كما هو) — الأخف على المعالج'
       : 'ترميز H.264 (نسخ المصدر غير ممكن' + (wm ? ' — الشعار المائي مفعّل' : ' لهذا المصدر') + ')';
   } else {
-    const h = QUALITY_HEIGHTS[q] || 720;
-    output = 'ترميز H.264 بدقة ' + h + 'p · ' + (QUALITY_BITRATES[h] || 'تلقائي') + ' · x264 ' +
+    const info = qualityInfo(q) || {};
+    // التجاوزات المكتوبة في النموذج تظهر هنا كما ستُطبَّق فعلاً على المخرج.
+    const fps = $('#ch_fps').value.trim() || (s.fps ? s.fps + 'fps (من الالتقاط)' : 'تلقائي');
+    const bitrate = $('#ch_bitrate').value.trim() || info.bitrate || 'تلقائي';
+    output = 'ترميز H.264 بدقة ' + (info.height || 720) + 'p · ' + bitrate + ' · ' + fps + ' · x264 ' +
       (DATA.settings.x264Preset || 'veryfast');
   }
   box.textContent = 'الالتقاط: ' + capture + ' — الإخراج: ' + output;
@@ -575,8 +590,10 @@ function openChannelModal(id) {
   $('#ch_cover').value = ch ? ch.cover || '' : '';
   $('#ch_sort').value = ch ? ch.sort || 0 : DATA.channels.length;
   $('#ch_fps').value = ch && ch.fps ? ch.fps : '';
+  $('#ch_bitrate').value = ch && ch.bitrate ? ch.bitrate : '';
   $('#ch_enabled').checked = ch ? ch.enabled !== false : true;
   $('#ch_autoStart').checked = ch ? Boolean(ch.autoStart) : false;
+  $('#ch_alwaysOn').checked = ch ? Boolean(ch.alwaysOn) : false;
   const sched = (ch && ch.schedule) || { enabled: false, days: [], from: '08:00', to: '23:59' };
   $('#ch_schedEnabled').checked = Boolean(sched.enabled);
   $('#ch_from').value = sched.from || '08:00';
@@ -636,15 +653,6 @@ async function openChannelById(id, sourceId) {
   return undefined;
 }
 
-/** فتح نافذة قناة باسمها — جدول المصادر يعرض أسماء القنوات المستعملة للمصدر. */
-async function openChannelByName(name) {
-  await ensureFullChannels();
-  const ch = DATA.channels.find((c) => c.name === name);
-  if (!ch) { toast('لم يُعثر على القناة «' + name + '»', true); return undefined; }
-  openChannelModal(ch.id);
-  return undefined;
-}
-
 /** الانتقال إلى سجل المصدر في قسم «مصادر البث» وتمييزه (ربط القنوات بالمصادر). */
 async function goToSource(id) {
   await switchView('sources');
@@ -664,6 +672,8 @@ $('#chManageSources').addEventListener('click', () => {
 });
 $('#ch_sourceId').addEventListener('change', () => onChannelSourceChange());
 $('#ch_quality').addEventListener('change', updateChannelOutputSummary);
+$('#ch_fps').addEventListener('input', updateChannelOutputSummary);
+$('#ch_bitrate').addEventListener('input', updateChannelOutputSummary);
 // زر إظهار/إخفاء معرّف جهاز المصدر داخل نافذة القناة
 $('#channelModal').addEventListener('click', (e) => {
   const btn = e.target.closest('button[data-devid]');
@@ -679,9 +689,11 @@ $('#channelSave').addEventListener('click', async () => {
     cover: $('#ch_cover').value.trim(),
     quality: $('#ch_quality').value,
     fps: $('#ch_fps').value.trim() ? Number($('#ch_fps').value) : null,
+    bitrate: $('#ch_bitrate').value.trim(),
     sort: Number($('#ch_sort').value) || 0,
     enabled: $('#ch_enabled').checked,
     autoStart: $('#ch_autoStart').checked,
+    alwaysOn: $('#ch_alwaysOn').checked,
     schedule: {
       enabled: $('#ch_schedEnabled').checked,
       days,
@@ -782,7 +794,7 @@ function deviceRow(d) {
   // «استخدام كمصدر»: يظهر تلقائياً أي مصدر/قناة يعتمد على هذه القطعة الآن.
   const users = deviceUsers(d);
   const chans = [];
-  for (const u of users) for (const c of (u.usedByChannels || [])) if (!chans.includes(c)) chans.push(c);
+  for (const u of users) for (const c of (u.usedByChannels || [])) if (!chans.includes(c.name)) chans.push(c.name);
   const usage = users.length
     ? '<div class="dev-use">مستخدم كمصدر في: <b>' + users.map((u) => esc(u.name)).join('، ') + '</b>' +
       (chans.length ? ' · القنوات: ' + esc(chans.join('، ')) : '') + '</div>'
@@ -858,7 +870,7 @@ $('#sourcesTable').addEventListener('click', async (e) => {
   const idBtn = e.target.closest('button[data-devid]');
   if (idBtn) return toggleDeviceId(idBtn);
   const chBtn = e.target.closest('button[data-gotoch]');
-  if (chBtn) return openChannelByName(chBtn.dataset.gotoch);
+  if (chBtn) return openChannelById(chBtn.dataset.gotoch);
   const btn = e.target.closest('button[data-sact]');
   if (!btn) return;
   const id = btn.dataset.id;
@@ -937,9 +949,11 @@ function deviceCell(s) {
 
 /** خلية «القنوات» في جدول المصادر: كل قناة رابط يفتح نموذجها (ربط الأقسام). */
 function channelLinksCell(s) {
-  const names = s.usedByChannels || [];
-  if (!names.length) return '<span class="hint">—</span>';
-  return names.map((n) => '<button class="link-btn" data-gotoch="' + esc(n) + '">' + esc(n) + '</button>').join('<br>');
+  // الربط بالمعرّف (source.id ← channel.sourceId) لا بالاسم، فاسم قناة مكرّر
+  // لا يفتح قناة أخرى.
+  const used = s.usedByChannels || [];
+  if (!used.length) return '<span class="hint">—</span>';
+  return used.map((c) => '<button class="link-btn" data-gotoch="' + esc(c.id) + '">' + esc(c.name) + '</button>').join('<br>');
 }
 
 function renderSourcesTable() {
@@ -1180,6 +1194,8 @@ $('#sourceSave').addEventListener('click', async () => {
 async function loadSettings() {
   const r = await api('/settings');
   DATA.settings = r.settings || {};
+  // جدول جودات الإخراج يأتي من الخادم (src/quality.js) — مصدر واحد للواجهة ومحرّك البث.
+  DATA.quality = r.quality || [];
   for (const k of S_KEYS) {
     const el = $('#s_' + k);
     if (!el) continue;

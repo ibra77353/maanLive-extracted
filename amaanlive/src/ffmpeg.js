@@ -14,6 +14,7 @@ const { spawn } = require('child_process');
 const store = require('./store');
 const devices = require('./devices');
 const nginx = require('./nginx');
+const quality = require('./quality');
 
 /** حالة كل قناة قيد التشغيل أو المراقبة. */
 const runtime = new Map();
@@ -184,11 +185,10 @@ async function pickVariant(source) {
   return variants[0];
 }
 
-/** ارتفاع الإخراج الفعلي (للترميز ولتحجيم الشعار المائي). */
+/** ارتفاع الإخراج الفعلي (للترميز ولتحجيم الشعار المائي) — من جدول الجودات الموحّد. */
 function outputHeight(channel, source) {
-  const q = String(channel.quality || 'copy');
-  const m = /^(\d{3,4})p$/.exec(q);
-  if (m) return Number(m[1]);
+  const h = quality.heightFor(channel && channel.quality);
+  if (h) return h;
   const vs = /^(\d+)x(\d+)$/.exec(source && source.videoSize ? source.videoSize : '');
   if (vs) return Number(vs[2]);
   return 720;
@@ -216,7 +216,16 @@ function copySupported(source) {
 
 /** هل النسخ الفعلي هو ما سيُنفَّذ؟ (الشعار المائي يفرض الترميز دائماً). */
 function streamCopyActive(channel, source, watermark) {
-  return String(channel.quality || '') === 'copy' && !watermark && copySupported(source);
+  return quality.isCopy(channel && channel.quality) && !watermark && copySupported(source);
+}
+
+/**
+ * معدل بت القناة المخصّص (`bitrate`, مثل «1500k») — يعلو على معدل الجودة الافتراضي،
+ * نفس سلوك النظام الأصلي. القيمة تُطبَّع وتُتحقَّق في الموجّه (src/routes.js).
+ */
+function channelBitrate(channel) {
+  const v = String((channel && channel.bitrate) || '').trim();
+  return /^\d{2,6}k$/.test(v) ? v : null;
 }
 
 /**
@@ -227,9 +236,10 @@ function buildOutputArgs(channel, source, dir, watermark) {
   const settings = store.get().settings;
   const args = [];
   const height = outputHeight(channel, source);
-  const quality = String(channel.quality || 'copy');
-
-  const gop = Math.max(1, Math.round((Number(settings.gopSeconds) || 2) * (Number(channel.fps) || Number(source.fps) || 25)));
+  const q = String(channel.quality || quality.COPY);
+  // معدل الإطارات المطلوب على المخرج: تجاوز القناة ثم معدل الالتقاط ثم 25 — كما في النظام الأصلي.
+  const fps = Number(channel.fps) || Number(source.fps) || 25;
+  const gop = Math.max(1, Math.round((Number(settings.gopSeconds) || 2) * fps));
 
   if (streamCopyActive(channel, source, watermark)) {
     args.push('-c:v', 'copy');
@@ -239,9 +249,13 @@ function buildOutputArgs(channel, source, dir, watermark) {
     args.push(...x264TuneArgs(settings));
     args.push('-pix_fmt', 'yuv420p');
     args.push('-g', String(gop), '-keyint_min', String(gop), '-sc_threshold', '0');
-    if (Number(settings.x264Threads)) args.push('-threads', String(Number(settings.x264Threads)));
-    if (quality !== 'copy') args.push('-vf', 'scale=-2:' + height);
-    const bitrate = bitrateForQuality(quality, height);
+    // معدل الإطارات الفعلي على المخرج — بدونه بقي تجاوز القناة محسوباً في GOP فقط بلا أثر على البث.
+    args.push('-r', String(fps));
+    // خيوط الترميز: تجاوز القناة (`threads`) إن وُجد، وإلا الإعداد العام.
+    const threads = Number(channel.threads) || Number(settings.x264Threads);
+    if (threads) args.push('-threads', String(threads));
+    if (quality.heightFor(q)) args.push('-vf', 'scale=-2:' + height);
+    const bitrate = channelBitrate(channel) || quality.bitrateFor(q);
     if (bitrate) {
       args.push('-b:v', bitrate, '-maxrate', bitrate, '-bufsize', x264BufsizeFor(settings, bitrate));
     }
@@ -268,12 +282,6 @@ function buildOutputArgs(channel, source, dir, watermark) {
   args.push('-hls_segment_filename', path.join(dir, 'seg_%05d.ts'));
   args.push(path.join(dir, 'index.m3u8'));
   return args;
-}
-
-function bitrateForQuality(quality, height) {
-  if (quality === 'copy' || !quality) return null;
-  const table = { 240: '400k', 360: '800k', 480: '1400k', 720: '2500k', 1080: '4500k' };
-  return table[height] || null;
 }
 
 /**
@@ -493,7 +501,7 @@ async function start(channelId, opts) {
 
   // «نسخ المصدر» لا يفتحه مشغّل المشاهد إلا من مصدر H.264: نرفض التشغيل مبكراً برسالة
   // واضحة بدل إنتاج مقاطع لا تُعرض، ونرشد إلى جودة إخراج تُرمَّز بـH.264.
-  if (String(channel.quality || '') === 'copy' && !copySupported(source)) {
+  if (quality.isCopy(channel.quality) && !copySupported(source)) {
     throw new Error('«نسخ المصدر بلا ترميز» غير ممكن لهذا المصدر («' + sourceVideoCodec(source) +
       '») — اختر جودة إخراج (240p…1080p) لتُرمَّز القناة بـH.264');
   }
@@ -501,7 +509,7 @@ async function start(channelId, opts) {
   fs.mkdirSync(channelDir(channelId), { recursive: true });
   const bin = devices.ffmpegBin();
   const watermark = resolveLogo();
-  if (String(channel.quality || '') === 'copy' && watermark) {
+  if (quality.isCopy(channel.quality) && watermark) {
     appendLog(channelId, '[warn] الشعار المائي المفعّل يمنع نسخ المصدر — ستُرمَّز القناة بـH.264');
   }
   // الإدخال الفعلي: المجموعة التي يفتحها الجهاز فعلاً (تُجرَّب قبل التشغيل عند وجود بدائل)
@@ -1022,6 +1030,8 @@ module.exports = {
   sourceVideoCodec,
   copySupported,
   streamCopyActive,
+  channelBitrate,
+  outputHeight,
   buildOutputArgs,
   on
 };
