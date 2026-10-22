@@ -146,44 +146,81 @@ test('قدرات فارغة لا تُعدّ قراءة ناجحة (يُعاد س
 });
 
 /*
- * الضبط التلقائي لأفضل إعدادات: نفس منطق النسخة الأصلية — الأقرب إلى 1280×720
- * (921600 بكسل) هو الأفضل، بشرط أن يدعم الوضع معدل الإطارات المطلوب أو أعلى.
+ * الضبط التلقائي لأفضل إعدادات: الأقرب إلى 1280×720 (921600 بكسل) هو الأفضل — نفس معادلة
+ * النسخة الأصلية — مع قيدين يمنعان الوعد بما لم يثبت فعلاً:
+ *   1) المعدل المعلن ليس دليلاً: قد تظهر 60fps في قائمة DirectShow ثم لا تثبت عند الالتقاط؛
+ *   2) الصيغة الخام تُنقل بكامل بكسلاتها (yuyv422 = 16 بت/بكسل) فتلتهم ناقل USB، وسقفها
+ *      محسوب من عرض النطاق، ولذلك يُقدَّم المضغوط (mjpeg) عليها عند تساوي الدقة.
+ * الأوضاع أدناه هي أوضاع بطاقة الالتقاط «USB Video» (534D:2109) كما تعلنها فعلاً.
  */
-const AUTO_OPTIONS = [
+const CARD_OPTIONS = [
   '[dshow @ 000001d8f2a0]  Pin "Capture" (1):',
-  '[dshow @ 000001d8f2a0]   pixel_format=bgr24  min s=640x480 fps=5 max s=640x480 fps=30',
-  '[dshow @ 000001d8f2a0]   pixel_format=yuyv422  min s=640x480 fps=30 max s=1280x720 fps=30',
-  '[dshow @ 000001d8f2a0]   vcodec=mjpeg  min s=1280x720 fps=30 max s=1920x1080 fps=60'
+  '[dshow @ 000001d8f2a0]   vcodec=mjpeg  min s=1920x1080 fps=10 max s=1920x1080 fps=60',
+  '[dshow @ 000001d8f2a0]   vcodec=mjpeg  min s=1280x720 fps=10 max s=1280x720 fps=60',
+  '[dshow @ 000001d8f2a0]   vcodec=mjpeg  min s=640x480 fps=10 max s=640x480 fps=60',
+  '[dshow @ 000001d8f2a0]   pixel_format=yuyv422  min s=1920x1080 fps=5 max s=1920x1080 fps=5',
+  '[dshow @ 000001d8f2a0]   pixel_format=yuyv422  min s=1280x720 fps=10 max s=1280x720 fps=10',
+  '[dshow @ 000001d8f2a0]   pixel_format=yuyv422  min s=640x480 fps=5 max s=640x480 fps=30'
 ].join('\n');
 
-function autoCaps() {
-  return devices.buildCaps(devices.parseDshowVideoOptions(AUTO_OPTIONS), []);
+function cardCaps() {
+  return devices.buildCaps(devices.parseDshowVideoOptions(CARD_OPTIONS), []);
 }
 
-test('الضبط التلقائي: يختار الأقرب إلى 1280×720 من الأوضاع المدعومة فعلاً', () => {
-  const rec = devices.recommendFromCaps(autoCaps(), 30);
+test('الضبط التلقائي: بطاقة USB Video تختار mjpeg بالدقة 1280×720 ومعدل 30fps', () => {
+  const rec = devices.recommendFromCaps(cardCaps(), 30);
   assert.strictEqual(rec.videoSize, '1280x720');
+  assert.strictEqual(rec.vcodec, 'mjpeg');
+  assert.strictEqual(rec.pixelFormat, '');
   assert.strictEqual(rec.fps, 30);
-  assert.strictEqual(rec.pixelFormat, 'yuyv422');
-  assert.strictEqual(rec.vcodec, '');
-  assert.deepStrictEqual(rec.detected.sizes, ['640x480', '1280x720', '1920x1080']);
-  assert.deepStrictEqual(rec.detected.pixelFormats, ['bgr24', 'yuyv422']);
+  assert.deepStrictEqual(rec.detected.sizes, ['1920x1080', '1280x720', '640x480']);
+  assert.deepStrictEqual(rec.detected.pixelFormats, ['yuyv422']); // mjpeg يظهر في المرمّزات
+  assert.deepStrictEqual(rec.detected.fps, [5, 10, 30, 60]);
   assert.deepStrictEqual(rec.detected.codecs, ['mjpeg']);
 });
 
-test('الضبط التلقائي: معدل أعلى يقيّد الاختيار على الأوضاع التي تدعمه', () => {
-  const rec = devices.recommendFromCaps(autoCaps(), 60);
-  assert.strictEqual(rec.vcodec, 'mjpeg');
-  assert.strictEqual(rec.pixelFormat, '');
-  assert.strictEqual(rec.videoSize, '1920x1080');
-  assert.strictEqual(rec.fps, 60);
+test('الضبط التلقائي: لا يُوصى بـyuyv422 لمعدل لا يحمله ناقل USB', () => {
+  const rawOnly = devices.buildCaps([{
+    pixelFormat: 'yuyv422',
+    vcodec: '',
+    sizes: [
+      { bound: 'min', width: 1280, height: 720, fps: 10 },
+      { bound: 'max', width: 1280, height: 720, fps: 30 }
+    ]
+  }], []);
+  const rec = devices.recommendFromCaps(rawOnly, 30);
+  assert.strictEqual(rec.pixelFormat, 'yuyv422');
+  assert.strictEqual(rec.videoSize, '1280x720');
+  assert.strictEqual(rec.fps, 10, '720p بلا ضغط لا يحمله الناقل بـ30fps فنبقى على المعلن');
 });
 
-test('الضبط التلقائي: بلا وضع يفي بالمعدل المطلوب يرجع لصيغة الجهاز ودقته الأعلى', () => {
-  const rec = devices.recommendFromCaps(autoCaps(), 120);
+test('الضبط التلقائي: عند تساوي الدقة يُقدَّم المضغوط على الخام', () => {
+  const caps = devices.buildCaps([
+    { pixelFormat: 'yuyv422', vcodec: '', sizes: [{ bound: 'max', width: 640, height: 480, fps: 30 }] },
+    { pixelFormat: '', vcodec: 'mjpeg', sizes: [{ bound: 'max', width: 640, height: 480, fps: 30 }] }
+  ], []);
+  const rec = devices.recommendFromCaps(caps, 30);
+  assert.strictEqual(rec.vcodec, 'mjpeg');
+  assert.strictEqual(rec.pixelFormat, '');
+});
+
+test('الضبط التلقائي: لا يُوصى بـ60fps لمجرد ظهوره في الأوضاع المعلنة', () => {
+  const rec = devices.recommendFromCaps(cardCaps(), 60);
+  assert.strictEqual(rec.fps, 30);
   assert.strictEqual(rec.vcodec, 'mjpeg');
   assert.strictEqual(rec.videoSize, '1280x720');
-  assert.strictEqual(rec.fps, 60);
+});
+
+test('الضبط التلقائي: بلا وضع يفي بالمعدل المطلوب يرجع لصيغة الجهاز ودقته المعلنة', () => {
+  const caps = devices.buildCaps([{
+    pixelFormat: '',
+    vcodec: 'mjpeg',
+    sizes: [{ bound: 'max', width: 1280, height: 720, fps: 10 }]
+  }], []);
+  const rec = devices.recommendFromCaps(caps, 30);
+  assert.strictEqual(rec.vcodec, 'mjpeg');
+  assert.strictEqual(rec.videoSize, '1280x720');
+  assert.strictEqual(rec.fps, 10);
 });
 
 test('الضبط التلقائي: جهاز بلا مرمّز يختار yuyv422 ودقته المعلنة', () => {

@@ -236,6 +236,43 @@ function buildCaps(videoFormats, audioOptions) {
 const TARGET_PIXELS = 921600;
 const MIN_PIXELS = 307200;
 
+/**
+ * سقف معدل الإطارات الذي نثق به بلا اختبار فعلي: DirectShow يعلن ما يستطيعه الجهاز
+ * نظرياً، وقد يظهر 60fps في قائمة الأوضاع ثم لا يثبت عند الالتقاط، فلا يُعامل المعدل
+ * المعلن وحده كدليل ولا تُصدر توصية بأعلى منه.
+ */
+const TRUSTED_FPS_MAX = 30;
+
+/**
+ * الصيغة الخام تُنقل بكامل بكسلاتها (yuyv422 = 16 بت/بكسل) فتلتهم ناقل USB سريعاً،
+ * بخلاف المرمّزات المضغوطة (mjpeg/h264) التي تصل مرمّزة. لذلك نحسب للخام سقفاً من
+ * ميزانية الحافلة (≈30 م.ب/ث عملياً على USB 2.0) بدل الوثوق بالمعدل الأعلى المعلن.
+ */
+const COMPRESSED_CODECS = ['mjpeg', 'mjpg', 'h264', 'hevc', 'h265'];
+const RAW_BYTES_PER_PIXEL = 2;
+const RAW_BYTES_PER_SEC = 30 * 1024 * 1024;
+
+/** هل الوضع مرمّز مضغوط (mjpeg/h264…) لا صيغة خام؟ */
+function isCompressedMode(mode) {
+  const name = String((mode && (mode.vcodec || mode.pixelFormat)) || '').toLowerCase();
+  return COMPRESSED_CODECS.includes(name);
+}
+
+/** سقف ناقل USB لوضع خام بهذه الدقة (عدد الإطارات التي تحملها الحافلة بلا ضغط). */
+function rawFpsCeiling(width, height) {
+  const px = (Number(width) || 0) * (Number(height) || 0);
+  return px > 0 ? Math.floor(RAW_BYTES_PER_SEC / (px * RAW_BYTES_PER_PIXEL)) : TRUSTED_FPS_MAX;
+}
+
+/** أقصى معدل إطارات نثق به لوضع: المعلن، مقصوصاً بسقف الناقل للخام وبسقف التحقق العام. */
+function trustedFpsMax(mode) {
+  const max = Number(mode && mode.fpsMax) || 0;
+  const limit = (mode && !isCompressedMode(mode))
+    ? rawFpsCeiling(mode.width, mode.height)
+    : TRUSTED_FPS_MAX;
+  return Math.min(max, limit);
+}
+
 /** الصيغ الخام (`pixel_format=`) والمرمّزات (`vcodec=`) المكتشفة في أوضاع الجهاز. */
 function capsFormats(caps) {
   const modes = (caps && caps.modes) || [];
@@ -259,17 +296,25 @@ function modeScore(mode) {
 
 /**
  * أفضل إعدادات لهذا الجهاز من قدراته المقروءة فعلاً (منطق النسخة الأصلية):
- * نرشّح الأوضاع التي يبلغ معدل إطاراتها الأقصى ≥ المطلوب، ثم نأخذ أعلاها تقييماً.
- * بلا مرشّح نرجع إلى صيغة الجهاز ودقته ومعدله الأعلى المعلن.
+ * نرشّح الأوضاع التي يبلغ معدلها **الموثوق** المطلوب (لا المعلن فقط: 60fps المعلن ليس
+ * دليلاً، والصيغة الخام لا يحملها الناقل بمعدل مرتفع)، ثم نرتّبها: الأقرب إلى 1280×720
+ * أولاً، ثم المضغوط قبل الخام عند تساوي الدقة، ثم الأعلى معدلاً.
+ * بلا مرشّح نرجع إلى صيغة الجهاز ودقته ومعدله المعلن — وبالسقوف نفسها.
  */
 function recommendFromCaps(caps, wantFps) {
-  const fps = Number(wantFps) || 30;
+  const fps = Math.min(Math.max(Number(wantFps) || 30, 1), TRUSTED_FPS_MAX);
   const { pixelFormats, codecs } = capsFormats(caps);
   const sizes = (caps && caps.resolutions) || [];
   const fpsList = (caps && caps.fps) || [];
   const best = ((caps && caps.modes) || [])
-    .filter((m) => (m.fpsMax || 0) >= fps)
-    .sort((a, b) => modeScore(b) - modeScore(a))[0];
+    .filter((m) => trustedFpsMax(m) >= fps)
+    .sort((a, b) => {
+      const byDensity = modeScore(b) - modeScore(a);
+      if (byDensity) return byDensity;
+      const byCompression = Number(isCompressedMode(b)) - Number(isCompressedMode(a));
+      if (byCompression) return byCompression;
+      return (b.fpsMax || 0) - (a.fpsMax || 0);
+    })[0];
 
   let pixelFormat = '';
   let vcodec = '';
@@ -280,12 +325,18 @@ function recommendFromCaps(caps, wantFps) {
     pixelFormat = best.pixelFormat || '';
     vcodec = best.vcodec || '';
     videoSize = best.width + 'x' + best.height;
-    outFps = Math.min(fps, best.fpsMax || fps) || fps;
+    outFps = Math.min(fps, trustedFpsMax(best)) || fps;
   } else {
     if (codecs.includes('mjpeg')) vcodec = 'mjpeg';
     else if (pixelFormats.includes('yuyv422')) pixelFormat = 'yuyv422';
     videoSize = sizes.includes('1280x720') ? '1280x720' : (sizes[sizes.length - 1] || '1280x720');
-    outFps = fpsList.includes(fps) ? fps : (fpsList[fpsList.length - 1] || fps);
+    const [w, h] = String(videoSize).split('x').map(Number);
+    // نفس السقوف هنا: لا نفرض معدلاً ثقيلاً لم يثبت، ولا نختلق معدلاً لم يعلنه الجهاز.
+    const cap = (pixelFormat || vcodec)
+      ? trustedFpsMax({ width: w, height: h, pixelFormat, vcodec, fpsMax: Infinity })
+      : TRUSTED_FPS_MAX;
+    const fits = fpsList.filter((f) => f <= cap);
+    outFps = fits.length ? Math.max(...fits) : Math.min(fps, cap);
   }
 
   return {
@@ -732,5 +783,7 @@ module.exports = {
   buildCaps,
   capsFormats,
   modeScore,
+  isCompressedMode,
+  trustedFpsMax,
   recommendFromCaps
 };
