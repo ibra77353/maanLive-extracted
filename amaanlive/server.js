@@ -4,7 +4,7 @@
  *
  * الترتيب: قفل النسخة الواحدة → تحميل الإعدادات → مراقبة الأجهزة → تركيب المسارات
  * (لوحة التحكم، الموارد، المرفوعات، صفحة المشاهدين، HLS، API) → تشغيل Nginx →
- * طابور القنوات + حلقات الخمول والجدولة → الاستماع على 0.0.0.0.
+ * طابور القنوات + حلقات الخمول والجدولة ومراقبة عمليات ffmpeg → الاستماع على 0.0.0.0.
  *
  * بلا إنترنت وبلا تراخيص: Nginx و FFmpeg المرفقان مع المشروع فقط.
  */
@@ -23,6 +23,7 @@ const nginx = require('./src/nginx');
 const routes = require('./src/routes');
 const idle = require('./src/idle');
 const scheduler = require('./src/scheduler');
+const monitor = require('./src/monitor');
 const shutdown = require('./src/shutdown');
 const lock = require('./src/lock');
 
@@ -187,9 +188,10 @@ async function boot() {
   await ffmpeg.killStaleProcesses();
   ffmpeg.startupQueue().catch((e) => console.error('[ffmpeg] الطابور: ' + e.message));
 
-  // 3) حلقات الخمول والجدولة
+  // 3) حلقات الخمول والجدولة، والمراقبة الدورية لعمليات ffmpeg (تعطّل/تجمّد)
   idle.startLoop();
   scheduler.startLoop();
+  monitor.startLoop();
 
   // 4) خطوات الإيقاف المنظّم
   shutdown.register('إيقاف القنوات', () => ffmpeg.stopAll('shutdown'));

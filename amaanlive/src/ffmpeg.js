@@ -607,6 +607,96 @@ function statusOf(id) {
   };
 }
 
+/** هل العملية المسجّلة ما زالت حيّة في النظام؟ شبكة أمان إن لم يصل حدث إغلاق العملية. */
+function pidAlive(pid) {
+  if (!pid) return false;
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (e) {
+    return e.code === 'EPERM'; // موجودة لكن بلا صلاحية إرسال إشارة
+  }
+}
+
+/** عمر آخر تحديث لقائمة التشغيل index.m3u8 بالملّي ثانية (null إن لم تُكتب بعد). */
+function playlistAgeMs(id) {
+  try {
+    return Date.now() - fs.statSync(path.join(channelDir(id), 'index.m3u8')).mtimeMs;
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * قراءة حالة قناة للفحص الدوري — لا تغيّر أي شيء.
+ * `playlistAgeMs === null` تعني أن ffmpeg لم تُنتج قائمة تشغيل بعد.
+ */
+function health(id) {
+  const s = runtime.get(id);
+  const channel = store.findChannel(id);
+  if (!s || !channel) return null;
+  return {
+    id,
+    name: channel.name,
+    state: s.state,
+    hasChild: Boolean(s.child),
+    pid: s.pid || null,
+    pidAlive: pidAlive(s.pid),
+    pendingRestart: Boolean(s.timer),
+    uptimeMs: s.runStartedAt && s.child ? Date.now() - s.runStartedAt : 0,
+    playlistAgeMs: playlistAgeMs(id),
+    restarts: s.restarts
+  };
+}
+
+/**
+ * إعادة تشغيل قناة بعد تعطّل أو تجمّد، مع احترام الإعداد «إعادة تشغيل القناة تلقائياً
+ * عند التعطل» وحدّ المحاولات (maxRestarts). تُستدعى من المراقب الدوري (monitor.js)
+ * للحالات التي لا يبلغ عنها حدث إغلاق العملية: عملية مفقودة، أو عملية متجمّدة.
+ * تعيد true إن جُدولت إعادة التشغيل.
+ */
+async function revive(channelId, reason) {
+  const s = runtime.get(channelId);
+  const channel = store.findChannel(channelId);
+  if (!s || !channel) return false;
+  if (!channel.enabled || channel.manualStopped) return false;
+  if (s.timer || s.stopping) return false; // إعادة تشغيل مجدولة بالفعل
+
+  const settings = store.get().settings;
+  const maxRestarts = Number(settings.maxRestarts) || 20;
+  if (settings.autoRestartCrashed === false || s.restarts >= maxRestarts) {
+    s.state = 'error';
+    s.lastError = reason + (s.restarts >= maxRestarts ? ' — بلغنا حدّ محاولات الإعادة (' + maxRestarts + ')' : '');
+    appendLog(channelId, '[high] ' + s.lastError);
+    console.error('[monitor] «' + channel.name + '» توقّفت نهائياً: ' + s.lastError);
+    emit('channel', { id: channelId, state: 'error' });
+    return false;
+  }
+
+  if (s.child) await stop(channelId, 'revive'); // نتخلّص من العملية المتجمّدة أولاً
+
+  s.restarts += 1;
+  s.state = 'restarting';
+  s.lastError = reason;
+  const backoff = Math.max(1000, Number(settings.restartBackoffMs) || 5000);
+  appendLog(channelId, '[restart] إعادة تشغيل تلقائية رقم ' + s.restarts + ' (' + reason + ') بعد ' + backoff + 'ms');
+  console.log('[monitor] إعادة تشغيل «' + channel.name + '» (' + reason + ') بعد ' + backoff + 'ms');
+  emit('channel', { id: channelId, state: 'restarting' });
+
+  if (s.timer) clearTimeout(s.timer);
+  s.timer = setTimeout(() => {
+    s.timer = null;
+    start(channelId, { restart: true }).catch((e) => {
+      s.state = 'error';
+      s.lastError = e.message;
+      appendLog(channelId, '[high] فشل إعادة التشغيل: ' + e.message);
+      emit('channel', { id: channelId, state: 'error' });
+    });
+  }, backoff);
+  s.timer.unref && s.timer.unref();
+  return true;
+}
+
 function statusAll() {
   return store.get().channels.map((c) => statusOf(c.id));
 }
@@ -720,6 +810,8 @@ module.exports = {
   isRunning,
   statusOf,
   statusAll,
+  health,
+  revive,
   runningCount,
   readLog,
   clearLog,
