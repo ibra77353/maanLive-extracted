@@ -28,6 +28,9 @@ docker run --rm node:18.5.0 node -e 'const vm=require("vm");const c=new vm.Scrip
 |---|---|
 | `pipeline.sh` | end-to-end rebuild of `decompiled/` (disassemble → View8 → resolve strings → headers) |
 | `resolve_strings.py` | resolves the obfuscated base64 string array (accessor offset + rotation + alphabet) in View8 output |
+| `emit_source.py` | lowers a resolved register listing into candidate JavaScript under `recovered/`, with literal verification |
+| `normalize_listing.py` | literal-aware scanning and structural repairs for extended conditions and malformed catch blocks |
+| `test_emit_source.py` | regression fixtures for the five emitter defects and a temporary-output syntax audit of all 18 modules |
 | `load_bytecode.js` | runs the original caches as CommonJS modules under Node 18.5.0 (ground truth for verification) |
 
 ## Manual pipeline
@@ -62,6 +65,50 @@ docker run --rm node:18.5.0 node -e 'const vm=require("vm");const c=new vm.Scrip
    ```sh
    docker run --rm -v "$PWD":/work -w /work node:18.5.0 node tools/decompile/load_bytecode.js src/auth.js
    ```
+
+## Lowering into the original module layout
+
+With Python 3.10+ and Node available, emit a module without replacing its original binary:
+
+```sh
+mkdir -p recovered/src
+python3 tools/decompile/emit_source.py --ir decompiled/server.js --binary server.js \
+  --out recovered/server.js
+node --check recovered/server.js
+```
+
+For each `src/NAME.js`, use `--ir decompiled/src/NAME.js --binary src/NAME.js
+--out recovered/src/NAME.js`. The emitter still reads the corresponding committed disassembler dump
+and reports verified/unverified literal counts; structural repairs do not bypass that verifier.
+
+The five targeted repairs are:
+
+1. Join extended `if` headers and keep intervening register assignments inside the appropriate
+   short-circuit operand, rather than eagerly evaluating them before the condition.
+2. Put iterator-cleanup catches after their try's closing brace; restore the missing `try` for
+   recognized context blocks followed by a catch. Reject unsupported catch layouts.
+3. Emit `async function NAME`, and detect `await` in code rather than in string contents.
+4. Identify the CommonJS wrapper from the outer script's assignment/return pair, including
+   `server.js`, which has no exports assignment. Ambiguous wrappers are rejected.
+5. Scan backslash-delimited RegExp sources before interpreting quotes inside them, and emit
+   `new RegExp(sourceString)` so JavaScript decodes escapes once. Literal braces do not affect
+   function splitting, and literal text is not renamed as if it were code.
+
+Run the focused regression checks and the 18-module syntax audit:
+
+```sh
+python3 -m unittest discover -s tools/decompile -p 'test_emit_source.py' -v
+```
+
+The audit generates files only in a temporary directory, calls `node --check` on each one, and
+removes them afterwards. Only synthetic fixtures are executed in the behavioural tests, never
+recovered application modules. A passing syntax check is **not** proof of runtime equivalence.
+Node-dependent tests are marked skipped if Node is unavailable; that is not a successful audit.
+
+**Verification status for these changes:** the tests have been added but have not been run in the
+current session, and the existing `recovered/` files have not been regenerated. RegExp flags,
+flattened exception handlers and V8 context lifetimes still require bytecode-level verification.
+The original `server.js`, `src/` binaries and `decompiled/` listings are left untouched.
 
 ## Caveats
 

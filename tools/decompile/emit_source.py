@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
-"""Lower the View8 register listing (`decompiled/`) into valid, readable JavaScript (`recovered/`).
+"""Lower the View8 register listing (`decompiled/`) into candidate JavaScript (`recovered/`).
 
-`decompiled/*.js` is a faithful but register-level listing: three-address statements over `rN`/`ACCU`
-registers, V8 context slots (`Scope[n][m]`) and View8's own notations for literals and operators. This
-script lowers that representation into ordinary JavaScript in the application's original file layout, so
-the recovered modules are readable, parseable modules that keep the original structure:
+`decompiled/*.js` is a register-level listing: three-address statements over `rN`/`ACCU` registers,
+V8 context slots (`Scope[n][m]`) and View8's own notations for literals and operators. This script
+lowers that representation into JavaScript in the application's original file layout. Syntax checks
+and independent behavioural checks are still required; lowering alone does not prove equivalence:
 
   register-level listing                  recovered JavaScript
   -------------------------------------   -------------------------------------------------------
   `r5 = Scope[1][3]("./src/store")`       `r5 = s1_3("./src/store")`  (a file-level slot variable)
   `ACCU = r7(r9)`                         `accu = r7(r9)`
   `a1("crypto")` in the module wrapper     `require("crypto")`
-  `a2[r4] = r5` with `r4 = "exports"`      `module.exports = r5` (the `["key"]` → `.key` rewrite)
+  `a2[r4] = r5` with `r4 = "exports"`      `module[r4] = r5` (the wrapper's module parameter)
   `(-parseInt(r5)) \\ 1`                   `(-parseInt(r5)) / 1`  (View8 prints the `DivSmi` opcode as `\\`)
   `new {"login": null}`                   `{"login": null}`
-  `\\^https?:\\\\/\\\\/\\`                 `/^https?:\\/\\//`  (a RegExp literal)
+  a backslash-delimited RegExp source    `new RegExp("...")` (a verified source string)
   `<closure>` / `<this>`                  `__closure` / `this`
   a function body containing `await`      `async function`
 
@@ -42,11 +42,11 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import resolve_strings  # noqa: E402  (the string-array decoder, used to verify recovered literals)
+from normalize_listing import code_only, mask_literals, normalize_body, restore_literals  # noqa: E402
 
 REGISTER = re.compile(r"\br\d+\b")
 SCOPE_SLOT = re.compile(r"Scope\[(\d+)\]\[(\d+)\]")
 SCOPE_PUSH = re.compile(r"Scope\[(\d+)\](?!\[)")
-IDENT_KEY = re.compile(r'\["([A-Za-z_$][A-Za-z0-9_$]*)"\]')
 MODULE_EXPORT = re.compile(r"^\s*a2(\[|\.)")
 COMMONJS_NAMES = ["exports", "require", "module", "__filename", "__dirname"]
 
@@ -55,9 +55,9 @@ HEADER = """\
 //
 // Lowered from the View8 register listing of the V8 code cache in the repository root (%d source
 // characters; Node 18.5.0 / V8 10.2.154.4-node.8) by tools/decompile/emit_source.py, after
-// tools/decompile/resolve_strings.py restored the obfuscated string array. The module is a faithful
-// reconstruction of the original control flow and data flow; see DECOMPILATION.md for the analysis and
-// its limitations.
+// tools/decompile/resolve_strings.py restored the obfuscated string array. This is a syntactic
+// reconstruction of View8's listing, not a proof of equivalence to the binary. Context lifetimes and
+// exception semantics still need verification; see tools/decompile/README.md and DECOMPILATION.md.
 //
 // How to read it:
 //   rN        a bytecode register (a local of the enclosing function)
@@ -66,7 +66,7 @@ HEADER = """\
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   /.../     a RegExp literal (the code cache does not record its flags)
+//   RegExp    a recovered source string (flags are not recovered by this emitter)
 """
 
 
@@ -199,105 +199,108 @@ def quote(value: str) -> str:
 # ------------------------------------------------------------------------------------ line lowering
 
 def protect(line: str, verify, stats: dict) -> str:
-    """Decode and mask the literals of one line, then apply the structural rewrites."""
-    values: list[str] = []
-    kinds: list[str] = []
-    out: list[str] = []
-    i = 0
-    size = len(line)
-    while i < size:
-        char = line[i]
-        if char == '"':
-            j = i + 1
-            while j < size:
-                if line[j] == "\\":
-                    j += 2
-                    continue
-                if line[j] == '"':
-                    break
-                j += 1
-            value, how = decode_string(line[i:j + 1], verify)
-            stats["strings"] += 1
-            stats["string_readings"][how] = stats["string_readings"].get(how, 0) + 1
-            if how == "unverified":
-                stats["unverified"].append(value[:80])
-            values.append(quote(value))
-            kinds.append("string")
-            out.append("\x00%d\x00" % (len(values) - 1))
-            i = j + 1
-            continue
-        out.append(char)
-        i += 1
-    masked = "".join(out)
-
-    # A RegExp literal is printed as `\source\`. After masking the strings, the only backslashes that
-    # are not View8's ` \ ` integer division belong to it, and View8 puts such a literal last on its line.
-    divisions = {k for k in range(len(masked))
-                 if masked[k] == "\\" and masked[k - 1:k] == " " and masked[k + 1:k + 2] == " "}
-    other = [k for k in range(len(masked)) if masked[k] == "\\" and k not in divisions]
-    if other:
-        stripped = masked.rstrip()
-        if not stripped.endswith("\\") or other[0] >= len(stripped):
-            raise SystemExit("unexpected RegExp literal layout: %r" % line)
-        value, how = decode_regex(masked[other[0] + 1:len(stripped) - 1], verify)
-        stats["regexes"] += 1
-        stats["regex_readings"][how] = stats["regex_readings"].get(how, 0) + 1
+    """Lower code without ever interpreting RegExp quotes as string delimiters."""
+    masked, literals = mask_literals(line)
+    decoded: list[tuple[str, str]] = []
+    for kind, raw in literals:
+        if kind == "regex":
+            value, how = decode_regex(raw[1:-1], verify)
+            counter, readings = "regexes", "regex_readings"
+            # A JSON-escaped *string* is not a RegExp-literal body. Use a constructor so quotes,
+            # slashes, newlines, and backslashes survive exactly one JavaScript decoding step.
+            rendered = "new RegExp(%s)" % quote(value)
+        else:
+            value, how = decode_string(raw, verify)
+            counter, readings = "strings", "string_readings"
+            rendered = quote(value)
+        stats[counter] += 1
+        stats[readings][how] = stats[readings].get(how, 0) + 1
         if how == "unverified":
             stats["unverified"].append(value[:80])
-        values.append(quote(value))
-        kinds.append("regex")
-        masked = masked[:other[0]] + ("\x00%d\x00" % (len(values) - 1)) + masked[len(stripped):]
+        decoded.append((kind, rendered))
 
     masked = masked.replace(" \\ ", " / ")                      # integer division
     masked = masked.replace("new {", "{").replace("new [", "[")  # literal constructors
     masked = masked.replace("switch ()", "switch (void 0)")
-    masked = IDENT_KEY.sub(lambda m: "." + m.group(1), masked)   # obj["key"] → obj.key
     masked = SCOPE_SLOT.sub(lambda m: "s%s_%s" % m.groups(), masked)
     masked = SCOPE_PUSH.sub(lambda m: "ctx%s" % m.group(1), masked)
     masked = re.sub(r"\bACCU\b", "accu", masked)
     masked = masked.replace("<closure>", "__closure").replace("<this>", "this")
-
-    def restore(match: re.Match) -> str:
-        index = int(match.group(1))
-        return "/%s/" % values[index][1:-1] if kinds[index] == "regex" else values[index]
-
-    return re.sub("\x00(\\d+)\x00", restore, masked)
+    return restore_literals(masked, decoded)
 
 
 # -------------------------------------------------------------------------------------- module file
 
 def split_functions(lines: list[str]) -> list[dict]:
-    """Split the listing into its functions; View8 emits every one of them at the top level."""
+    """Split top-level functions, ignoring braces and quotes inside either kind of literal."""
     funcs: list[dict] = []
     current: dict | None = None
     depth = 0
+    opened = False
     for line in lines:
         if current is None:
-            match = re.match(r"function (func_\S+?)\(([^)]*)\)\s*$", line)
+            match = re.fullmatch(r"function (func_\S+?)\(([^)]*)\)\s*", line)
             if match:
                 current = {"name": match.group(1),
                            "params": [p.strip() for p in match.group(2).split(",") if p.strip()],
                            "body": []}
-                depth = 0
-                continue
-            if line.strip():
-                raise SystemExit("unexpected content outside a function: %r" % line)
+                depth, opened = 0, False
+            elif line.strip():
+                raise ValueError("unexpected content outside a function: %r" % line)
             continue
-        if not current["body"] and line == "{":
+        if not opened:
+            if not line.strip():
+                continue
+            if line != "{":
+                raise ValueError("expected function opening brace: %r" % line)
+            opened = True
             continue
         current["body"].append(line)
-        masked = re.sub(r'"(?:[^"\\]|\\.)*"', '""', line)
-        if masked.strip() == "}" and depth == 0:          # the function's own closing brace
+        masked = code_only(line)
+        if masked.strip() == "}" and depth == 0:
             funcs.append(current)
             current = None
             continue
         depth += masked.count("{") - masked.count("}")
+        if depth < 0:
+            raise ValueError("unbalanced function block: %r" % line)
+    if current is not None:
+        raise ValueError("unclosed function: %s" % current["name"])
     return funcs
 
 
+def find_module_wrapper(funcs: list[dict]) -> tuple[dict, dict | None]:
+    """Prefer the wrapper returned by the code cache's outer script, including entry-only modules.
+
+    server.js has no module.exports assignment. An exports-only heuristic cannot identify it.
+    Require the five CommonJS parameters and an exact assignment/return register pair; never
+    guess from the presence of a2 inside an unrelated function.
+    """
+    by_name = {func["name"]: func for func in funcs}
+    candidates: list[tuple[dict, dict | None]] = []
+    commonjs_params = ["a%d" % index for index in range(len(COMMONJS_NAMES))]
+    for func in funcs:
+        body = [code_only(line).strip() for line in func["body"][:-1] if line.strip()]
+        if func["params"] or len(body) != 2:
+            continue
+        assignment = re.fullmatch(r"(r\d+) = (func_\S+)", body[0])
+        if not assignment or body[1] != "return " + assignment.group(1):
+            continue
+        target = by_name.get(assignment.group(2))
+        if target is not None and target["params"] == commonjs_params:
+            candidates.append((target, func))
+    if not candidates:
+        candidates = [(func, None) for func in funcs if func["params"] == commonjs_params
+                      and any(MODULE_EXPORT.match(code_only(line)) for line in func["body"])]
+    if len(candidates) != 1:
+        raise ValueError("expected one CommonJS module wrapper, found %d" % len(candidates))
+    return candidates[0]
+
+
 def declares_registers(body: list[str]) -> list[str]:
-    names = sorted(set(REGISTER.findall("\n".join(body))), key=lambda name: int(name[1:]))
-    if re.search(r"\baccu\b", "\n".join(body)):
+    code = "\n".join(code_only(line) for line in body)
+    names = sorted(set(REGISTER.findall(code)), key=lambda name: int(name[1:]))
+    if re.search(r"\baccu\b", code):
         names.append("accu")
     return names
 
@@ -323,35 +326,33 @@ def emit(ir_path: str, binary_path: str, out_path: str, listing_path: str | None
 
     verify = make_verifier(binary, disassembly)
     funcs = split_functions(lines)
-    module_func = next((f for f in funcs if any(MODULE_EXPORT.match(line) for line in f["body"])), None)
-    if module_func is None:
-        raise SystemExit("no CommonJS module wrapper found in %s" % ir_path)
-    outer = next((f for f in funcs if not f["params"] and len(f["body"]) == 3
-                  and re.match(r"\tr\d+ = %s$" % re.escape(module_func["name"]), f["body"][0])
-                  and re.match(r"\treturn r\d+$", f["body"][1])), None)
+    module_func, outer = find_module_wrapper(funcs)
 
     # Context slots and pushes are file-level variables: they are the module's shared V8 contexts.
     slots: set[tuple[str, str]] = set()
     contexts: set[str] = set()
     for func in funcs:
-        every = "\n".join(func["body"])
+        every = "\n".join(code_only(line) for line in func["body"])
         slots |= set(SCOPE_SLOT.findall(every))
         contexts |= set(SCOPE_PUSH.findall(every))
 
     lowered: list[dict] = []
     for func in funcs:
         body = func["body"][:-1] if func["body"] else []          # drop the closing `}`
+        body = normalize_body([protect(line, verify, stats) for line in body])
         entry = {"name": func["name"], "params": func["params"], "outer": func is outer,
-                 "async": bool(re.search(r"\bawait\b", "\n".join(body))),
-                 "module": func is module_func,
-                 "body": [protect(line, verify, stats) for line in body]}
+                 "async": bool(re.search(r"\bawait\b", "\n".join(code_only(line) for line in body))),
+                 "module": func is module_func, "body": body}
         if entry["module"]:
-            # The wrapper's parameters are the CommonJS ones; name the body's references accordingly.
+            if entry["async"]:
+                raise ValueError("unexpected await in synchronous CommonJS module wrapper")
+            # Rename code tokens only. A literal containing "a1" is data, not a require reference.
             renamed: list[str] = []
             for line in entry["body"]:
+                masked, literals = mask_literals(line)
                 for index, name in enumerate(COMMONJS_NAMES):
-                    line = re.sub(r"\ba%d\b" % index, name, line)
-                renamed.append(line)
+                    masked = re.sub(r"\ba%d\b" % index, name, masked)
+                renamed.append(restore_literals(masked, literals))
             entry["body"] = renamed
         lowered.append(entry)
 
@@ -376,8 +377,8 @@ def emit(ir_path: str, binary_path: str, out_path: str, listing_path: str | None
             out.append("")
             continue
         registers = declares_registers(entry["body"])
-        out.append("function %s%s(%s)" % ("async " if entry["async"] else "", entry["name"],
-                                          ", ".join(entry["params"])))
+        out.append("%sfunction %s(%s)" % ("async " if entry["async"] else "", entry["name"],
+                                         ", ".join(entry["params"])))
         out.append("{")
         if registers:
             out.append("\tlet %s;" % ", ".join(registers))
