@@ -426,6 +426,24 @@ $('#channelsTable').addEventListener('click', async (e) => {
   return undefined;
 });
 
+/** جهاز المصدر المختار في نافذة القناة: اسم مقروء دائماً، والمعرّف الخام مخفي خلف زر الإظهار. */
+function channelSourceDevice() {
+  const box = $('#ch_sourceDev');
+  const s = DATA.sources.find((x) => x.id === $('#ch_sourceId').value);
+  if (!s) { box.innerHTML = ''; return; }
+  const v = s.videoDevice;
+  const a = s.audioDevice;
+  const raw = [];
+  if (v) raw.push(rawDeviceId(v, 'video'));
+  if (a) raw.push(rawDeviceId(a, 'audio'));
+  box.innerHTML = 'الجهاز: ' + esc(v ? deviceLabel(v, s.videoDeviceLabel) : 'الشاشة') +
+    (a ? ' · ' + esc(deviceLabel(a, s.audioDeviceLabel)) : '') +
+    (raw.length
+      ? '<button class="link-btn" data-devid aria-expanded="false">إظهار المعرّف</button>' +
+        '<div class="dev-id hidden">' + raw.map(esc).join('<br>') + '</div>'
+      : '');
+}
+
 function openChannelModal(id) {
   editingChannelId = id || null;
   const ch = id ? DATA.channels.find((c) => c.id === id) : null;
@@ -446,14 +464,22 @@ function openChannelModal(id) {
     '<label><input type="checkbox" data-day="' + i + '"' + ((sched.days || []).includes(i) ? ' checked' : '') + '>' + d + '</label>').join('');
 
   $('#ch_sourceId').innerHTML = DATA.sources.length
-    ? DATA.sources.map((s) => '<option value="' + s.id + '">' + esc(s.name) + ' (' + esc(s.videoDevice || 'الشاشة') + ')</option>').join('')
+    ? DATA.sources.map((s) => '<option value="' + s.id + '">' + esc(s.name) + ' (' +
+        esc(s.videoDevice ? deviceLabel(s.videoDevice, s.videoDeviceLabel) : 'الشاشة') + ')</option>').join('')
     : '<option value="">— لا مصادر، أضف مصدراً أولاً —</option>';
   if (ch) $('#ch_sourceId').value = ch.sourceId;
+  channelSourceDevice();
 
   $('#channelModal').classList.remove('hidden');
 }
 
 $('#addChannelBtn').addEventListener('click', () => openChannelModal(null));
+$('#ch_sourceId').addEventListener('change', channelSourceDevice);
+// زر إظهار/إخفاء معرّف جهاز المصدر داخل نافذة القناة
+$('#channelModal').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-devid]');
+  if (btn) toggleDeviceId(btn);
+});
 
 $('#channelSave').addEventListener('click', async () => {
   const days = $$('#ch_days input[data-day]').filter((i) => i.checked).map((i) => Number(i.dataset.day));
