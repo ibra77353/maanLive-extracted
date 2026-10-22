@@ -372,8 +372,12 @@
 
       <div id="src_busWrap">
         <label>جهاز الفيديو<select class="input" id="src_videoDevice"></select></label>
+        <button class="link-btn" id="src_videoIdToggle" data-devid aria-expanded="false">إظهار المعرّف</button>
+        <div class="dev-id hidden" id="src_videoId"></div>
         <div class="caps-list" id="src_videoCaps"></div>
         <label style="margin-top:12px">جهاز الصوت (اختياري)<select class="input" id="src_audioDevice"></select></label>
+        <button class="link-btn" id="src_audioIdToggle" data-devid aria-expanded="false">إظهار المعرّف</button>
+        <div class="dev-id hidden" id="src_audioId"></div>
         <div class="grid-2" style="margin-top:10px">
           <label>الدقة<select class="input" id="src_videoSize"></select></label>
           <label>معدل الإطارات<select class="input" id="src_fps"></select></label>

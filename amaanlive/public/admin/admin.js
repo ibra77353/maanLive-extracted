@@ -505,6 +505,47 @@ async function loadDevices(force) {
   renderDevices();
 }
 
+/** هل القيمة المحفوظة معرّف جهاز خام (moniker) لا اسم مقروء؟ */
+function isRawDeviceId(v) {
+  return /^@device_/i.test(String(v || ''));
+}
+
+/** اسم مقروء للجهاز: القيمة إن لم تكن معرّفاً خاماً، وإلا التسمية المحفوظة أو نص مختصر. */
+function deviceLabel(v, savedLabel) {
+  return isRawDeviceId(v) ? (savedLabel || 'جهاز محفوظ') : v;
+}
+
+/** نص خيار جهاز محفوظ غير مكتشف الآن (بلا معرّف خام ظاهر). */
+function savedDeviceText(v, savedLabel) {
+  const raw = isRawDeviceId(v);
+  const name = raw ? (savedLabel || 'جهاز محفوظ') : v;
+  return name + (raw && !savedLabel ? ' (غير مكتشف الآن)' : ' (محفوظ — غير مكتشف الآن)');
+}
+
+/** المعرّف الخام للجهاز: الاسم البديل/المفتاح لجهاز مكتشف، وإلا القيمة المحفوظة. */
+function rawDeviceId(v, kind) {
+  const dev = (DATA.devices.devices || []).find((d) => d.kind === kind && d.name === v);
+  return dev ? (dev.altName || dev.key) : v;
+}
+
+/** سطر معرّف الجهاز أسفل قائمتي الأجهزة في نافذة المصدر (مخفي حتى يُطلب). */
+function refreshSourceDeviceIds() {
+  const pair = [
+    ['#src_videoIdToggle', '#src_videoId', $('#src_videoDevice').value, 'video'],
+    ['#src_audioIdToggle', '#src_audioId', $('#src_audioDevice').value, 'audio']
+  ];
+  for (const [btnSel, boxSel, value, kind] of pair) {
+    const btn = $(btnSel);
+    const box = $(boxSel);
+    const raw = value ? rawDeviceId(value, kind) : '';
+    btn.classList.toggle('hidden', !raw);
+    box.classList.add('hidden');
+    box.textContent = raw;
+    btn.textContent = 'إظهار المعرّف';
+    btn.setAttribute('aria-expanded', 'false');
+  }
+}
+
 /** المصادر المحفوظة التي تستعمل هذا الجهاز فعلاً. */
 function deviceUsers(d) {
   return (DATA.sources || []).filter((s) =>
@@ -542,10 +583,10 @@ function deviceRow(d) {
     '</div>';
 }
 
-/** إخفاء/إظهار معرّف الجهاز الخام داخل بطاقة الجهاز. */
+/** إخفاء/إظهار معرّف الجهاز الخام (سطر المعرّف يلي الزر مباشرةً في البطاقة والنافذة). */
 function toggleDeviceId(btn) {
-  const block = btn.parentElement.querySelector('.dev-id');
-  if (!block) return;
+  const block = btn.nextElementSibling;
+  if (!block || !block.classList.contains('dev-id')) return;
   const show = block.classList.contains('hidden');
   block.classList.toggle('hidden', !show);
   btn.textContent = show ? 'إخفاء المعرّف' : 'إظهار المعرّف';
@@ -696,6 +737,7 @@ function onVideoDeviceChange() {
       (caps.pixelFormats || []).length + '</b> صيغة · <b>' + modes.length + '</b> وضع (' + 
       (caps.fps || []).length + ' معدل إطارات).'
     : 'لم تُقرأ قدرات لهذا الجهاز — سيعمل الالتقاط بالإعدادات التلقائية.';
+  refreshSourceDeviceIds();
 }
 
 async function openSourceModal(id) {
@@ -715,14 +757,14 @@ async function openSourceModal(id) {
   if (src && src.videoDevice) {
     if (!videos.find((d) => d.name === src.videoDevice)) {
       $('#src_videoDevice').insertAdjacentHTML('beforeend',
-        '<option value="' + esc(src.videoDevice) + '">' + esc(src.videoDevice) + ' (محفوظ — غير مكتشف الآن)</option>');
+        '<option value="' + esc(src.videoDevice) + '">' + esc(savedDeviceText(src.videoDevice, src.videoDeviceLabel)) + '</option>');
     }
     $('#src_videoDevice').value = src.videoDevice;
   }
   if (src && src.audioDevice) {
     if (!audios.find((d) => d.name === src.audioDevice)) {
       $('#src_audioDevice').insertAdjacentHTML('beforeend',
-        '<option value="' + esc(src.audioDevice) + '">' + esc(src.audioDevice) + ' (محفوظ)</option>');
+        '<option value="' + esc(src.audioDevice) + '">' + esc(savedDeviceText(src.audioDevice, src.audioDeviceLabel)) + '</option>');
     }
     $('#src_audioDevice').value = src.audioDevice;
   }
@@ -741,6 +783,12 @@ async function openSourceModal(id) {
 $('#addSourceBtn').addEventListener('click', () => openSourceModal(null));
 $('#src_type').addEventListener('change', onSourceTypeChange);
 $('#src_videoDevice').addEventListener('change', onVideoDeviceChange);
+$('#src_audioDevice').addEventListener('change', refreshSourceDeviceIds);
+// زر إظهار/إخفاء معرّف الجهاز داخل نافذة المصدر
+$('#sourceModal').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-devid]');
+  if (btn) toggleDeviceId(btn);
+});
 
 function currentSourceBody() {
   const isUsb = $('#src_type').value === 'usb';
