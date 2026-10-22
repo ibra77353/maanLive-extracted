@@ -268,17 +268,32 @@ function resolveLogo() {
 
 // ---------------------------------------------------------------- viewer stats
 
+/*
+ * سجل تراكمي للمشاهدين المختلفين: مفتاح «القناة|الطرفية» يُضاف مرة واحدة لكل مشاهد
+ * ولا يُفرَّغ إلا بإعادة تشغيل البرنامج — ومنه تُحسب «إجمالي المشاهدين منذ بدء التشغيل».
+ */
+const seenViewers = new Set();
+
+function noteViewer(channelId, ip) {
+  if (ip) seenViewers.add(channelId + '|' + ip);
+}
+
+/** عدد المشاهدين المختلفين منذ إقلاع البرنامج (المشاهد يُحسب مرة واحدة لكل قناة). */
+function totalViewersSeen() {
+  return seenViewers.size;
+}
+
 /** يُسجّل قراءة من مسار HLS لقناة: آخر ظهور + حجم مخدوم (لعدّ الخمول والبيانات). */
 function noteHlsAccess(channelId, ip, bytes) {
   const s = rt(channelId);
-  if (ip) s.viewers.set(ip, Date.now());
+  if (ip) { s.viewers.set(ip, Date.now()); noteViewer(channelId, ip); }
   if (bytes) s.servedBytes += Number(bytes) || 0;
   s.lastViewerAt = Date.now();
 }
 
 function heartbeat(channelId, ip) {
   const s = rt(channelId);
-  if (ip) s.heartbeats.set(ip, Date.now());
+  if (ip) { s.heartbeats.set(ip, Date.now()); noteViewer(channelId, ip); }
   s.lastViewerAt = Date.now();
 }
 
@@ -821,6 +836,7 @@ module.exports = {
   noteHlsAccess,
   heartbeat,
   viewerCount,
+  totalViewersSeen,
   lastViewerAt,
   bytesOut,
   totalBytesOut,

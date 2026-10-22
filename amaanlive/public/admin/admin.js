@@ -252,6 +252,7 @@ function renderDash(s) {
   const cards = [
     ['📺', s.channels.running + '<small>/' + s.channels.total + '</small>', 'قنوات تبث الآن', 'أخطاء: ' + s.channels.error, 'live-accent'],
     ['👁', String(s.viewers), 'المشاهدون الآن', 'نبضات وقراءات HLS', 'green-accent'],
+    ['👥', String(s.totalViewers || 0), 'إجمالي المشاهدين', 'منذ بدء التشغيل', 'blue-accent'],
     ['⚙️', s.cpuPercent + '<small>٪</small>', 'استهلاك المعالج', s.platform, 'amber-accent'],
     ['🧠', s.memoryMb + '<small>MB</small>', 'ذاكرة الخادم', 'Node ' + s.node, 'blue-accent'],
     ['⏱', fmtDur(s.uptimeSeconds), 'مدة التشغيل', 'منذ إقلاع البرنامج', 'purple-accent'],

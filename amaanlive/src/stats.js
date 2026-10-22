@@ -86,6 +86,7 @@ function snapshot(uptimeSeconds, nginxStatus, devicesInfo) {
       error: statuses.filter((s) => s.state === 'error').length
     },
     viewers,
+    totalViewers: ffmpeg.totalViewersSeen(),
     ingestBps: ingestBps(),
     genBps: genBps(),
     outBps: servedBps(),
