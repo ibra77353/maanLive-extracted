@@ -291,13 +291,19 @@ function createRouter() {
         ffmpeg: devs.ffmpeg
       }),
       statuses: ffmpeg.statusAll(),
-      channels: store.get().channels.map((c) => Object.assign(publicChannel(c), {
-        lastError: ffmpeg.statusOf(c.id).lastError,
-        restarts: ffmpeg.statusOf(c.id).restarts,
-        uptimeMs: ffmpeg.statusOf(c.id).uptimeMs,
-        enabled: c.enabled,
-        autoStart: c.autoStart
-      }))
+      channels: store.get().channels.map((c) => {
+        const st = ffmpeg.statusOf(c.id);
+        // `state` هي حالة ffmpeg الخام التي تعرضها «الحالة» في لوحة المراقبة (chip)
+        // ويوضع بجانبها عدّاد مرات الإعادة التلقائية `restarts`.
+        return Object.assign(publicChannel(c), {
+          state: st.state,
+          lastError: st.lastError,
+          restarts: st.restarts,
+          uptimeMs: st.uptimeMs,
+          enabled: c.enabled,
+          autoStart: c.autoStart
+        });
+      })
     });
   });
 

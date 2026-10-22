@@ -99,6 +99,16 @@ function chip(state) {
   return '<span class="chip ' + esc(state) + '">' + esc(label) + '</span>';
 }
 
+/**
+ * شارة عدّاد مرات الإعادة التلقائية (مصدرها مراقب ffmpeg) — تُعرض بجانب حالة البث
+ * لتسهيل متابعة استقرار القناة: يرجع العدّاد إلى الصفر بعد كل تشغيل أو إعادة يدوية.
+ */
+function restartBadge(n) {
+  n = Number(n) || 0;
+  const title = 'مرات الإعادة التلقائية منذ آخر تشغيل يدوي (مراقب ffmpeg)';
+  return '<span class="restart-badge' + (n ? ' hot' : '') + '" title="' + title + '">↻ إعادة تلقائية: ' + n + '</span>';
+}
+
 function errClass(text) {
   if (!text) return '';
   if (/could not|no such|busy|cannot|not found|invalid|end of file|i\/o/i.test(text)) return 'err-high';
@@ -260,15 +270,15 @@ function renderStatusTable(channels) {
     const err = c.lastError || '';
     return '<tr>' +
       '<td><b>' + esc(c.name) + '</b><div class="cell-muted">' + esc(c.device || '') + '</div></td>' +
-      '<td>' + chip(c.state) + '</td>' +
+      '<td><div class="cell-status">' + chip(c.state) + restartBadge(c.restarts) + '</div></td>' +
       '<td>' + (c.viewers || 0) + '</td>' +
       '<td>' + fmtBytes(c.bytesOut) + '</td>' +
-      '<td>' + (c.restarts || 0) + '<div class="cell-muted">' + (c.uptimeMs ? fmtDur(c.uptimeMs / 1000) : '—') + '</div></td>' +
+      '<td>' + (c.uptimeMs ? fmtDur(c.uptimeMs / 1000) : '—') + '</td>' +
       '<td><div class="err-lines ' + errClass(err) + '" title="' + esc(err) + '">' + (err ? esc(err) : '—') + '</div></td>' +
       '<td><div class="row-actions">' +
         '<button class="btn btn-sm" data-act="start" data-id="' + c.id + '">تشغيل</button>' +
         '<button class="btn btn-sm" data-act="stop" data-id="' + c.id + '">إيقاف</button>' +
-        '<button class="btn btn-sm" data-act="restart" data-id="' + c.id + '">إعادة</button>' +
+        '<button class="btn btn-sm" data-act="restart" data-id="' + c.id + '">إعادة تشغيل القناة</button>' +
         '<button class="btn btn-sm" data-act="log" data-id="' + c.id + '">السجل</button>' +
       '</div></td></tr>';
   }).join('');
@@ -283,7 +293,7 @@ $('#statusTable').addEventListener('click', async (e) => {
   btn.disabled = true;
   try {
     const r = await api('/channels/' + id + '/' + act, { method: 'POST', body: {} });
-    toast(act === 'start' ? 'بدأ التشغيل' : act === 'stop' ? 'أُوقفت القناة' : 'أُعيد التشغيل');
+    toast(act === 'start' ? 'بدأ التشغيل' : act === 'stop' ? 'أُوقفت القناة' : 'أُعيد تشغيل القناة');
     if (r.status && r.status.state === 'starting') toast('جارٍ التشغيل…');
   } catch (err) {
     toast(err.message, true);
@@ -366,10 +376,12 @@ function renderChannelsTable() {
       '<td>' + esc(c.quality || 'copy') + '</td>' +
       '<td>' + (c.autoStart ? 'نعم' : 'لا') + '</td>' +
       '<td>' + sched + '</td>' +
-      '<td>' + chip(c.state) + (c.enabled ? '' : '<div class="cell-muted">معطّلة</div>') + '</td>' +
+      '<td><div class="cell-status">' + chip(c.state) + restartBadge(c.restarts) + '</div>' +
+        (c.enabled ? '' : '<div class="cell-muted">معطّلة</div>') + '</td>' +
       '<td><div class="row-actions">' +
         '<button class="btn btn-sm" data-cact="start" data-id="' + c.id + '">تشغيل</button>' +
         '<button class="btn btn-sm" data-cact="stop" data-id="' + c.id + '">إيقاف</button>' +
+        '<button class="btn btn-sm" data-cact="restart" data-id="' + c.id + '">إعادة تشغيل القناة</button>' +
         '<button class="btn btn-sm" data-cact="edit" data-id="' + c.id + '">تعديل</button>' +
         '<button class="btn btn-sm btn-danger" data-cact="delete" data-id="' + c.id + '">حذف</button>' +
       '</div></td></tr>';
@@ -393,8 +405,9 @@ $('#channelsTable').addEventListener('click', async (e) => {
   }
   try {
     await api('/channels/' + id + '/' + act, { method: 'POST', body: {} });
-    toast(act === 'start' ? 'بدأ التشغيل' : 'أُوقفت القناة');
+    toast(act === 'start' ? 'بدأ التشغيل' : act === 'stop' ? 'أُوقفت القناة' : 'أُعيد تشغيل القناة');
     loadChannels();
+    refreshStats();
   } catch (err) { toast(err.message, true); }
   return undefined;
 });
