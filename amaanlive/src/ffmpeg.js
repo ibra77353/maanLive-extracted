@@ -444,8 +444,11 @@ async function start(channelId, opts) {
   if (isRunning(channelId) || s.state === 'starting') return statusOf(channelId);
 
   if (source.type !== 'screen') {
-    const dev = devices.find(source.videoDevice, 'video');
-    if (dev && !dev.present) throw new Error('جهاز الالتقاط «' + source.videoDevice + '» غير موصول');
+    // المقارنة بالاسم المكتشف لا بالاسم المحفوظ: المحفوظ قد يكون اسماً بديلاً (moniker)
+    // من إعداد قديم فلا يطابق أي جهاز، فيبدو «موجوداً» بينما هو مفصول فعلاً.
+    const name = devices.resolveDeviceName(source.videoDevice, 'video');
+    const dev = devices.find(name, 'video');
+    if (dev && !dev.present) throw new Error('جهاز الالتقاط «' + name + '» غير موصول');
   }
 
   fs.mkdirSync(channelDir(channelId), { recursive: true });

@@ -283,12 +283,36 @@ function forcesSettings(source) {
 }
 
 /**
+ * الاسم المحفوظ للجهاز قد يكون اسماً بديلاً (moniker) أو مفتاحاً من إعداد قديم،
+ * ولا يفتح DirectShow الجهاز إلا باسمه المعروض — فنحوّل القيمة المحفوظة إلى الاسم
+ * المكتشف حالياً. بلا مطابقة نُبقي القيمة كما هي.
+ */
+function resolveDeviceName(value, kind, list) {
+  const v = String(value || '');
+  if (!v) return v;
+  const devs = list || state.devices || [];
+  const match = devs.find((d) => d.kind === kind &&
+    (d.name === v || d.altName === v || d.key === v));
+  return match ? match.name : v;
+}
+
+/** أول جهاز فيديو مكتشف الآن غير المحفوظ (null إن كان المحفوظ مكتشفاً أو لا أجهزة). */
+function otherDetectedVideo(savedName) {
+  const present = (state.devices || []).filter((d) => d.kind === 'video' && d.present !== false);
+  if (present.some((d) => d.name === savedName)) return null;
+  return present.length ? present[0].name : null;
+}
+
+/**
  * مجموعات وسائط الإدخال الممكنة بالترتيب: الأخصّ أولاً ثم الأعمّ.
  *
  * السبب واقعي: كثير من أجهزة الالتقاط ترفض الفتح بالفيديو والصوت معاً (جهاز صوت مشغول
  * أو اسم غير مطابق) أو ترفض الصيغة/الدقة المفروضة، فيطبع ffmpeg خطأً عاماً مثل
  * «I/O error» وتفشل القناة بلا داعٍ مع أن الجهاز سليم. لذلك نجرب المحفوظ أولاً،
  * ثم الفيديو وحده، ثم الإعدادات التلقائية للجهاز.
+ *
+ * وأخيراً جهاز مكتشف آخر: الاسم المحفوظ قد يكون اسماً بديلاً قديماً أو اسماً تغيّر بعد
+ * إعادة تركيب التعريف، فلا معنى لإعادة المحاولة به — نجرب جهازاً مكتشفاً فعلاً بدلاً منه.
  */
 function inputVariants(source, platform) {
   const list = [];
@@ -301,15 +325,31 @@ function inputVariants(source, platform) {
     list.push({ key, label, args });
   };
 
-  add(source, 'الإعدادات المحفوظة');
-  if (source.type !== 'screen' && source.audioDevice) {
-    add(Object.assign({}, source, { audioDevice: '' }), 'فيديو فقط بلا صوت');
+  // المجموعة الأولى هي المحفوظ دائماً، لكن بعد تحويل أي اسم بديل إلى الاسم المكتشف.
+  const saved = Object.assign({}, source, {
+    videoDevice: resolveDeviceName(source.videoDevice, 'video'),
+    audioDevice: resolveDeviceName(source.audioDevice, 'audio')
+  });
+  const renamed = saved.videoDevice !== source.videoDevice || saved.audioDevice !== source.audioDevice;
+  add(saved, renamed ? 'الجهاز المكتشف بالاسم البديل' : 'الإعدادات المحفوظة');
+
+  if (saved.type !== 'screen' && saved.audioDevice) {
+    add(Object.assign({}, saved, { audioDevice: '' }), 'فيديو فقط بلا صوت');
   }
-  if (forcesSettings(source)) {
-    const auto = Object.assign({}, source, { pixelFormat: '', vcodec: '', videoSize: '', fps: null });
+  if (forcesSettings(saved)) {
+    const auto = Object.assign({}, saved, { pixelFormat: '', vcodec: '', videoSize: '', fps: null });
     add(auto, 'الإعدادات التلقائية للجهاز');
-    if (source.audioDevice) {
+    if (saved.audioDevice) {
       add(Object.assign({}, auto, { audioDevice: '' }), 'الإعدادات التلقائية بلا صوت');
+    }
+  }
+  if (saved.type !== 'screen') {
+    const other = otherDetectedVideo(saved.videoDevice);
+    if (other) {
+      add(Object.assign({}, saved, {
+        videoDevice: other, audioDevice: '', pixelFormat: '', vcodec: '',
+        videoSize: '', fps: null, captureSafeMode: true
+      }), 'جهاز مكتشف آخر (' + other + ')');
     }
   }
   return list;
@@ -340,7 +380,7 @@ async function tryCapture(source, seconds, platform) {
 function explainError(text) {
   const t = String(text || '');
   if (/i\/o error|device or resource busy|already in use|could not run graph|access is denied|cannot open/i.test(t)) {
-    return 'تعذّر فتح الجهاز — يبدو مشغولاً ببرنامج آخر (I/O error). أغلق أي برنامج يستخدم الكاميرا/بطاقة الالتقاط ثم أعد المحاولة';
+    return 'تعذّر فتح الجهاز — إما أنه مشغول ببرنامج آخر (I/O error) وإما أن الاسم المحفوظ لم يعد مطابقاً؛ أعد اختيار الجهاز من قائمة الأجهزة المكتشفة ثم أعد المحاولة';
   }
   if (/could not find|couldn't find|no such device|not found|no such file/i.test(t)) {
     return 'لم يُعثر على الجهاز بالاسم المحدد — أعد فحص الأجهزة واختر الاسم من القائمة';
@@ -593,6 +633,7 @@ module.exports = {
   inputVariants,
   buildInputArgs,
   forcesSettings,
+  resolveDeviceName,
   explainError,
   errorMessage,
   hasCaps,
