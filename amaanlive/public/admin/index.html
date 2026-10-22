@@ -387,6 +387,8 @@
         <button class="link-btn" id="src_videoIdToggle" data-devid aria-expanded="false">إظهار المعرّف</button>
         <div class="dev-id hidden" id="src_videoId"></div>
         <div class="caps-list" id="src_videoCaps"></div>
+        <div class="switch-row" style="margin-top:10px"><input type="checkbox" id="src_autoConfig"><span>⚙ ضبط تلقائي لأفضل إعدادات (موصى به لكروت USB)</span></div>
+        <p class="hint" id="src_autoHint"></p>
         <label style="margin-top:12px">جهاز الصوت (اختياري)<select class="input" id="src_audioDevice"></select></label>
         <button class="link-btn" id="src_audioIdToggle" data-devid aria-expanded="false">إظهار المعرّف</button>
         <div class="dev-id hidden" id="src_audioId"></div>
@@ -394,8 +396,8 @@
           <label>الدقة<select class="input" id="src_videoSize"></select></label>
           <label>معدل الإطارات<select class="input" id="src_fps"></select></label>
         </div>
-        <label>صيغة الالتقاط (pixel format)<select class="input" id="src_pixelFormat"></select></label>
-        <div class="switch-row"><input type="checkbox" id="src_captureSafeMode"><span>وضع الالتقاط الآمن (لا نفرض الدقة/المعدل — للكاميرات الحساسة)</span></div>
+        <label>صيغة الالتقاط (pixel format / vcodec)<select class="input" id="src_pixelFormat"></select></label>
+        <div class="switch-row"><input type="checkbox" id="src_captureSafeMode"><span>الوضع الآمن (لا تفرض الدقة/الإطارات — جرّبه إن ظهر خطأ «Could not set video options»)</span></div>
         <p class="hint" id="src_capsHint">اختر جهازاً لعرض قدراته الفعلية المقروءة من الجهاز.</p>
       </div>
 

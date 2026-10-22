@@ -144,3 +144,71 @@ test('قدرات فارغة لا تُعدّ قراءة ناجحة (يُعاد س
   assert.strictEqual(devices.hasCaps({ resolutions: ['640x480'] }), true);
   assert.strictEqual(devices.hasCaps({ audio: { sampleRates: [44100] } }), true);
 });
+
+/*
+ * الضبط التلقائي لأفضل إعدادات: نفس منطق النسخة الأصلية — الأقرب إلى 1280×720
+ * (921600 بكسل) هو الأفضل، بشرط أن يدعم الوضع معدل الإطارات المطلوب أو أعلى.
+ */
+const AUTO_OPTIONS = [
+  '[dshow @ 000001d8f2a0]  Pin "Capture" (1):',
+  '[dshow @ 000001d8f2a0]   pixel_format=bgr24  min s=640x480 fps=5 max s=640x480 fps=30',
+  '[dshow @ 000001d8f2a0]   pixel_format=yuyv422  min s=640x480 fps=30 max s=1280x720 fps=30',
+  '[dshow @ 000001d8f2a0]   vcodec=mjpeg  min s=1280x720 fps=30 max s=1920x1080 fps=60'
+].join('\n');
+
+function autoCaps() {
+  return devices.buildCaps(devices.parseDshowVideoOptions(AUTO_OPTIONS), []);
+}
+
+test('الضبط التلقائي: يختار الأقرب إلى 1280×720 من الأوضاع المدعومة فعلاً', () => {
+  const rec = devices.recommendFromCaps(autoCaps(), 30);
+  assert.strictEqual(rec.videoSize, '1280x720');
+  assert.strictEqual(rec.fps, 30);
+  assert.strictEqual(rec.pixelFormat, 'yuyv422');
+  assert.strictEqual(rec.vcodec, '');
+  assert.deepStrictEqual(rec.detected.sizes, ['640x480', '1280x720', '1920x1080']);
+  assert.deepStrictEqual(rec.detected.pixelFormats, ['bgr24', 'yuyv422']);
+  assert.deepStrictEqual(rec.detected.codecs, ['mjpeg']);
+});
+
+test('الضبط التلقائي: معدل أعلى يقيّد الاختيار على الأوضاع التي تدعمه', () => {
+  const rec = devices.recommendFromCaps(autoCaps(), 60);
+  assert.strictEqual(rec.vcodec, 'mjpeg');
+  assert.strictEqual(rec.pixelFormat, '');
+  assert.strictEqual(rec.videoSize, '1920x1080');
+  assert.strictEqual(rec.fps, 60);
+});
+
+test('الضبط التلقائي: بلا وضع يفي بالمعدل المطلوب يرجع لصيغة الجهاز ودقته الأعلى', () => {
+  const rec = devices.recommendFromCaps(autoCaps(), 120);
+  assert.strictEqual(rec.vcodec, 'mjpeg');
+  assert.strictEqual(rec.videoSize, '1280x720');
+  assert.strictEqual(rec.fps, 60);
+});
+
+test('الضبط التلقائي: جهاز بلا مرمّز يختار yuyv422 ودقته المعلنة', () => {
+  const caps = devices.buildCaps([{
+    pixelFormat: 'yuyv422',
+    vcodec: '',
+    sizes: [{ bound: 'max', width: 640, height: 480, fps: 10 }]
+  }], []);
+  const rec = devices.recommendFromCaps(caps, 30);
+  assert.strictEqual(rec.pixelFormat, 'yuyv422');
+  assert.strictEqual(rec.videoSize, '640x480');
+  assert.strictEqual(rec.fps, 10);
+});
+
+test('الضبط التلقائي: بلا قدرات مقروءة يعطي الإعدادات المحايدة بلا خطأ', () => {
+  const rec = devices.recommendFromCaps(devices.buildCaps([], []), 30);
+  assert.deepStrictEqual(
+    { pixelFormat: rec.pixelFormat, vcodec: rec.vcodec, videoSize: rec.videoSize, fps: rec.fps },
+    { pixelFormat: '', vcodec: '', videoSize: '1280x720', fps: 30 }
+  );
+});
+
+test('تقييم الأوضاع: الدقة الأثقل من الهدف تُعاقب أكثر من الأقرب له', () => {
+  assert.ok(devices.modeScore({ width: 1280, height: 720 }) >
+    devices.modeScore({ width: 1920, height: 1080 }));
+  assert.ok(devices.modeScore({ width: 640, height: 480 }) < 0);
+  assert.ok(devices.modeScore({ width: 1280, height: 720 }) === 0); // قد تكون -0، وهي الصفر نفسه
+});

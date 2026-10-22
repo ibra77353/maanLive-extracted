@@ -374,6 +374,19 @@ function createRouter() {
     return ok(res, Object.assign(devices.list(), { devices: list }));
   });
 
+  /** توصية أفضل إعدادات لهذا الجهاز (صيغة/دقة/معدل) من قدراته الفعلية. */
+  r.get('/api/devices/recommend', async (req, res) => {
+    try {
+      const rec = await devices.recommendCaptureSettings(
+        (req.query && req.query.device) || '',
+        (req.query && req.query.fps) || 30
+      );
+      return ok(res, rec);
+    } catch (e) {
+      return fail(res, 404, e.message);
+    }
+  });
+
   /** تشخيص: هل ffmpeg المرفق يدعم dshow؟ وما مخرجاته الخام؟ */
   r.get('/api/devices/diagnose', async (req, res) => {
     const st = devices.ffmpegStatus();

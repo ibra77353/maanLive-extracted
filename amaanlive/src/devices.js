@@ -230,6 +230,88 @@ function buildCaps(videoFormats, audioOptions) {
   };
 }
 
+// ---------------------------------------------------------------- التوصية التلقائية
+
+/** كثافة البكسل المثالية لكروت USB (1280×720) والحدّ الأدنى المقبول (640×480). */
+const TARGET_PIXELS = 921600;
+const MIN_PIXELS = 307200;
+
+/** الصيغ الخام (`pixel_format=`) والمرمّزات (`vcodec=`) المكتشفة في أوضاع الجهاز. */
+function capsFormats(caps) {
+  const modes = (caps && caps.modes) || [];
+  return {
+    pixelFormats: [...new Set(modes.map((m) => m.pixelFormat).filter(Boolean))],
+    codecs: [...new Set(modes.map((m) => m.vcodec).filter(Boolean))]
+  };
+}
+
+/**
+ * تقييم وضع: الأقرب إلى 1280×720 هو الأفضل، مع عقوبة للدقات الأثقل من الهدف (-0.5)
+ * وللأدنى من 640×480 (-0.3) — نفس معادلة النسخة الأصلية.
+ */
+function modeScore(mode) {
+  const px = (mode.width || 0) * (mode.height || 0);
+  let score = -Math.abs(px - TARGET_PIXELS) / TARGET_PIXELS;
+  if (px > TARGET_PIXELS) score -= 0.5;
+  if (px < MIN_PIXELS) score -= 0.3;
+  return score;
+}
+
+/**
+ * أفضل إعدادات لهذا الجهاز من قدراته المقروءة فعلاً (منطق النسخة الأصلية):
+ * نرشّح الأوضاع التي يبلغ معدل إطاراتها الأقصى ≥ المطلوب، ثم نأخذ أعلاها تقييماً.
+ * بلا مرشّح نرجع إلى صيغة الجهاز ودقته ومعدله الأعلى المعلن.
+ */
+function recommendFromCaps(caps, wantFps) {
+  const fps = Number(wantFps) || 30;
+  const { pixelFormats, codecs } = capsFormats(caps);
+  const sizes = (caps && caps.resolutions) || [];
+  const fpsList = (caps && caps.fps) || [];
+  const best = ((caps && caps.modes) || [])
+    .filter((m) => (m.fpsMax || 0) >= fps)
+    .sort((a, b) => modeScore(b) - modeScore(a))[0];
+
+  let pixelFormat = '';
+  let vcodec = '';
+  let videoSize = '1280x720';
+  let outFps = fps;
+
+  if (best) {
+    pixelFormat = best.pixelFormat || '';
+    vcodec = best.vcodec || '';
+    videoSize = best.width + 'x' + best.height;
+    outFps = Math.min(fps, best.fpsMax || fps) || fps;
+  } else {
+    if (codecs.includes('mjpeg')) vcodec = 'mjpeg';
+    else if (pixelFormats.includes('yuyv422')) pixelFormat = 'yuyv422';
+    videoSize = sizes.includes('1280x720') ? '1280x720' : (sizes[sizes.length - 1] || '1280x720');
+    outFps = fpsList.includes(fps) ? fps : (fpsList[fpsList.length - 1] || fps);
+  }
+
+  return {
+    pixelFormat,
+    vcodec,
+    videoSize,
+    fps: outFps,
+    detected: { sizes, fps: fpsList, pixelFormats, codecs, modes: (caps && caps.modes) || [] }
+  };
+}
+
+/** توصية لجهاز بالاسم — تُقرأ قدراته من الجهاز إن لم تكن مقروءة بعد. */
+async function recommendCaptureSettings(deviceName, wantFps) {
+  const value = String(deviceName || '');
+  const dev = find(value, 'video');
+  if (!dev) throw new Error('جهاز الفيديو غير موجود: ' + (value || '—'));
+  if (!hasCaps(dev.caps)) {
+    const res = await readCaps(dev);
+    dev.caps = res.caps;
+    dev.raw = res.raw;
+    dev.capsAt = Date.now();
+    dev.capsTriedAt = Date.now();
+  }
+  return Object.assign({ device: dev.name }, recommendFromCaps(dev.caps, wantFps));
+}
+
 // ---------------------------------------------------------------- وسائط الإدخال
 
 /**
@@ -628,6 +710,7 @@ module.exports = {
   list,
   find,
   readCaps,
+  recommendCaptureSettings,
   startWatcher,
   stopWatcher,
   on,
@@ -646,5 +729,8 @@ module.exports = {
   parseDshowVideoOptions,
   parseDshowAudioOptions,
   parseV4l2Formats,
-  buildCaps
+  buildCaps,
+  capsFormats,
+  modeScore,
+  recommendFromCaps
 };

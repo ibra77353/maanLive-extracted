@@ -761,27 +761,96 @@ function onSourceTypeChange() {
 function fillSelect(sel, values, emptyLabel) {
   const el = $(sel);
   const current = el.value;
-  el.innerHTML = values.length
-    ? values.map((v) => '<option value="' + esc(v) + '">' + esc(v) + '</option>').join('')
+  const items = (values || []).map((v) => (v && typeof v === 'object' ? v : { value: v, label: v }));
+  el.innerHTML = items.length
+    ? items.map((o) => '<option value="' + esc(o.value) + '">' + esc(o.label) + '</option>').join('')
     : '<option value="">' + (emptyLabel || '—') + '</option>';
-  if (values.includes(current)) el.value = current;
+  if (items.some((o) => String(o.value) === current)) el.value = current;
+}
+
+/**
+ * يضمن وجود القيمة في القائمة ثم يختارها — التوصية أو قيمة محفوظة قد تأتيان بقيمة
+ * غير مُدرَجة كخيار (جهاز غير مكتشف الآن)، وإلا ظهر الحقل فارغاً وفُقدت عند الحفظ.
+ */
+function setSelectValue(sel, value) {
+  const el = $(sel);
+  if (value === null || value === undefined || value === '') return;
+  const v = String(value);
+  if (![...el.options].some((o) => o.value === v)) {
+    const label = sel === '#src_pixelFormat' ? (FORMAT_LABELS[v] || v) : v;
+    el.insertAdjacentHTML('beforeend', '<option value="' + esc(v) + '">' + esc(label) + '</option>');
+  }
+  el.value = v;
+}
+
+/** تسميات الصيغ المعروفة (بنفس صياغة النسخة الأصلية) — القيمة تبقى رمز الصيغة نفسه. */
+const FORMAT_LABELS = {
+  yuyv422: 'yuyv422 (خام — يمنع أعطال MJPEG)',
+  mjpeg: 'mjpeg (إن لم يدعم الجهاز yuyv)'
+};
+
+function formatOptions(caps) {
+  return (caps.pixelFormats || []).map((v) => ({ value: v, label: FORMAT_LABELS[v] || v }));
+}
+
+function deviceCaps(name) {
+  const dev = (DATA.devices.devices || []).find((d) => d.kind === 'video' && d.name === name);
+  return (dev && dev.caps) || {};
+}
+
+/** مرمّزات مضغوطة يقرأها ffmpeg عبر vcodec لا عبر pixel_format. */
+const CODEC_VALUES = ['mjpeg', 'h264', 'hevc'];
+
+/** هل القيمة المختارة مرمّز (vcodec) لا صيغة خام؟ تُحفظ في الحقل المناسب لـ ffmpeg. */
+function isCodecValue(caps, value) {
+  if (!value) return false;
+  const modes = caps.modes || [];
+  if (modes.some((m) => m.vcodec === value)) return true;
+  return CODEC_VALUES.includes(value) && !modes.some((m) => m.pixelFormat === value);
+}
+
+/**
+ * «ضبط تلقائي لأفضل إعدادات»: نسأل الخادم عن توصيته من قدرات الجهاز الفعلية
+ * (الأقرب إلى 1280×720 بأعلى معدل إطارات مدعوم) ونطبّقها على حقول الصيغة والدقة والمعدل.
+ */
+async function applyAutoConfig() {
+  const hint = $('#src_autoHint');
+  const name = $('#src_videoDevice').value;
+  if (!name) {
+    hint.textContent = '';
+    return;
+  }
+  hint.textContent = 'جارٍ قراءة قدرات الجهاز واختيار أفضل إعدادات…';
+  try {
+    const rec = await api('/devices/recommend?device=' + encodeURIComponent(name) + '&fps=30');
+    setSelectValue('#src_pixelFormat', rec.pixelFormat || rec.vcodec || '');
+    setSelectValue('#src_videoSize', rec.videoSize || '');
+    setSelectValue('#src_fps', rec.fps || '');
+    const supported = (rec.detected.pixelFormats || []).concat(rec.detected.codecs || []);
+    hint.textContent = 'تم: الصيغة ' + (rec.pixelFormat || rec.vcodec || 'افتراضي') +
+      ' · الدقة ' + rec.videoSize + ' · ' + rec.fps + 'fps. الجهاز يدعم: ' +
+      (supported.join(', ') || 'غير معلوم');
+  } catch (e) {
+    hint.textContent = 'تعذّر الضبط التلقائي: ' + e.message;
+  }
 }
 
 function onVideoDeviceChange() {
   const name = $('#src_videoDevice').value;
-  const dev = (DATA.devices.devices || []).find((d) => d.kind === 'video' && d.name === name);
-  const caps = (dev && dev.caps) || {};
+  const caps = deviceCaps(name);
   fillSelect('#src_videoSize', caps.resolutions || [], 'تلقائي');
   fillSelect('#src_fps', caps.fps || [], 'تلقائي');
-  fillSelect('#src_pixelFormat', caps.pixelFormats || [], 'تلقائي');
+  fillSelect('#src_pixelFormat', formatOptions(caps), 'تلقائي');
 
   const modes = caps.modes || [];
+  $('#src_autoHint').textContent = '';
   $('#src_capsHint').innerHTML = caps.resolutions && caps.resolutions.length
     ? 'قدرات هذا الجهاز المقروءة فعلاً: <b>' + caps.resolutions.length + '</b> دقة · <b>' +
       (caps.pixelFormats || []).length + '</b> صيغة · <b>' + modes.length + '</b> وضع (' + 
       (caps.fps || []).length + ' معدل إطارات).'
     : 'لم تُقرأ قدرات لهذا الجهاز — سيعمل الالتقاط بالإعدادات التلقائية.';
   refreshSourceDeviceIds();
+  if ($('#src_autoConfig').checked) applyAutoConfig();
 }
 
 async function openSourceModal(id) {
@@ -813,13 +882,15 @@ async function openSourceModal(id) {
     $('#src_audioDevice').value = src.audioDevice;
   }
   $('#src_captureSafeMode').checked = src ? Boolean(src.captureSafeMode) : false;
+  $('#src_autoConfig').checked = !src; // مصدر جديد: نبدأ بالضبط التلقائي كما في النسخة الأصلية
+  $('#src_autoHint').textContent = '';
   $('#src_screenSize').value = src && src.type === 'screen' ? src.videoSize || '' : '1280x720';
   $('#src_screenFps').value = src && src.type === 'screen' ? src.fps || 15 : 15;
 
   onVideoDeviceChange();
-  if (src && src.videoSize) $('#src_videoSize').value = src.videoSize;
-  if (src && src.fps) $('#src_fps').value = src.fps;
-  if (src && src.pixelFormat) $('#src_pixelFormat').value = src.pixelFormat;
+  if (src && src.videoSize) setSelectValue('#src_videoSize', src.videoSize);
+  if (src && src.fps) setSelectValue('#src_fps', src.fps);
+  if (src && (src.pixelFormat || src.vcodec)) setSelectValue('#src_pixelFormat', src.pixelFormat || src.vcodec);
 
   $('#sourceModal').classList.remove('hidden');
 }
@@ -828,6 +899,10 @@ $('#addSourceBtn').addEventListener('click', () => openSourceModal(null));
 $('#src_type').addEventListener('change', onSourceTypeChange);
 $('#src_videoDevice').addEventListener('change', onVideoDeviceChange);
 $('#src_audioDevice').addEventListener('change', refreshSourceDeviceIds);
+$('#src_autoConfig').addEventListener('change', () => {
+  if ($('#src_autoConfig').checked) applyAutoConfig();
+  else $('#src_autoHint').textContent = '';
+});
 // زر إظهار/إخفاء معرّف الجهاز داخل نافذة المصدر
 $('#sourceModal').addEventListener('click', (e) => {
   const btn = e.target.closest('button[data-devid]');
@@ -836,6 +911,10 @@ $('#sourceModal').addEventListener('click', (e) => {
 
 function currentSourceBody() {
   const isUsb = $('#src_type').value === 'usb';
+  // حقل واحد للصيغة: المرمّز (mjpeg) يُحفظ في vcodec فيقرأ ffmpeg الوسيط الصحيح،
+  // والصيغة الخام (yuyv422, bgr24) تُحفظ في pixelFormat.
+  const fmt = isUsb ? $('#src_pixelFormat').value : '';
+  const asCodec = isCodecValue(deviceCaps($('#src_videoDevice').value), fmt);
   return {
     name: $('#src_name').value.trim(),
     type: $('#src_type').value,
@@ -843,7 +922,8 @@ function currentSourceBody() {
     audioDevice: isUsb ? $('#src_audioDevice').value : '',
     videoSize: isUsb ? $('#src_videoSize').value : $('#src_screenSize').value.trim(),
     fps: isUsb ? ($('#src_fps').value || null) : ($('#src_screenFps').value || null),
-    pixelFormat: isUsb ? $('#src_pixelFormat').value : '',
+    pixelFormat: isUsb && !asCodec ? fmt : '',
+    vcodec: isUsb && asCodec ? fmt : '',
     captureSafeMode: isUsb ? $('#src_captureSafeMode').checked : false
   };
 }
