@@ -7,7 +7,12 @@
 const test = require('node:test');
 const assert = require('node:assert');
 const ffmpeg = require('../src/ffmpeg');
+const store = require('../src/store');
 
+// الإعدادات تُقرأ من config/config.json: نحفظ نسخة الذاكرة ونعيد قيم المستخدم كما كانت،
+// ونمنع أي كتابة في ملفه (store.save معطّلة) — نفس ما يفعله اختبار المراقبة.
+store.load();
+store.save = () => true;
 const USB_SOURCE = {
   type: 'usb',
   videoDevice: 'USB Video',
@@ -81,8 +86,7 @@ test('نسخ المصدر (copy) بلا ترميز', () => {
   assert.ok(!args.join(' ').includes('libx264'));
 });
 
-test('الشعار المائي: مرشّح overlay مع الإدخال الثاني', () => {
-  const args = ffmpeg.buildOutputArgs({ id: 'ch_3', quality: '480p' }, USB_SOURCE, '/tmp/hls/ch_3', '/tmp/logo.png');
+test('الشعار المائي: مرشّح overlay مع الإدخال الثاني', () => {  const args = ffmpeg.buildOutputArgs({ id: 'ch_3', quality: '480p' }, USB_SOURCE, '/tmp/hls/ch_3', '/tmp/logo.png');
   const joined = args.join(' ');
   assert.ok(joined.includes('-filter_complex'));
   assert.ok(joined.includes('[0:v][wm]overlay=W-w-20:20:format=auto[v]'));

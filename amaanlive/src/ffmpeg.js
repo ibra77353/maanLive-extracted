@@ -211,13 +211,14 @@ function buildOutputArgs(channel, source, dir, watermark) {
   } else {
     args.push('-c:v', 'libx264');
     args.push('-preset', settings.x264Preset || 'veryfast');
+    args.push(...x264TuneArgs(settings));
     args.push('-pix_fmt', 'yuv420p');
     args.push('-g', String(gop), '-keyint_min', String(gop), '-sc_threshold', '0');
     if (Number(settings.x264Threads)) args.push('-threads', String(Number(settings.x264Threads)));
     if (quality !== 'copy') args.push('-vf', 'scale=-2:' + height);
     const bitrate = bitrateForQuality(quality, height);
     if (bitrate) {
-      args.push('-b:v', bitrate, '-maxrate', bitrate, '-bufsize', (parseInt(bitrate, 10) * 2) + 'k');
+      args.push('-b:v', bitrate, '-maxrate', bitrate, '-bufsize', x264BufsizeFor(settings, bitrate));
     }
   }
 
@@ -248,6 +249,20 @@ function bitrateForQuality(quality, height) {
   if (quality === 'copy' || !quality) return null;
   const table = { 240: '400k', 360: '800k', 480: '1400k', 720: '2500k', 1080: '4500k' };
   return table[height] || null;
+}
+
+/**
+ * وضع الجودة (`x264QualityMode`) — نفس سلوك النظام الأصلي:
+ * مفعّلاً: بلا `-tune zerolatency` مع مخزن مضاعف (جودة أعلى على حساب التأخير)،
+ * معطّلاً: `-tune zerolatency` ومخزن يساوي معدل البت (بث مباشر بأقل تأخير).
+ */
+function x264TuneArgs(settings) {
+  return settings.x264QualityMode ? [] : ['-tune', 'zerolatency'];
+}
+
+function x264BufsizeFor(settings, bitrate) {
+  const m = /^(\d+)k$/.exec(String(bitrate));
+  return settings.x264QualityMode && m ? (Number(m[1]) * 2) + 'k' : bitrate;
 }
 
 function overlayPosition(position) {
@@ -743,7 +758,10 @@ function health(id) {
     pendingRestart: Boolean(s.timer),
     uptimeMs: s.runStartedAt && s.child ? Date.now() - s.runStartedAt : 0,
     playlistAgeMs: playlistAgeMs(id),
-    restarts: s.restarts
+    restarts: s.restarts,
+    // متى توقّفت العملية (يُستخدم في حساب مدة الانتظار قبل الإحياء الدوري)
+    stoppedAt: s.stoppedAt || null,
+    lastWatchdogAt: s.lastWatchdogAt || null
   };
 }
 
@@ -793,6 +811,40 @@ async function revive(channelId, reason) {
   }, backoff);
   s.timer.unref && s.timer.unref();
   return true;
+}
+
+/**
+ * إحياء دوري لقناة متوقّفة — منطق «WATCHDOG» في النظام الأصلي:
+ * القناة التي استُنفدت محاولاتها السريعة (`error`) أو التي جهازها منفصل/مشغول
+ * (`waiting-device`) تُعاد محاولة تشغيلها بعد مدة الانتظار من الإعدادات
+ * (`sourceFailStopMinutes` للمصدر الفاشل، و`blockedStopMinutes` للجهاز المشغول)،
+ * بمحاولة واحدة لكل مدة (يضبطها المراقب في monitor.js) فلا تتكرر بلا نهاية.
+ * لا تُصفَّر محاولات الإعادة هنا، فيبقى حدّ `maxRestarts` محترماً في الإعادات السريعة.
+ */
+async function watchdog(channelId, reason) {
+  const s = runtime.get(channelId);
+  const channel = store.findChannel(channelId);
+  if (!s || !channel) return false;
+  if (!channel.enabled || channel.manualStopped) return false;
+  if (s.child || s.timer || s.stopping || s.state === 'starting') return false;
+  if (store.get().settings.autoRestartCrashed === false) return false;
+
+  s.lastWatchdogAt = Date.now();
+  s.state = 'restarting';
+  appendLog(channelId, '[watchdog] إعادة إحياء قناة متوقفة — ' + (reason || 'انتهاء مدة الانتظار'));
+  console.log('[monitor] إحياء «' + channel.name + '» — ' + (reason || 'انتهاء مدة الانتظار'));
+  emit('channel', { id: channelId, state: 'restarting' });
+
+  try {
+    await start(channelId, { restart: true });
+    return true;
+  } catch (e) {
+    s.state = 'error';
+    s.lastError = e.message;
+    appendLog(channelId, '[high] فشل الإحياء: ' + e.message);
+    emit('channel', { id: channelId, state: 'error' });
+    return false;
+  }
 }
 
 function statusAll() {
@@ -910,6 +962,7 @@ module.exports = {
   statusAll,
   health,
   revive,
+  watchdog,
   runningCount,
   readLog,
   clearLog,

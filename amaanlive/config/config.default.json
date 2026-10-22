@@ -7,12 +7,20 @@
     "ticker": "أهلاً بكم في البث المباشر",
     "tickerEnabled": true,
 
+    "theme": "default",
+    "worldCupTheme": false,
+    "worldCupFullPage": true,
+    "worldCupApiGames": "",
+    "worldCupApiStadiums": "",
+
     "port": 3001,
     "nginxPort": 801,
     "useNginx": true,
 
     "ffmpegPath": "",
+    "ffprobePath": "",
     "nginxPath": "",
+    "streamUserAgent": "VLC/3.0.20 LibVLC/3.0.20",
 
     "hlsRoot": "srv/hls",
     "hlsTime": 2,
@@ -22,6 +30,7 @@
 
     "x264Preset": "veryfast",
     "x264Threads": 2,
+    "x264QualityMode": false,
     "audioBitrate": "128k",
 
     "startupQueueDelayMs": 4000,
@@ -38,6 +47,7 @@
 
     "deviceWatchSeconds": 5,
     "sourceFailStopMinutes": 3,
+    "blockedStopMinutes": 5,
 
     "playerMaxBufferLength": 20,
     "playerBackBufferLength": 10,
@@ -48,7 +58,17 @@
     "logoImage": "",
     "logoPosition": "top-right",
     "logoSizePct": 10,
-    "logoOpacityPct": 60
+    "logoOpacityPct": 60,
+
+    "newsSources": [],
+    "newsCacheMinutes": 30,
+    "sportsTickerEnabled": false,
+    "sportsNewsSources": [],
+
+    "ownerName": "",
+    "networkName": "",
+    "city": "",
+    "setupDone": false
   },
 
   "admin": {

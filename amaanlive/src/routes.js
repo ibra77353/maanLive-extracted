@@ -250,13 +250,19 @@ function createRouter() {
     const s = store.get().settings;
     const allowed = [
       'siteName', 'siteNameLatin', 'logo', 'phone', 'ticker', 'tickerEnabled',
-      'port', 'nginxPort', 'useNginx', 'ffmpegPath', 'nginxPath', 'hlsRoot',
+      // مفاتيح المظهر والنسخة الكاملة لنفس ملف إعدادات النظام الأصلي — تُحفظ كما هي،
+      // وتعمل منها بلا إنترنت ما لا يحتاج مصادر خارجية فقط (انظر README).
+      'theme', 'worldCupTheme', 'worldCupFullPage', 'worldCupApiGames', 'worldCupApiStadiums',
+      'port', 'nginxPort', 'useNginx', 'ffmpegPath', 'ffprobePath', 'nginxPath', 'hlsRoot',
+      'streamUserAgent', 'newsSources', 'newsCacheMinutes', 'sportsTickerEnabled', 'sportsNewsSources',
       'hlsTime', 'hlsListSize', 'hlsDeleteThreshold', 'gopSeconds',
-      'x264Preset', 'x264Threads', 'audioBitrate',
+      'x264Preset', 'x264Threads', 'x264QualityMode', 'audioBitrate',
       'startupQueueDelayMs', 'startupConcurrency', 'autoRestartCrashed', 'restartBackoffMs', 'maxRestarts', 'logMaxLines',
-      'idleStopEnabled', 'idleStopMinutes', 'autoStartOnDemand', 'viewerWindowSeconds', 'deviceWatchSeconds', 'sourceFailStopMinutes',
+      'idleStopEnabled', 'idleStopMinutes', 'autoStartOnDemand', 'viewerWindowSeconds', 'deviceWatchSeconds',
+      'sourceFailStopMinutes', 'blockedStopMinutes',
       'playerMaxBufferLength', 'playerBackBufferLength', 'playerLiveSyncDuration', 'capLevelToPlayerSize', 'cpuSaverDefault',
-      'logoImage', 'logoPosition', 'logoSizePct', 'logoOpacityPct'
+      'logoImage', 'logoPosition', 'logoSizePct', 'logoOpacityPct',
+      'ownerName', 'networkName', 'city', 'setupDone'
     ];
     // نبني نسخة مرشّحة ثم نتحقق منها قبل المساس بالإعدادات الحيّة: الطلب المرفوض
     // (مثل تساوي المنفذين) يجب ألّا يترك التطبيق في حالة داخلية متناقضة تُعطّل كل حفظ لاحق.

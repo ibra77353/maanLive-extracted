@@ -257,6 +257,7 @@
             </select></label>
             <label>خيوط الترميز<input class="input" id="s_x264Threads" type="number" min="0" max="32"></label>
           </div>
+          <div class="switch-row"><input type="checkbox" id="s_x264QualityMode"><span>وضع الجودة: بلا zerolatency ومخزن مضاعف (جودة أعلى وتأخير أكبر)</span></div>
           <label>معدل بت الصوت<input class="input" id="s_audioBitrate" dir="ltr" placeholder="128k"></label>
         </div>
 
@@ -281,8 +282,10 @@
           <div class="grid-3">
             <label>نافذة احتساب المشاهد (ث)<input class="input" id="s_viewerWindowSeconds" type="number" min="5" max="120"></label>
             <label>فاصل فحص الأجهزة (ث)<input class="input" id="s_deviceWatchSeconds" type="number" min="2" max="60"></label>
-            <label>إيقاف مصدر فاشل بعد (د)<input class="input" id="s_sourceFailStopMinutes" type="number" min="1" max="60"></label>
+            <label>إحياء قناة فشل مصدرها بعد (د)<input class="input" id="s_sourceFailStopMinutes" type="number" min="1" max="60"></label>
+            <label>إحياء قناة جهازها مشغول بعد (د)<input class="input" id="s_blockedStopMinutes" type="number" min="1" max="60"></label>
           </div>
+          <p class="hint">القناة التي يتعطّل مصدرها أو يبقى جهازها مشغولاً/منفصلاً تُحيا تلقائياً بعد هذه المدة (محاولة واحدة لكل مدة).</p>
         </div>
 
         <div class="card">
@@ -294,6 +297,14 @@
           </div>
           <div class="switch-row"><input type="checkbox" id="s_capLevelToPlayerSize"><span>تحديد الجودة بحجم المشغّل</span></div>
           <div class="switch-row"><input type="checkbox" id="s_cpuSaverDefault"><span>تفعيل «توفير المعالج» افتراضياً</span></div>
+        </div>
+
+        <div class="card">
+          <h3>المالك والشبكة</h3>
+          <p class="hint">بيانات الإعداد الأوّلي في ملف القديم (ownerName / networkName / city) — تُحفظ كما هي وتظهر أسفل اللوحة.</p>
+          <label>اسم المالك<input class="input" id="s_ownerName"></label>
+          <label>اسم الشبكة<input class="input" id="s_networkName"></label>
+          <label>المدينة<input class="input" id="s_city"></label>
         </div>
 
         <div class="card">

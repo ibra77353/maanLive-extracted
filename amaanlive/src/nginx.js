@@ -21,8 +21,20 @@ function settings() {
   return store.get().settings;
 }
 
-function confDir() {
+/**
+ * مجلد Nginx المخصّص من الإعدادات (`nginxPath`) — يُستخدم فقط إن وُجد مجلده فعلاً على
+ * هذا الجهاز؛ فمسار ويندوز محفوظ من جهاز آخر (أو مجلد محذوف) لا يجب أن يُنشئ مجلداً
+ * وهمياً ولا أن يمنع التشغيل، بل نرجع إلى Nginx المرفق بجانب المشروع — نفس سلوك النظام
+ * الأصلي في الرجوع إلى النسخة المرفقة.
+ */
+function customPrefix() {
   const custom = (settings().nginxPath || '').trim();
+  if (!custom) return '';
+  return fs.existsSync(path.dirname(custom)) ? custom : '';
+}
+
+function confDir() {
+  const custom = customPrefix();
   const root = custom ? path.dirname(custom) : path.join(store.ROOT, 'nginx');
   return path.join(root, 'conf');
 }
@@ -46,7 +58,7 @@ function accessLogPath() {
 
 /** مسار ffmpeg التنفيذي أو اسمه في PATH — يُستخدم في تشخيص الواجهة. */
 function nginxBin() {
-  const custom = (settings().nginxPath || '').trim();
+  const custom = customPrefix();
   if (custom) {
     if (path.isAbsolute(custom) && fs.existsSync(custom)) return custom;
     if (!path.isAbsolute(custom)) return custom;

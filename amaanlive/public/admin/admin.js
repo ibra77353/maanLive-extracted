@@ -29,11 +29,13 @@ const S_KEYS = [
   'siteName', 'siteNameLatin', 'phone',
   'useNginx', 'nginxPort', 'nginxPath', 'port', 'ffmpegPath',
   'hlsRoot', 'hlsTime', 'hlsListSize', 'hlsDeleteThreshold', 'gopSeconds',
-  'x264Preset', 'x264Threads', 'audioBitrate',
+  'x264Preset', 'x264Threads', 'x264QualityMode', 'audioBitrate',
   'startupQueueDelayMs', 'startupConcurrency', 'autoRestartCrashed', 'restartBackoffMs', 'maxRestarts', 'logMaxLines',
-  'idleStopEnabled', 'idleStopMinutes', 'autoStartOnDemand', 'viewerWindowSeconds', 'deviceWatchSeconds', 'sourceFailStopMinutes',
+  'idleStopEnabled', 'idleStopMinutes', 'autoStartOnDemand', 'viewerWindowSeconds', 'deviceWatchSeconds',
+  'sourceFailStopMinutes', 'blockedStopMinutes',
   'playerMaxBufferLength', 'playerBackBufferLength', 'playerLiveSyncDuration', 'capLevelToPlayerSize', 'cpuSaverDefault',
-  'logoImage', 'logoPosition', 'logoSizePct', 'logoOpacityPct'
+  'logoImage', 'logoPosition', 'logoSizePct', 'logoOpacityPct',
+  'ownerName', 'networkName', 'city'
 ];
 
 const DATA = { settings: {}, sources: [], channels: [], ads: [], devices: { devices: [] }, nginx: null };
@@ -886,7 +888,8 @@ async function loadSettings() {
     else el.value = DATA.settings[k] == null ? '' : DATA.settings[k];
   }
   $('#brandName').textContent = DATA.settings.siteName || 'بثي المحلي';
-  $('#adminFooter').textContent = (DATA.settings.siteName || 'بثي المحلي') + ' — يعمل بلا إنترنت · بلا تراخيص';
+  $('#adminFooter').textContent = (DATA.settings.siteName || 'بثي المحلي') +
+    (DATA.settings.networkName ? ' · ' + DATA.settings.networkName : '') + ' — يعمل بلا إنترنت · بلا تراخيص';
   const logo = $('#brandLogo');
   if (DATA.settings.logo) {
     logo.src = '/' + String(DATA.settings.logo).replace(/^\//, '').replace(/^srv\/uploads\//, 'uploads/');
