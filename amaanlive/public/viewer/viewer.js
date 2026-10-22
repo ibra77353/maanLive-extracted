@@ -64,6 +64,15 @@ async function health(channelId) {
   return r;
 }
 
+/** «تشغيل القناة تلقائياً عند طلب مشاهد»: نطلب من الخادم بدء البث فوراً. */
+async function requestStart(channelId) {
+  return fetch('/api/public/watch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: channelId })
+  }).then((x) => x.json()).catch(() => null);
+}
+
 async function play(channelId) {
   const ch = CHANNELS.find((c) => c.id === channelId);
   if (!ch) return;
@@ -78,6 +87,20 @@ async function play(channelId) {
 
   const state = await health(channelId);
   if (state && !state.live) {
+    // إن كان الخيار مفعّلاً نطلب تشغيل القناة تلقائياً بدل انتظار لوحة التحكم
+    if (SETTINGS.autoStartOnDemand) {
+      const req = await requestStart(channelId);
+      if (req && req.started) {
+        showStatus('⏳', 'جارٍ تشغيل القناة', 'سيبدأ البث تلقائياً خلال لحظات');
+        startHealthPolling(channelId);
+        return;
+      }
+      if (req && req.reason === 'error' && req.message) {
+        showStatus('⚠️', 'تعذّر تشغيل القناة', req.message);
+        startHealthPolling(channelId);
+        return;
+      }
+    }
     const reasons = {
       scheduled: ['🕒', 'القناة مجدولة', 'ستبدأ في وقتها المحدد من لوحة التحكم'],
       'waiting-device': ['🔌', 'جهاز الالتقاط غير موصول', 'أعد توصيل الجهاز وستعود القناة تلقائياً'],

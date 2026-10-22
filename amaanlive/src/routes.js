@@ -171,6 +171,8 @@ function createRouter() {
         playerLiveSyncDuration: s.playerLiveSyncDuration,
         capLevelToPlayerSize: Boolean(s.capLevelToPlayerSize),
         cpuSaverDefault: Boolean(s.cpuSaverDefault),
+        // «تشغيل القناة تلقائياً عند طلب مشاهد» — تقرأه صفحة المشاهدين لطلب التشغيل
+        autoStartOnDemand: Boolean(s.autoStartOnDemand),
         // الإعلانات المحلية المفعّلة فقط — تُعرض في الشريط المتحرك وكسلايدر للصور
         ads: store.get().ads.filter((a) => a.enabled).map((a) => ({ type: a.type, text: a.text, image: a.image }))
       }
@@ -209,6 +211,28 @@ function createRouter() {
     return ok(res, { viewers: ffmpeg.viewerCount(ch.id) });
   });
 
+  /**
+   * طلب مشاهدة من صفحة المشاهدين: يشغّل القناة المتوقفة تلقائياً إن كان خيار
+   * «تشغيل القناة تلقائياً عند طلب مشاهد» مفعّلاً — بدل انتظار ضغط «تشغيل» في اللوحة.
+   * لا يشمل القنوات المعطّلة أو الموقوفة يدوياً أو خارج وقت جدولتها.
+   */
+  r.post('/api/public/watch', async (req, res) => {
+    const body = await readJson(req);
+    const ch = store.findChannel(String(body.id || ''));
+    if (!ch) return fail(res, 404, 'القناة غير موجودة');
+    if (!ch.enabled || ch.manualStopped) return ok(res, { started: false, live: false, reason: 'stopped' });
+    if (ffmpeg.isRunning(ch.id)) return ok(res, { started: false, live: true, reason: 'running' });
+    if (!store.get().settings.autoStartOnDemand) return ok(res, { started: false, live: false, reason: 'disabled' });
+    if (scheduler.inWindow(ch.schedule) === false) return ok(res, { started: false, live: false, reason: 'scheduled' });
+    try {
+      await ffmpeg.start(ch.id);
+      console.log('[watch] تشغيل «' + ch.name + '» عند طلب مشاهد');
+      return ok(res, { started: true, live: true, reason: 'starting' });
+    } catch (e) {
+      return ok(res, { started: false, live: false, reason: 'error', message: e.message });
+    }
+  });
+
   // ======================= الحارس =======================
   r.use('/api', auth.requireAuth);
 
@@ -224,7 +248,7 @@ function createRouter() {
       'hlsTime', 'hlsListSize', 'hlsDeleteThreshold', 'gopSeconds',
       'x264Preset', 'x264Threads', 'audioBitrate',
       'startupQueueDelayMs', 'startupConcurrency', 'autoRestartCrashed', 'restartBackoffMs', 'maxRestarts', 'logMaxLines',
-      'idleStopEnabled', 'idleStopMinutes', 'viewerWindowSeconds', 'deviceWatchSeconds', 'sourceFailStopMinutes',
+      'idleStopEnabled', 'idleStopMinutes', 'autoStartOnDemand', 'viewerWindowSeconds', 'deviceWatchSeconds', 'sourceFailStopMinutes',
       'playerMaxBufferLength', 'playerBackBufferLength', 'playerLiveSyncDuration', 'capLevelToPlayerSize', 'cpuSaverDefault',
       'logoImage', 'logoPosition', 'logoSizePct', 'logoOpacityPct'
     ];

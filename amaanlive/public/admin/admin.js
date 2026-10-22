@@ -31,7 +31,7 @@ const S_KEYS = [
   'hlsRoot', 'hlsTime', 'hlsListSize', 'hlsDeleteThreshold', 'gopSeconds',
   'x264Preset', 'x264Threads', 'audioBitrate',
   'startupQueueDelayMs', 'startupConcurrency', 'autoRestartCrashed', 'restartBackoffMs', 'maxRestarts', 'logMaxLines',
-  'idleStopEnabled', 'idleStopMinutes', 'viewerWindowSeconds', 'deviceWatchSeconds', 'sourceFailStopMinutes',
+  'idleStopEnabled', 'idleStopMinutes', 'autoStartOnDemand', 'viewerWindowSeconds', 'deviceWatchSeconds', 'sourceFailStopMinutes',
   'playerMaxBufferLength', 'playerBackBufferLength', 'playerLiveSyncDuration', 'capLevelToPlayerSize', 'cpuSaverDefault',
   'logoImage', 'logoPosition', 'logoSizePct', 'logoOpacityPct'
 ];
