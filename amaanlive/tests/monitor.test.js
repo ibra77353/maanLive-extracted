@@ -205,3 +205,53 @@ test('إعداد «إعادة التشغيل التلقائي عند التعط�
     await teardown(dir);
   }
 });
+
+test('مهلة الإحياء الدوري: ٣ دقائق للمصدر الفاشل و٥ دقائق للجهاز المشغول', () => {
+  assert.strictEqual(monitor.watchdogDelayFor({}, 'error'), 3 * 60000);
+  assert.strictEqual(monitor.watchdogDelayFor({}, 'waiting-device'), 5 * 60000);
+  assert.strictEqual(monitor.watchdogDelayFor({ sourceFailStopMinutes: 7, blockedStopMinutes: 9 }, 'error'), 7 * 60000);
+  assert.strictEqual(monitor.watchdogDelayFor({ sourceFailStopMinutes: 7, blockedStopMinutes: 9 }, 'waiting-device'), 9 * 60000);
+  assert.strictEqual(monitor.watchdogDelayFor({ sourceFailStopMinutes: 7 }, 'error', 250), 250, 'التجاوز يُستخدم في الفحوص');
+});
+
+test('قناة توقّفت بعد استنفاد المحاولات: لا تُحيا قبل المدة وتُحيا بعدها', { skip: SKIP }, async () => {
+  const dir = setup('crash');
+  try {
+    store.get().settings.maxRestarts = 1; // محاولة سريعة واحدة فقط → تُعلن القناة «خطأ» بعدها
+    await ffmpeg.start(CHANNEL_ID).catch(() => null);
+    const errored = await until(() => ffmpeg.health(CHANNEL_ID).state === 'error', 5000);
+    assert.ok(errored, 'لم تدخل القناة حالة الخطأ بعد التعطّل');
+    assert.ok(ffmpeg.health(CHANNEL_ID).stoppedAt, 'لم يُسجَّل وقت التوقّف الذي تُحسب منه المدة');
+
+    // قبل انتهاء مدة الانتظار: المراقب لا يمسّها
+    await monitor.tick({ watchdogDelayMs: 60000 });
+    assert.strictEqual(ffmpeg.health(CHANNEL_ID).state, 'error', 'أُحيت القناة قبل انتهاء مدة الانتظار');
+
+    // الجهاز صار يفتح فعلاً: الإحياء الدوري يعيد القناة بلا تدخّل
+    fakeFfmpeg(dir, 'healthy');
+    await monitor.tick({ watchdogDelayMs: 1 });
+    const revived = await until(() => ffmpeg.health(CHANNEL_ID).state === 'running', 5000);
+    assert.ok(revived, 'لم تُحيا القناة المتوقفة بعد انتهاء المدة');
+    assert.match(ffmpeg.readLog(CHANNEL_ID), /\[watchdog\]/);
+    assert.ok(ffmpeg.health(CHANNEL_ID).lastWatchdogAt, 'لم يُسجَّل وقت الإحياء فلا تُحسب المدة التالية');
+  } finally {
+    await teardown(dir);
+  }
+});
+
+test('الإحياء الدوري يتوقّف مع تعطيل «إعادة التشغيل التلقائي عند التعطل»', { skip: SKIP }, async () => {
+  const dir = setup('crash');
+  try {
+    store.get().settings.maxRestarts = 1;
+    await ffmpeg.start(CHANNEL_ID).catch(() => null);
+    const errored = await until(() => ffmpeg.health(CHANNEL_ID).state === 'error', 5000);
+    assert.ok(errored, 'لم تدخل القناة حالة الخطأ بعد التعطّل');
+
+    store.get().settings.autoRestartCrashed = false;
+    fakeFfmpeg(dir, 'healthy');
+    await monitor.tick({ watchdogDelayMs: 1 });
+    assert.strictEqual(ffmpeg.health(CHANNEL_ID).state, 'error', 'أُحيت القناة رغم تعطيل الإعداد');
+  } finally {
+    await teardown(dir);
+  }
+});

@@ -86,11 +86,45 @@ test('نسخ المصدر (copy) بلا ترميز', () => {
   assert.ok(!args.join(' ').includes('libx264'));
 });
 
-test('الشعار المائي: مرشّح overlay مع الإدخال الثاني', () => {  const args = ffmpeg.buildOutputArgs({ id: 'ch_3', quality: '480p' }, USB_SOURCE, '/tmp/hls/ch_3', '/tmp/logo.png');
+test('الشعار المائي: مرشّح overlay مع الإدخال الثاني', () => {
+  const args = ffmpeg.buildOutputArgs({ id: 'ch_3', quality: '480p' }, USB_SOURCE, '/tmp/hls/ch_3', '/tmp/logo.png');
   const joined = args.join(' ');
   assert.ok(joined.includes('-filter_complex'));
   assert.ok(joined.includes('[0:v][wm]overlay=W-w-20:20:format=auto[v]'));
   assert.ok(joined.includes('-map [v]'));
   assert.ok(joined.includes('-map 0:a?'));
   assert.ok(!joined.includes('-c:v copy'), 'الشعار يفرض الترميز');
+});
+
+/** تشغيل مقطع بضبط قيمة إعداد في الذاكرة ثم إعادتها كما كانت (بلا كتابة في ملف المستخدم). */
+function withSetting(key, value, run) {
+  const settings = store.get().settings;
+  const before = settings[key];
+  settings[key] = value;
+  try {
+    return run();
+  } finally {
+    settings[key] = before;
+  }
+}
+
+test('وضع الجودة معطّل (البث المباشر): zerolatency والمخزن يساوي معدل البت', () => {
+  const joined = withSetting('x264QualityMode', false, () =>
+    ffmpeg.buildOutputArgs({ id: 'ch_q1', quality: '480p' }, USB_SOURCE, '/tmp/hls/ch_q1', null).join(' '));
+  assert.ok(joined.includes('-tune zerolatency'), 'البث المباشر يحتاج أقل تأخير');
+  assert.ok(joined.includes('-b:v 1400k -maxrate 1400k -bufsize 1400k'), 'المخزن في الوضع السريع يساوي معدل البت');
+});
+
+test('وضع الجودة مفعّل: بلا zerolatency مع مخزن مضاعف', () => {
+  const joined = withSetting('x264QualityMode', true, () =>
+    ffmpeg.buildOutputArgs({ id: 'ch_q2', quality: '480p' }, USB_SOURCE, '/tmp/hls/ch_q2', null).join(' '));
+  assert.ok(!joined.includes('zerolatency'), 'وضع الجودة يرفع التأخير مقابل الجودة');
+  assert.ok(joined.includes('-b:v 1400k -maxrate 1400k -bufsize 2800k'), 'المخزن يتضاعف في وضع الجودة');
+});
+
+test('وضع الجودة لا يمسّ نسخ المصدر (copy)', () => {
+  const joined = withSetting('x264QualityMode', true, () =>
+    ffmpeg.buildOutputArgs({ id: 'ch_q3', quality: 'copy' }, USB_SOURCE, '/tmp/hls/ch_q3', null).join(' '));
+  assert.ok(joined.includes('-c:v copy'));
+  assert.ok(!joined.includes('bufsize'));
 });

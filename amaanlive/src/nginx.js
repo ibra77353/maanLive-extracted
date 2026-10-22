@@ -30,7 +30,15 @@ function settings() {
 function customPrefix() {
   const custom = (settings().nginxPath || '').trim();
   if (!custom) return '';
-  return fs.existsSync(path.dirname(custom)) ? custom : '';
+  // مسار ويندوز ليس «مطلقاً» على غير ويندوز، و`path.dirname` هناك يعطي «.» فيبدو المجلد
+  // موجوداً بلا سبب ثم يفشل تشغيله (ENOENT) — لذلك نستخرج مجلده بأدوات ويندوز نفسها.
+  const dir = isWindowsAbsolute(custom) ? path.win32.dirname(custom) : path.dirname(custom);
+  return fs.existsSync(dir) ? custom : '';
+}
+
+/** مسار مطلق بنمط ويندوز (`C:\...` أو `C:/...`) — يُعامل كمسار مطلق على كل الأنظمة. */
+function isWindowsAbsolute(p) {
+  return /^[A-Za-z]:[\\/]/.test(p);
 }
 
 function confDir() {
@@ -261,6 +269,8 @@ async function start() {
       stdio: 'ignore',
       windowsHide: true
     });
+    // بلا مستمع للخطأ يتحوّل فشل التشغيل (ملف غير موجود/بلا صلاحية) إلى استثناء غير ملتقط
+    child.on('error', (e) => console.error('[nginx] تعذّر تشغيل nginx: ' + e.message));
     child.unref();
   } catch (e) {
     return { ok: false, message: 'تعذّر تشغيل nginx: ' + e.message };

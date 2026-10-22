@@ -372,7 +372,8 @@ async function tryCapture(source, seconds, platform) {
     lastStderr = text;
     const frames = (text.match(/frame=\s*(\d+)/g) || []).map((s) => Number(s.replace(/\D/g, ''))).pop() || 0;
     // نجاح = خروج سليم من ffmpeg، أو وصول إطارات فعلية (لو أنهت المهلة عملية متجمّدة بعدها)
-    const ok = res.code === 0 || frames > 0;    attempts.push({ label: variant.label, ok, frames, error: ok ? null : firstError(text) });
+    const ok = res.code === 0 || frames > 0;
+    attempts.push({ label: variant.label, ok, frames, error: ok ? null : firstError(text) });
     if (ok) return { ok: true, variant, frames, attempts, stderr: text.slice(-2000) };
   }
   return { ok: false, variant: null, frames: 0, attempts, stderr: lastStderr.slice(-2000) };
