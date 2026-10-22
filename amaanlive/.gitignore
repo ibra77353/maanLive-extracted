@@ -1,0 +1,8 @@
+# بيانات التشغيل المحلية — تُنشأ تلقائياً عند أول تشغيل ولا تُرفع للمستودع
+config/config.json
+logs/
+run/
+srv/hls/
+srv/uploads/
+nginx/logs/
+nginx/temp/

@@ -1,0 +1,15 @@
+{
+  "name": "amaan-live-local",
+  "version": "1.0.0",
+  "private": true,
+  "description": "نظام بث مباشر محلي مستقل (Node.js + FFmpeg + HLS + Nginx) — نسخة كود مصدري مفتوحة، تعمل بلا إنترنت وبلا تراخيص.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {}
+}

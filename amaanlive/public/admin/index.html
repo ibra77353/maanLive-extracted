@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>لوحة التحكم — بثي المحلي</title>
+<link rel="icon" type="image/png" href="/admin/favicon.png">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- ======== تسجيل الدخول ======== -->
+<div id="loginScreen" class="login-screen hidden">
+  <form id="loginForm" class="login-card">
+    <div class="login-mark">بثي <span>المحلي</span></div>
+    <p class="login-sub">لوحة تحكم البث المباشر</p>
+    <label>اسم المستخدم<input id="loginUser" autocomplete="username" value="admin" required></label>
+    <label>كلمة المرور<input id="loginPass" type="password" autocomplete="current-password" required></label>
+    <button class="btn btn-primary btn-block" type="submit">دخول</button>
+    <p id="loginError" class="form-error"></p>
+  </form>
+</div>
+
+<!-- ======== هيكل اللوحة ======== -->
+<div id="app" class="app hidden">
+  <aside class="sidebar">
+    <div class="brand">
+      <img id="brandLogo" class="brand-logo hidden" alt="">
+      <div class="brand-name" id="brandName">بثي المحلي</div>
+      <div class="onair-strip" id="onairStrip">OFF AIR</div>
+    </div>
+    <nav class="nav">
+      <button data-view="dashboard" class="nav-btn active">المراقبة والسجلات</button>
+      <button data-view="channels" class="nav-btn">القنوات</button>
+      <button data-view="sources" class="nav-btn">مصادر البث</button>
+      <button data-view="settings" class="nav-btn">الإعدادات</button>
+    </nav>
+    <div class="sidebar-foot">
+      <a href="/" target="_blank" class="btn btn-ghost btn-block">صفحة المشاهدين ↗</a>
+      <button id="logoutBtn" class="btn btn-ghost btn-block">تسجيل الخروج</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div id="sysMsgBar" class="sys-msg-wrap hidden"></div>
+
+    <!-- ===== المراقبة والسجلات ===== -->
+    <section id="view-dashboard" class="view">
+      <header class="view-head">
+        <h1>المراقبة والسجلات</h1>
+        <div class="head-stats" id="sysStats"></div>
+      </header>
+      <div class="dash-grid" id="dashGrid"></div>
+      <div class="table-wrap">
+        <table class="table" id="statusTable">
+          <thead><tr>
+            <th>القناة</th><th>الحالة</th><th>المشاهدون</th><th>البيانات</th>
+            <th>إعادة التشغيل</th><th>آخر الأخطاء</th><th>إجراءات</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="card log-card hidden" id="logCard">
+        <div class="card-head">
+          <h3 id="logTitle">سجل القناة</h3>
+          <div class="row-actions">
+            <button class="btn btn-sm" id="logDownload">⬇ حفظ كملف</button>
+            <button class="btn btn-sm btn-danger" id="logClear">🗑 تصفير</button>
+            <button class="btn btn-ghost" id="logClose">إغلاق</button>
+          </div>
+        </div>
+        <pre class="log-body" id="logBody"></pre>
+      </div>
+    </section>
+
+    <!-- ===== القنوات ===== -->
+    <section id="view-channels" class="view hidden">
+      <header class="view-head">
+        <h1>القنوات</h1>
+        <button class="btn btn-primary" id="addChannelBtn">+ إضافة قناة</button>
+      </header>
+      <div class="table-wrap">
+        <table class="table" id="channelsTable">
+          <thead><tr>
+            <th>الترتيب</th><th>القناة</th><th>التصنيف</th><th>المصدر</th><th>الجودة</th>
+            <th>تشغيل تلقائي</th><th>الجدولة</th><th>الحالة</th><th>إجراءات</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="hint">القناة ترتبط بمصدر واحد. عند تغيير المصدر أو الجودة تُعاد القناة تلقائياً بتعريفات FFmpeg الجديدة.</p>
+    </section>
+
+    <!-- ===== مصادر البث ===== -->
+    <section id="view-sources" class="view hidden">
+      <header class="view-head">
+        <h1>مصادر البث</h1>
+        <div class="head-actions">
+          <button class="btn" id="rescanBtn">↻ إعادة فحص الأجهزة</button>
+          <button class="btn" id="diagnoseBtn">🩺 تشخيص ffmpeg</button>
+          <button class="btn btn-primary" id="addSourceBtn">+ إضافة مصدر</button>
+        </div>
+      </header>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>الأجهزة المكتشفة تلقائياً</h3>
+          <span class="hint" id="devicesMeta"></span>
+        </div>
+        <div class="grid-2">
+          <div>
+            <h3 class="sec-title">أجهزة الفيديو</h3>
+            <div id="videoDevices"></div>
+          </div>
+          <div>
+            <h3 class="sec-title">أجهزة الصوت</h3>
+            <div id="audioDevices"></div>
+          </div>
+        </div>
+        <div id="diagnoseOut" class="log-body hidden" style="margin-top:14px"></div>
+      </div>
+
+      <h3 class="sec-title">المصادر المحفوظة</h3>
+      <div class="table-wrap">
+        <table class="table" id="sourcesTable">
+          <thead><tr><th>الاسم</th><th>النوع</th><th>الجهاز</th><th>الدقة / المعدل</th><th>الحالة</th><th>القنوات</th><th>إجراءات</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== الإعدادات ===== -->
+    <section id="view-settings" class="view hidden">
+      <header class="view-head">
+        <h1>الإعدادات</h1>
+        <button class="btn btn-primary" id="saveSettingsBtn">حفظ الإعدادات</button>
+      </header>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>الموقع وصفحة المشاهدين</h3>
+          <label>اسم الموقع<input class="input" id="s_siteName"></label>
+          <label>الاسم اللاتيني<input class="input" id="s_siteNameLatin"></label>
+          <label>رقم الهاتف (يظهر للمشاهدين)<input class="input" id="s_phone" dir="ltr"></label>
+          <label>شريط الإعلان<input class="input" id="s_ticker"></label>
+          <div class="switch-row"><input type="checkbox" id="s_tickerEnabled"><span>إظهار شريط الإعلان</span></div>
+          <label>شعار الموقع
+            <span class="with-browse">
+              <input class="input" id="s_logo" dir="ltr" placeholder="logo.png">
+              <label class="btn file-btn">رفع…<input type="file" id="logoFile" accept="image/*" hidden></label>
+            </span>
+          </label>
+        </div>
+
+        <div class="card">
+          <h3>الشعار المائي على البث</h3>
+          <p class="hint">يُدمج الشعار داخل الفيديو نفسه عبر FFmpeg (يتطلب ترميزاً، ولا يعمل مع «نسخ المصدر»).</p>
+          <label>ملف الشعار
+            <span class="with-browse">
+              <input class="input" id="s_logoImage" dir="ltr" placeholder="اتركه فارغاً لإيقافه">
+              <label class="btn file-btn">رفع…<input type="file" id="watermarkFile" accept="image/*" hidden></label>
+            </span>
+          </label>
+          <label>الموضع
+            <select class="input" id="s_logoPosition">
+              <option value="top-right">أعلى اليمين</option>
+              <option value="top-left">أعلى اليسار</option>
+              <option value="bottom-right">أسفل اليمين</option>
+              <option value="bottom-left">أسفل اليسار</option>
+              <option value="center">الوسط</option>
+            </select>
+          </label>
+          <label>الحجم بالنسبة المئوية من ارتفاع الفيديو<input class="input" id="s_logoSizePct" type="number" min="2" max="60"></label>
+          <label>الشفافية (٪)<input class="input" id="s_logoOpacityPct" type="number" min="5" max="100"></label>
+        </div>
+
+        <div class="card">
+          <h3>Nginx</h3>
+          <div id="nginxStatus" class="hint">…</div>
+          <div class="head-actions" style="margin:10px 0">
+            <button class="btn" id="nginxStart">تشغيل</button>
+            <button class="btn" id="nginxStop">إيقاف</button>
+            <button class="btn" id="nginxReload">إعادة تحميل الإعداد</button>
+            <button class="btn" id="nginxRegen">تحديث ملف nginx.conf</button>
+          </div>
+          <div class="switch-row"><input type="checkbox" id="s_useNginx"><span>تشغيل Nginx مع البرنامج</span></div>
+          <label>منفذ Nginx<input class="input" id="s_nginxPort" type="number" min="1" max="65535"></label>
+          <label>مسار nginx.exe (اتركه فارغاً للمرفق)<input class="input" id="s_nginxPath" dir="ltr"></label>
+          <label>منفذ النظام (Node)<input class="input" id="s_port" type="number" min="1" max="65535"></label>
+          <p class="hint">تغيير المنافذ يحتاج إعادة تشغيل البرنامج لتطبيق منفذ Node.</p>
+        </div>
+
+        <div class="card">
+          <h3>FFmpeg و HLS</h3>
+          <label>مسار ffmpeg (اتركه فارغاً للمرفق)<input class="input" id="s_ffmpegPath" dir="ltr"></label>
+          <label>مجلد HLS<input class="input" id="s_hlsRoot" dir="ltr"></label>
+          <div class="grid-3">
+            <label>مدة المقطع (ث)<input class="input" id="s_hlsTime" type="number" min="1" max="10"></label>
+            <label>عدد المقاطع في القائمة<input class="input" id="s_hlsListSize" type="number" min="2" max="20"></label>
+            <label>حد الحذف<input class="input" id="s_hlsDeleteThreshold" type="number" min="1" max="10"></label>
+            <label>طول GOP (ث)<input class="input" id="s_gopSeconds" type="number" min="1" max="10"></label>
+            <label>إعداد x264<select class="input" id="s_x264Preset">
+              <option value="ultrafast">ultrafast</option><option value="veryfast">veryfast</option>
+              <option value="faster">faster</option><option value="fast">fast</option>
+              <option value="medium">medium</option><option value="slow">slow</option>
+            </select></label>
+            <label>خيوط الترميز<input class="input" id="s_x264Threads" type="number" min="0" max="32"></label>
+          </div>
+          <label>معدل بت الصوت<input class="input" id="s_audioBitrate" dir="ltr" placeholder="128k"></label>
+        </div>
+
+        <div class="card">
+          <h3>التشغيل وإعادة المحاولة</h3>
+          <div class="grid-3">
+            <label>فاصل طابور الإقلاع (ملّي ثانية)<input class="input" id="s_startupQueueDelayMs" type="number" min="500" step="500"></label>
+            <label>قنوات تُشغَّل معاً<input class="input" id="s_startupConcurrency" type="number" min="1" max="8"></label>
+            <label>أقصى عدد محاولات<input class="input" id="s_maxRestarts" type="number" min="1" max="200"></label>
+            <label>زمن الانتظار قبل الإعادة (ملّي ثانية)<input class="input" id="s_restartBackoffMs" type="number" min="1000" step="1000"></label>
+            <label>أسطر السجل المحفوظة<input class="input" id="s_logMaxLines" type="number" min="100" max="5000"></label>
+          </div>
+          <div class="switch-row"><input type="checkbox" id="s_autoRestartCrashed"><span>إعادة تشغيل القناة تلقائياً عند التعطل</span></div>
+        </div>
+
+        <div class="card">
+          <h3>الخمول والأجهزة</h3>
+          <label>دقائق الخمول قبل الإيقاف<input class="input" id="s_idleStopMinutes" type="number" min="1" max="120"></label>
+          <div class="switch-row"><input type="checkbox" id="s_idleStopEnabled"><span>إيقاف القناة عند خمول المشاهدين</span></div>
+          <div class="grid-3">
+            <label>نافذة احتساب المشاهد (ث)<input class="input" id="s_viewerWindowSeconds" type="number" min="5" max="120"></label>
+            <label>فاصل فحص الأجهزة (ث)<input class="input" id="s_deviceWatchSeconds" type="number" min="2" max="60"></label>
+            <label>إيقاف مصدر فاشل بعد (د)<input class="input" id="s_sourceFailStopMinutes" type="number" min="1" max="60"></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>مشغّل المشاهدين</h3>
+          <div class="grid-3">
+            <label>أقصى مخزون (ث)<input class="input" id="s_playerMaxBufferLength" type="number" min="4" max="120"></label>
+            <label>المخزون الخلفي (ث)<input class="input" id="s_playerBackBufferLength" type="number" min="0" max="60"></label>
+            <label>تزامن البث المباشر (ث)<input class="input" id="s_playerLiveSyncDuration" type="number" min="1" max="30"></label>
+          </div>
+          <div class="switch-row"><input type="checkbox" id="s_capLevelToPlayerSize"><span>تحديد الجودة بحجم المشغّل</span></div>
+          <div class="switch-row"><input type="checkbox" id="s_cpuSaverDefault"><span>تفعيل «توفير المعالج» افتراضياً</span></div>
+        </div>
+
+        <div class="card">
+          <h3>حساب المسؤول</h3>
+          <p class="hint">حساب محلي واحد باسم <b>admin</b>. كلمة المرور مخزّنة مجزّأة (scrypt) ولا تُحفظ صريحة.</p>
+          <div id="pwdWarn" class="sys-msg warn hidden" style="margin-bottom:10px">
+            <span>⚠️</span><span>ما زلت تستخدم كلمة المرور الأولية Admin22 — غيّرها الآن.</span>
+          </div>
+          <label>كلمة المرور الحالية<input class="input" id="pwdCurrent" type="password" autocomplete="current-password"></label>
+          <label>كلمة المرور الجديدة<input class="input" id="pwdNext" type="password" autocomplete="new-password"></label>
+          <button class="btn btn-primary" id="changePwdBtn">تغيير كلمة المرور</button>
+          <p class="form-error" id="pwdError"></p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="admin-footer" id="adminFooter">بثي المحلي — نظام بث محلي يعمل بلا إنترنت</footer>
+  </main>
+</div>
+
+<!-- ======== نافذة القناة ======== -->
+<div id="channelModal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-head"><h3 id="channelModalTitle">إضافة قناة</h3><button class="modal-x" data-close="channelModal">✕</button></div>
+    <div class="modal-body">
+      <label>اسم القناة<input class="input" id="ch_name" required></label>
+      <label>المصدر<select class="input" id="ch_sourceId"></select></label>
+      <label>التصنيف<input class="input" id="ch_category" placeholder="مثال: رياضة"></label>
+      <div class="grid-2">
+        <label>الجودة
+          <select class="input" id="ch_quality">
+            <option value="copy">نسخ المصدر (بلا ترميز — الأخف)</option>
+            <option value="240p">240p</option><option value="360p">360p</option>
+            <option value="480p">480p</option><option value="720p">720p</option><option value="1080p">1080p</option>
+          </select>
+        </label>
+        <label>الترتيب<input class="input" id="ch_sort" type="number" value="0"></label>
+      </div>
+      <label>غلاف القناة
+        <span class="with-browse">
+          <input class="input" id="ch_cover" dir="ltr" placeholder="srv/uploads/…">
+          <label class="btn file-btn">رفع…<input type="file" id="coverFile" accept="image/*" hidden></label>
+        </span>
+      </label>
+      <div class="switch-row"><input type="checkbox" id="ch_enabled" checked><span>مفعّلة (تظهر للمشاهدين)</span></div>
+      <div class="switch-row"><input type="checkbox" id="ch_autoStart"><span>تشغيل تلقائي عند بدء البرنامج</span></div>
+      <hr class="sep">
+      <div class="switch-row"><input type="checkbox" id="ch_schedEnabled"><span>تشغيل بجدولة زمنية</span></div>
+      <div class="days-checks" id="ch_days"></div>
+      <div class="grid-2">
+        <label>من<input class="input" id="ch_from" type="time" value="08:00"></label>
+        <label>إلى<input class="input" id="ch_to" type="time" value="23:59"></label>
+      </div>
+      <p class="hint">إن كانت الجدولة مفعّلة وبدون أيام محددة فتعمل كل الأيام. الجدولة تتجاوز التشغيل التلقائي.</p>
+      <p class="form-error" id="channelError"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" id="channelSave">حفظ</button>
+      <button class="btn" data-close="channelModal">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======== نافذة المصدر ======== -->
+<div id="sourceModal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-head"><h3 id="sourceModalTitle">إضافة مصدر</h3><button class="modal-x" data-close="sourceModal">✕</button></div>
+    <div class="modal-body">
+      <label>اسم المصدر<input class="input" id="src_name" required></label>
+      <label>النوع
+        <select class="input" id="src_type">
+          <option value="usb">جهاز التقاط (USB / بطاقة التقاط)</option>
+          <option value="screen">التقاط الشاشة</option>
+        </select>
+      </label>
+
+      <div id="src_busWrap">
+        <label>جهاز الفيديو<select class="input" id="src_videoDevice"></select></label>
+        <div class="caps-list" id="src_videoCaps"></div>
+        <label style="margin-top:12px">جهاز الصوت (اختياري)<select class="input" id="src_audioDevice"></select></label>
+        <div class="grid-2" style="margin-top:10px">
+          <label>الدقة<select class="input" id="src_videoSize"></select></label>
+          <label>معدل الإطارات<select class="input" id="src_fps"></select></label>
+        </div>
+        <label>صيغة الالتقاط (pixel format)<select class="input" id="src_pixelFormat"></select></label>
+        <div class="switch-row"><input type="checkbox" id="src_captureSafeMode"><span>وضع الالتقاط الآمن (لا نفرض الدقة/المعدل — للكاميرات الحساسة)</span></div>
+        <p class="hint" id="src_capsHint">اختر جهازاً لعرض قدراته الفعلية المقروءة من الجهاز.</p>
+      </div>
+
+      <div id="src_screenWrap" class="hidden">
+        <div class="grid-2">
+          <label>الدقة<input class="input" id="src_screenSize" dir="ltr" placeholder="1280x720"></label>
+          <label>معدل الإطارات<input class="input" id="src_screenFps" type="number" min="1" max="60" value="15"></label>
+        </div>
+        <p class="hint">التقاط الشاشة عبر gdigrab على Windows — مفيد للعروض والاختبار بلا كاميرا.</p>
+      </div>
+
+      <div class="row-actions" style="margin-top:6px">
+        <button class="btn" id="srcTestBtn">🎥 اختبار الالتقاط</button>
+        <span class="hint" id="srcTestOut"></span>
+      </div>
+      <p class="form-error" id="sourceError"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" id="sourceSave">حفظ</button>
+      <button class="btn" data-close="sourceModal">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script src="admin.js"></script>
+</body>
+</html>

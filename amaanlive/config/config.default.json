@@ -1,0 +1,62 @@
+{
+  "settings": {
+    "siteName": "بثي المحلي",
+    "siteNameLatin": "My Live",
+    "logo": "logo.png",
+    "phone": "",
+    "ticker": "أهلاً بكم في البث المباشر",
+    "tickerEnabled": true,
+
+    "port": 3001,
+    "nginxPort": 801,
+    "useNginx": true,
+
+    "ffmpegPath": "",
+    "nginxPath": "",
+
+    "hlsRoot": "srv/hls",
+    "hlsTime": 2,
+    "hlsListSize": 6,
+    "hlsDeleteThreshold": 4,
+    "gopSeconds": 2,
+
+    "x264Preset": "veryfast",
+    "x264Threads": 2,
+    "audioBitrate": "128k",
+
+    "startupQueueDelayMs": 4000,
+    "startupConcurrency": 1,
+    "autoRestartCrashed": true,
+    "restartBackoffMs": 5000,
+    "maxRestarts": 20,
+    "logMaxLines": 800,
+
+    "idleStopEnabled": true,
+    "idleStopMinutes": 2,
+    "viewerWindowSeconds": 20,
+
+    "deviceWatchSeconds": 5,
+    "sourceFailStopMinutes": 3,
+
+    "playerMaxBufferLength": 20,
+    "playerBackBufferLength": 10,
+    "playerLiveSyncDuration": 4,
+    "capLevelToPlayerSize": true,
+    "cpuSaverDefault": true,
+
+    "logoImage": "",
+    "logoPosition": "top-right",
+    "logoSizePct": 10,
+    "logoOpacityPct": 60
+  },
+
+  "admin": {
+    "user": "admin",
+    "salt": "",
+    "hash": "",
+    "passwordIsDefault": true
+  },
+
+  "sources": [],
+  "channels": []
+}
