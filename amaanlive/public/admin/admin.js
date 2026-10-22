@@ -639,6 +639,8 @@ $('#diagnoseBtn').addEventListener('click', async () => {
 });
 
 $('#sourcesTable').addEventListener('click', async (e) => {
+  const idBtn = e.target.closest('button[data-devid]');
+  if (idBtn) return toggleDeviceId(idBtn);
   const btn = e.target.closest('button[data-sact]');
   if (!btn) return;
   const id = btn.dataset.id;
@@ -680,6 +682,21 @@ $('#audioDevices').addEventListener('click', (e) => {
   if (btn) toggleDeviceId(btn);
 });
 
+/** خلية «الجهاز» في جدول المصادر: اسم مقروء دائماً، والمعرّف الخام مخفي خلف زر الإظهار. */
+function deviceCell(s) {
+  const v = s.videoDevice;
+  const a = s.audioDevice;
+  const raw = [];
+  if (v) raw.push(rawDeviceId(v, 'video'));
+  if (a) raw.push(rawDeviceId(a, 'audio'));
+  return (v ? esc(deviceLabel(v, s.videoDeviceLabel)) : (s.type === 'screen' ? 'desktop' : '')) +
+    (a ? '<br>' + esc(deviceLabel(a, s.audioDeviceLabel)) : '') +
+    (raw.length
+      ? '<button class="link-btn" data-devid aria-expanded="false">إظهار المعرّف</button>' +
+        '<div class="dev-id hidden">' + raw.map(esc).join('<br>') + '</div>'
+      : '');
+}
+
 function renderSourcesTable() {
   const tb = $('#sourcesTable tbody');
   if (!DATA.sources.length) {
@@ -695,8 +712,7 @@ function renderSourcesTable() {
     return '<tr>' +
       '<td><b>' + esc(s.name) + '</b></td>' +
       '<td>' + (s.type === 'usb' ? 'التقاط DirectShow' : 'التقاط الشاشة') + '</td>' +
-      '<td class="cell-muted">' + esc(s.videoDevice || (s.type === 'screen' ? 'desktop' : '')) +
-        (s.audioDevice ? '<br>' + esc(s.audioDevice) : '') + '</td>' +
+      '<td class="cell-muted">' + deviceCell(s) + '</td>' +
       '<td>' + esc(s.videoSize || 'تلقائي') + ' · ' + (s.fps ? s.fps + 'fps' : 'تلقائي') +
         '<div class="cell-muted">' + esc(s.pixelFormat || s.vcodec || '—') + (modes ? ' · ' + modes + ' وضع' : '') + '</div></td>' +
       '<td>' + state + '</td>' +
