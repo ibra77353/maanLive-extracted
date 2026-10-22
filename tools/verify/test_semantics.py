@@ -56,15 +56,76 @@ function __module__(exports, require, module, __filename, __dirname)
 \t}
 \tcatch {}
 \tr0 = new RegExp("a\\\\s+b", "g")
+\ttry
+\t{
+\t\taccu = r0
+\t}
+\tcatch {}
+}
+"""
+
+# A dump shaped like the real ones: the section of the function a pool references — its own pool
+# included — is printed *inside* that pool, and the parent's remaining entries follow it. The wide
+# opcode form appears here too, because ffmpeg.js compiles one literal that way.
+NESTED_DUMP = """\
+Start SharedFunctionInfo
+ - name: 0x1 <String[5]: #outer>
+Start BytecodeArray
+Parameter count 1
+Register count 3
+         0x2 @   10 : 78 04 08 01       CreateRegExpLiteral [4], [8], #1
+         0x3 @   20 : 00 78 07 14 01    CreateRegExpLiteral.Wide [7], [20], #1
+Constant pool (size = 8)
+0x4: [FixedArray] in OldSpace
+ - map: 0x5 <Map>
+ - length: 8
+4: 0x6 <String[9]: #outer-one>
+Start SharedFunctionInfo
+0000: [SharedFunctionInfo] in OldSpace
+ - name: 0x7 <String[5]: #inner>
+Start BytecodeArray
+Parameter count 0
+Register count 2
+         0x8 @    0 : 78 00 00 00       CreateRegExpLiteral [0], [0], #0
+Constant pool (size = 1)
+0x9: [FixedArray] in OldSpace
+ - map: 0x5 <Map>
+ - length: 1
+0: 0xa <String[9]: #inner-one>
+Handler Table (size = 0)
+Source Position Table (size = 0)
+End BytecodeArray
+End SharedFunctionInfo
+7: 0xb <String[9]: #outer-two>
+Handler Table (size = 16)
+   from   to       hdlr (prediction,   data)
+  (   0,  40)  ->    20 (prediction=1, data=1)
+Source Position Table (size = 0)
+End BytecodeArray
+End SharedFunctionInfo
+"""
+
+NESTED_RECOVERED = """\
+function __module__(exports, require, module, __filename, __dirname)
+{
+\tlet r0, accu;
+\tr0 = new RegExp("outer-one", "g")
+\tr0 = new RegExp("outer-two", "g")
+\tr0 = new RegExp("inner-one")
+\ttry
+\t{
+\t\taccu = r0
+\t}
+\tcatch {}
 }
 """
 
 
-def build_root(recovered: str = RECOVERED) -> tempfile.TemporaryDirectory:
+def build_root(recovered: str = RECOVERED, dump: str = DUMP) -> tempfile.TemporaryDirectory:
     root = tempfile.TemporaryDirectory()
     (Path(root.name) / "decompiled" / "bytecode").mkdir(parents=True)
     (Path(root.name) / "recovered" / "src").mkdir(parents=True)
-    (Path(root.name) / "decompiled" / "bytecode" / "x.js.disasm.txt").write_text(DUMP, encoding="utf-8")
+    (Path(root.name) / "decompiled" / "bytecode" / "x.js.disasm.txt").write_text(dump, encoding="utf-8")
     (Path(root.name) / "recovered" / "src" / "x.js").write_text(recovered, encoding="utf-8")
     return root
 
@@ -136,6 +197,38 @@ class MatchTest(unittest.TestCase):
         self.assertEqual(result["extra"], [("invented", "")])
         result = semantics.match_regexes(self.listing, [("&amp;", "gs")])
         self.assertEqual([entry["pattern"] for entry in result["unbacked"]], ["a\\s+b"])
+
+
+class NestedTest(unittest.TestCase):
+    """A function section printed inside a pool must not cost the parent the entries after it."""
+
+    def setUp(self):
+        self.scan = semantics.scan_disassembly(NESTED_DUMP)
+
+    def test_every_pattern_resolves_against_its_own_pool(self):
+        pairs = {(readings[0], flags) for readings, flags in self.scan["regexes"]}
+        self.assertEqual(pairs, {("outer-one", "g"), ("outer-two", "g"), ("inner-one", "")})
+        self.assertEqual(self.scan["unresolved"], [])
+
+    def test_the_wide_opcode_carries_its_pattern_and_flags(self):
+        wide = [flags for readings, flags in self.scan["regexes"] if readings[0] == "outer-two"]
+        self.assertEqual(wide, ["g"])
+
+    def test_the_handler_table_keeps_the_enclosing_instruction_stream(self):
+        self.assertEqual([entry["handler"] for entry in self.scan["handlers"]], [20])
+        self.assertEqual([entry["handler_is_instruction"] for entry in self.scan["handlers"]], [True])
+        self.assertEqual([entry["kind"] for entry in self.scan["handlers"]], ["plain"])
+
+    def test_the_module_passes(self):
+        with build_root(NESTED_RECOVERED, NESTED_DUMP) as root:
+            report = semantics.check(root)
+        entry = report["modules"][0]
+        self.assertEqual(report["totals"]["ok_modules"], 1)
+        self.assertEqual(entry["regexes"]["listing"], 3)
+        self.assertEqual(entry["regexes"]["flags_recovered"], 2)
+        self.assertEqual(entry["regexes"]["unresolved_operands"], [])
+        self.assertEqual(entry["handlers"]["entries"], 1)
+        self.assertEqual(entry["handlers"]["bad_targets"], [])
 
 
 class CheckTest(unittest.TestCase):

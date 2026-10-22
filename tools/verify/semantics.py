@@ -18,10 +18,13 @@ stream, then its constant pool (`Constant pool (size = N)`, one numbered entry p
 arrays and boilerplate descriptions printed as their own `Start …`/`End …` sections), then the source
 position table, and — when the compilation produced handlers — a `Handler Table (size = N)` section
 whose size counts *bytes*: four Smi fields per entry, so `N/16` rows `(from, to) -> hdlr` follow its two
-header lines. Constant-pool numbering restarts with every function and the dump interleaves functions,
-so the file is read as one stream: a pool belongs to the instruction stream it was printed after, is
-resolved when it ends, and a handler table is consumed by its own declared size — a table whose rows do
-not match its declared size is an error, never a guess.
+header lines. Constant-pool numbering restarts with every function and the dump interleaves functions:
+a function's whole section, its pool included, is printed inside the pool of every function that
+references it, so a `Start SharedFunctionInfo` suspends the reading state and its matching
+`End SharedFunctionInfo` takes it back, the parent's pool entries resuming where they stopped. A pool
+belongs to the instruction stream it was printed after and is resolved when it ends, and a handler table
+is consumed by its own declared size — a table whose rows do not match its declared size is an error,
+never a guess.
 
 A `CreateRegExpLiteral` prints three operands: the pool index of the pattern string, the pool index of
 the flags Smi, and the **flag bitmask** V8 compiled (1 `g`, 2 `i`, 4 `m`, 8 `y`, 16 `u`, 32 `s`,
@@ -61,12 +64,12 @@ POOL_HEADER = re.compile(r"^Constant pool \(size = \d+[^)]*\)")
 POOL_ENTRY = re.compile(r"^\s*(\d+): (.*)$")
 POOL_END = re.compile(r"^(?:Constant pool|Handler Table|Source Position Table|Feedback Metadata|End )")
 STRING_ENTRY = re.compile(r"^0x[0-9a-f]+ <String\[\d+\]: u?#(.*)>$")
-FUNCTION_NAME = re.compile(r"^- name: 0x[0-9a-f]+ <String\[\d+\]: #([^>]*)>")
+FUNCTION_NAME = re.compile(r"^\s*- name: 0x[0-9a-f]+ <String\[\d+\]: #([^>]*)>")
 INSTRUCTION = re.compile(r"@\s*(\d+)\s*:\s+(?:[0-9a-f]{2} )+\s*(\S.*?)\s*$")
 TABLE_HEADER = re.compile(r"^Handler Table \(size = (\d+)\)")
 TABLE_COLUMNS = re.compile(r"^\s*from\s+to\s+hdlr")
 TABLE_ENTRY = re.compile(r"\(\s*(\d+),\s*(\d+)\)\s*->\s*(\d+)")
-CREATED_REGEXP = re.compile(r"CreateRegExpLiteral \[(\d+)\], \[(\d+)\], #(\d+)")
+CREATED_REGEXP = re.compile(r"CreateRegExpLiteral(?:\.(?:Wide|ExtraWide))? \[(\d+)\], \[(\d+)\], #(\d+)")
 CREATED_CATCH = re.compile(r"CreateCatchContext r\d+, \[(\d+)\]")
 
 # V8's JSRegExp flags, as the `CreateRegExpLiteral` mask carries them.
@@ -126,6 +129,7 @@ def scan_disassembly(text: str) -> dict:
     instructions: list[tuple[int, str]] = []
     snapshot: list[tuple[int, str]] = []            # the instruction stream a closed pool belongs to
     candidates: list[dict] = []                     # (name, instructions, pool) for each closed pool
+    suspended: list[tuple] = []                     # the state a nested function's section interrupts
     table_rows: list[tuple[int, int, int]] = []
     pending: list[tuple[int, int, int]] = []
     pool: dict[int, str] = {}
@@ -147,17 +151,17 @@ def scan_disassembly(text: str) -> dict:
     def classify(rows: list[tuple[int, int, int]]) -> list[dict]:
         """Attribute a handler table to the function whose instruction stream holds its targets.
 
-        The dump interleaves functions (nested `SharedFunctionInfo` sections are printed inside their
-        parent), so the instruction stream a table belongs to is the closed pool whose offsets contain
-        its handler targets.
+        A table is printed at the end of the bytecode it protects, so the stream in hand when it is
+        read — the one the enclosing section resumed — is its own; a closed pool is only a fallback,
+        and only wins when it holds strictly more of the table's handler targets.
         """
         targets = {row[2] for row in rows}
-        best = {"name": table_name, "instructions": snapshot or instructions, "pool": pool}
+        best = {"name": table_name, "instructions": instructions or snapshot, "pool": pool}
         if candidates:
             def coverage(candidate: dict) -> int:
                 return len(targets & {offset for offset, _ in candidate["instructions"]})
             top = max(candidates, key=coverage)
-            if coverage(top) >= coverage(best):
+            if coverage(top) > coverage(best):
                 best = top
         stream, stream_pool = best["instructions"], best["pool"]
         offsets = {offset for offset, _ in stream}
@@ -176,17 +180,28 @@ def scan_disassembly(text: str) -> dict:
         return inventory
 
     for line in text.split("\n"):
-        if line.startswith("Start SharedFunctionInfo") or line.startswith("Start BytecodeArray"):
+        if line.startswith("Start SharedFunctionInfo"):
+            # The section of every function this pool references is printed inside the pool, so the
+            # entries the pool still has to print resume once that section closes: suspend the whole
+            # reading state here and take it back at the matching `End SharedFunctionInfo`.
+            suspended.append((pool, pool_stack, instructions, pending, snapshot, name,
+                              rows_left, table_rows, table_name))
+            pool, pool_stack, instructions, pending = {}, [], [], []
+            snapshot, name, rows_left, table_rows, table_name = [], None, 0, [], None
+            continue
+        if line.startswith("Start BytecodeArray"):
             if pool_stack:                          # the previous function's pool was not closed
                 pool, pool_stack = pool_stack[0], []
                 resolve()
                 snapshot = list(instructions) or snapshot
                 candidates.append({"name": name, "instructions": snapshot, "pool": pool})
-            if line.startswith("Start SharedFunctionInfo"):
-                name = None
-                continue
             instructions, pending = [], []
             pool, pool_stack = {}, []
+            continue
+        if line.startswith("End SharedFunctionInfo"):
+            if suspended:                           # back to the section this one was printed inside
+                (pool, pool_stack, instructions, pending, snapshot, name,
+                 rows_left, table_rows, table_name) = suspended.pop()
             continue
         if line.startswith("End BytecodeArray"):
             resolve()

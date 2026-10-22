@@ -2188,7 +2188,7 @@ function func_unknown_0x100000033(a0)
 	r15 = accu
 	r14 = r15["join"]
 	r2 = r14(" ")
-	r15 = new RegExp("\\b40[13]\\b|Forbidden|access denied|HTTP error 40[13]")
+	r15 = new RegExp("\\b40[13]\\b|Forbidden|access denied|HTTP error 40[13]", "i")
 	r14 = r15["test"]
 	r3 = r14(r2)
 	r14 = Date["now"]()

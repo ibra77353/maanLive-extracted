@@ -608,7 +608,7 @@ function func_parseFeed_0x10000000b(a0)
 			r17 = r17[1]
 			r6 = func_decodeEntities_0x10000000a(r17)
 			r16 = r5[r0(117)]
-			r18 = new RegExp("<link[^>]*href=\"([^\"]+)\\")
+			r18 = new RegExp("<link[^>]*href=\"([^\"]+)\"", "i")
 			accu = r16(r18)
 			if (!r16(r18))
 			{

@@ -171,19 +171,20 @@ def make_verifier(binary: bytes, listing: str):
     return check
 
 
-def module_regexp_flags(disassembly: str) -> dict[str, str]:
-    """Pattern → flags for every `CreateRegExpLiteral` the module's disassembler dump prints.
+def module_regexp_flags(disassembly: str) -> dict[str, list[str]]:
+    """Pattern → the mask of every `CreateRegExpLiteral` that compiled it, in listing order.
 
     V8 carries a RegExp literal's flags in the `CreateRegExpLiteral [pattern], [pool], #mask` operand,
-    which `tools/verify/semantics.py` reads together with the constant pool that names the pattern. A
-    pattern printed with two different masks in one module cannot be paired by value and is dropped
-    here; the caller reports every literal it could not pair.
+    which `tools/verify/semantics.py` reads together with the constant pool that names the pattern. The
+    same source compiled with two different flag sets (`/…/` and `/…/g`) prints the same pattern twice,
+    so the masks are kept as the ordered list the listing compiled and `protect` consumes one per
+    occurrence; every literal the listing has no mask left for is reported by the caller.
     """
-    flags: dict[str, set[str]] = {}
+    flags: dict[str, list[str]] = {}
     for readings, mask in scan_disassembly(disassembly)["regexes"]:
-        for reading in readings:
-            flags.setdefault(reading, set()).add(mask)
-    return {pattern: next(iter(masks)) for pattern, masks in flags.items() if len(masks) == 1}
+        for reading in dict.fromkeys(readings):
+            flags.setdefault(reading, []).append(mask)
+    return flags
 
 
 def decode_string(raw: str, verify) -> tuple[str, str]:
@@ -198,10 +199,19 @@ def decode_string(raw: str, verify) -> tuple[str, str]:
 
 
 def decode_regex(body: str, verify) -> tuple[str, str]:
-    """Decode a RegExp source printed as `\\source\\`."""
+    """Decode a RegExp source printed as `\\source\\`.
+
+    View8 prints the source through V8's escaping, which doubles the backslashes and escapes the quotes
+    — except a quote that ends the source, which reaches the listing as a bare backslash
+    (`tvg-logo="([^"]*)"` is printed `tvg-logo=\\"([^\\"]*)\\`). That reading is offered only as a
+    candidate, next to the one the printing implies verbatim, and the code cache decides: a source whose
+    own last character really is a backslash verifies as printed and keeps it.
+    """
     candidates = [("halved-hex-runs-max", decode_literal(body, "max", True)),
-                  ("halved-hex-runs-two", decode_literal(body, "two", True)),
-                  ("verbatim", body)]
+                  ("halved-hex-runs-two", decode_literal(body, "two", True))]
+    if body.endswith("\\"):
+        candidates.append(("halved-lost-quote", decode_literal(body[:-1], "max", True) + '"'))
+    candidates.append(("verbatim", body))
     for label, value in candidates:
         if verify(value):
             return value, label
@@ -215,7 +225,7 @@ def quote(value: str) -> str:
 
 # ------------------------------------------------------------------------------------ line lowering
 
-def protect(line: str, verify, stats: dict, regexp_flags: dict[str, str] | None = None) -> str:
+def protect(line: str, verify, stats: dict, regexp_flags: dict[str, list[str]] | None = None) -> str:
     """Lower code without ever interpreting RegExp quotes as string delimiters."""
     masked, literals = mask_literals(line)
     decoded: list[tuple[str, str]] = []
@@ -223,7 +233,8 @@ def protect(line: str, verify, stats: dict, regexp_flags: dict[str, str] | None 
         if kind == "regex":
             value, how = decode_regex(raw[1:-1], verify)
             counter, readings = "regexes", "regex_readings"
-            flags = (regexp_flags or {}).get(value)
+            masks = (regexp_flags or {}).get(value)
+            flags = masks.pop(0) if masks else None
             stats["regex_flags" if flags is not None else "regex_flags_unpaired"] += 1
             # A JSON-escaped *string* is not a RegExp-literal body. Use a constructor so quotes,
             # slashes, newlines, and backslashes survive exactly one JavaScript decoding step, and keep

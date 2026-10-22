@@ -688,7 +688,7 @@ function func_parseM3U_0x10000000e(a0)
 				r19 = accu
 				r8 = r19["trim"]()
 				r18 = r7[r0(521)]
-				r20 = new RegExp("tvg-logo=\"([^\"]*)\\")
+				r20 = new RegExp("tvg-logo=\"([^\"]*)\"")
 				accu = r18(r20)
 				if (!r18(r20))
 				{
@@ -702,7 +702,7 @@ function func_parseM3U_0x10000000e(a0)
 				}
 				r9 = accu
 				r18 = r7[r0(521)]
-				r20 = new RegExp("group-title=\"([^\"]*)\\")
+				r20 = new RegExp("group-title=\"([^\"]*)\"")
 				accu = r18(r20)
 				if (!r18(r20))
 				{

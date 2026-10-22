@@ -30,13 +30,14 @@ docker run --rm node:18.5.0 node -e 'const vm=require("vm");const c=new vm.Scrip
 | `resolve_strings.py` | resolves the obfuscated base64 string array (accessor offset + rotation + alphabet) in View8 output |
 | `emit_source.py` | lowers a resolved register listing into candidate JavaScript under `recovered/`, with literal verification |
 | `normalize_listing.py` | literal-aware scanning and structural repairs for extended conditions and malformed catch blocks |
-| `test_emit_source.py` | regression fixtures for the five emitter defects and a temporary-output syntax audit of all 18 modules |
+| `test_emit_source.py` | regression fixtures for the emitter's structural and literal repairs, and a temporary-output syntax audit of all 18 modules |
 | `load_bytecode.js` | runs the original caches as CommonJS modules under Node 18.5.0 (ground truth for verification) |
 
-The structure and name checks live one directory over, in `tools/verify/`: `structure.py` compares every
-recovered loop and `switch` statement with the bytecode listings, and `crosscheck.py` compares the
-recovered names with the names the running caches expose (Node 18.5.0 container). *Verification status*
-below records what they report.
+The structure, RegExp/handler and name checks live one directory over, in `tools/verify/`: `structure.py`
+compares every recovered loop and `switch` statement with the bytecode listings, `semantics.py` compares
+every RegExp literal and every exception handler with them, and `crosscheck.py` compares the recovered
+names with the names the running caches expose (Node 18.5.0 container). *Verification status* below
+records what they report.
 
 ## Manual pipeline
 
@@ -96,8 +97,9 @@ The targeted repairs are:
 4. Identify the CommonJS wrapper from the outer script's assignment/return pair, including
    `server.js`, which has no exports assignment. Ambiguous wrappers are rejected.
 5. Scan backslash-delimited RegExp sources before interpreting quotes inside them, and emit
-   `new RegExp(sourceString)` so JavaScript decodes escapes once. Literal braces do not affect
-   function splitting, and literal text is not renamed as if it were code.
+   `new RegExp(sourceString, flags)` — the flags the listing compiled for that *occurrence*, since the
+   same pattern may be compiled twice with different ones — so JavaScript decodes escapes once. Literal
+   braces do not affect function splitting, and literal text is not renamed as if it were code.
 6. Add the block a switch statement needs. View8 prints `switch (r8)` directly followed by the
    clauses, each carrying its own block, and keeps the statements the bytecode still runs inside the
    switch — a trailing `return`, `break` or assignment run — after the last clause. The added block
@@ -110,6 +112,10 @@ The targeted repairs are:
    directly inside it is wrapped in `while (true)`. Nothing is moved, added or reordered.
 8. Lower View8's `<null` object-literal values (a `null` that carries no character data of its own)
    to `null`.
+9. Recover a RegExp source whose final quote View8 prints as a bare backslash — `tvg-logo="([^"]*)"`
+   reaches the listing as `tvg-logo=\"([^\"]*)\`. That reading is offered as one candidate next to the
+   one the printing implies verbatim, and the module's string table decides, so a source whose own last
+   character really is a backslash is still recovered exactly as printed.
 
 Run the focused regression checks and the 18-module syntax audit:
 
@@ -122,20 +128,28 @@ python3 tools/verify/structure.py
 python3 -m unittest discover -s tools/verify -p 'test_structure.py' -v
 ```
 
+```sh
+python3 tools/verify/semantics.py
+python3 -m unittest discover -s tools/verify -p 'test_semantics.py' -v
+```
+
 `tools/verify/structure.py` checks the repaired loop and `switch` structures against the bytecode
 itself rather than the emitted syntax: it compares `recovered/` with the committed
 `decompiled/bytecode/*.disasm.txt` listings (loop back edges and nesting depth per function, `switch`
 jump tables and their clause blocks, strict-comparison `switch` chains, and `async` generator resume
 dispatch). One row per module; a non-zero exit means a construct in `recovered/` is not backed by the
-listing, or a listing construct is missing from it. `tools/verify/crosscheck.py` compares recovered
-names against the names the running bytecode exposes.
+listing, or a listing construct is missing from it. `tools/verify/semantics.py` does the same for the
+two constructs a syntax check cannot see: it pairs every `CreateRegExpLiteral` — pattern from the
+constant pool, flags from the mask V8 compiled — with the `new RegExp(…)` the emitter produced, and
+holds each module's `catch`-clause count to its handler-table entry count. `tools/verify/crosscheck.py`
+compares recovered names against the names the running bytecode exposes.
 
 The audit generates files only in a temporary directory, calls `node --check` on each one, and
 removes them afterwards. Only synthetic fixtures are executed in the behavioural tests, never
 recovered application modules. A passing syntax check is **not** proof of runtime equivalence.
 Node-dependent tests are marked skipped if Node is unavailable; that is not a successful audit.
 
-**Verification status:** the 30 emitter tests pass, including the 18-module syntax audit, and `recovered/`
+**Verification status:** the 32 emitter tests pass, including the 18-module syntax audit, and `recovered/`
 has been regenerated from the listings — all **18/18** modules are emitted and each one passes
 `node --check`. `tools/verify/crosscheck.py` still reports 18/18 modules whose every `require()` name
 the running bytecode produced is present in the output, and all 44 such names appear in
@@ -145,8 +159,14 @@ at bytecode level: `tools/verify/structure.py` reports **18/18** modules in whic
 functions), all **8** jump tables, the single strict-comparison `switch` chain and all **55** `async`
 resume dispatches is backed by the committed listings — its own last line, `modules whose every loop
 and switch construct is backed by the bytecode: 18/18`, is the pass condition — and its 9 regression
-tests pass as well. RegExp flags, flattened exception handlers and V8 context lifetimes still require
-bytecode-level verification:
+tests pass as well. The RegExp literals and exception handlers the emitter restored **are** verified at
+bytecode level too: `tools/verify/semantics.py` reports **18/18** modules in which all **113**
+`new RegExp(…)` literals match a `CreateRegExpLiteral` pattern *and* its compiled flag mask, and all
+**375** handler-table entries match a `catch` clause, with every handler target resolving to an
+instruction offset of its own bytecode array — its own last line, `modules: 18/18 with every RegExp
+literal and every exception handler backed by the bytecode`, is the pass condition — and its
+**18** regression tests pass as well. V8 context lifetimes are the one construct left without a
+bytecode-level check:
 a passing syntax check is not runtime equivalence. The original `server.js`, `src/` binaries and
 `decompiled/` listings are left untouched.
 
@@ -159,3 +179,6 @@ a passing syntax check is not runtime equivalence. The original `server.js`, `sr
   files as `10.2.154.4`.
 * View8 output is a register-level representation, not reconstructable source. Do not expect
   `decompiled/*.js` to parse or run.
+* View8's listing is not byte-exact for one RegExp case: the quote that ends a source is printed as a
+  backslash. `tools/decompile/emit_source.py` recovers it from the code cache's string table (repair 9),
+  and `tools/verify/semantics.py` checks the result against the bytecode.

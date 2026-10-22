@@ -641,7 +641,7 @@ async function func_importChannel_0x100000019(a0)
 			r13 = ctx10
 			r14 = "oc_"
 			r15 = s10_2["id"]["replace"]
-			r17 = new RegExp("[^a-zA-Z0-9_-]")
+			r17 = new RegExp("[^a-zA-Z0-9_-]", "g")
 			s11_2 = (r14 + r15(r17, ""))
 			s11_3 = s10_2["name"]
 			while (true)

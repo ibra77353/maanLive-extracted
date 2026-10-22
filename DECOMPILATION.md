@@ -1,6 +1,6 @@
 # AmaanLive — binary module analysis and decompilation
 
-**ملخّص بالعربية:** ملفات `server.js` وجميع ملفات `src/*.js` في هذا المستودع ليست جافاسكربت ولا كوداً تنفيذياً للآلة، بل **ذاكرة مؤقتة لكود V8 (V8 code cache)** — أي "بایت‌كود المحرك Ignition" مُسلسَل مع جدول الثوابت (constant pool) وشجرة `SharedFunctionInfo`. النسخة المولِّدة لها: **Node.js v18.5.0 / V8 10.2.154.4-node.8** مع إعدادات V8 الافتراضية، وتم تصنيفها بنسخ مُشوَّش (javascript-obfuscator). تم تحويلها كلها (18/18 وحدة) إلى جافاسكربت مقروء مع استعادة مصفوفة النصوص المُشفّرة، والنتائج في مجلد `decompiled/` (سجلات على مستوى السجلات). ثم يُخفّض كل سجل إلى وحدة جافاسكربت صالحة نحوياً في مجلد `recovered/` عبر `tools/decompile/emit_source.py`: الوحدات الثماني عشرة كلها مُولّدة وكلها تنجح في `node --check`، وتم التحقق من بنية الحلقات وعبارات `switch` في كل وحدة مقابل البايت‌كود (`tools/verify/structure.py`، 18/18 وحدة)، مع بقاء تحقق إضافي مطلوباً على مستوى البايت‌كود لِلافتات RegExp ومعالجات الاستثناءات وأعمار سياقات V8. الأدوات وخطوات إعادة التنفيذ في `tools/decompile/`.
+**ملخّص بالعربية:** ملفات `server.js` وجميع ملفات `src/*.js` في هذا المستودع ليست جافاسكربت ولا كوداً تنفيذياً للآلة، بل **ذاكرة مؤقتة لكود V8 (V8 code cache)** — أي "بایت‌كود المحرك Ignition" مُسلسَل مع جدول الثوابت (constant pool) وشجرة `SharedFunctionInfo`. النسخة المولِّدة لها: **Node.js v18.5.0 / V8 10.2.154.4-node.8** مع إعدادات V8 الافتراضية، وتم تصنيفها بنسخ مُشوَّش (javascript-obfuscator). تم تحويلها كلها (18/18 وحدة) إلى جافاسكربت مقروء مع استعادة مصفوفة النصوص المُشفّرة، والنتائج في مجلد `decompiled/` (سجلات على مستوى السجلات). ثم يُخفّض كل سجل إلى وحدة جافاسكربت صالحة نحوياً في مجلد `recovered/` عبر `tools/decompile/emit_source.py`: الوحدات الثماني عشرة كلها مُولّدة وكلها تنجح في `node --check`، وتم التحقق من بنية الحلقات وعبارات `switch` في كل وحدة مقابل البايت‌كود (`tools/verify/structure.py`، 18/18 وحدة)، ومن كل نمط RegExp ولافتاته ومن جدول معالجات الاستثناءات في كل وحدة (`tools/verify/semantics.py`، 18/18 وحدة: 113 نمطاً و375 مدخلاً)، وكلها مطابقة للبايت‌كود. يبقى أعمار سياقات V8 (context lifetimes) بلا تحقق آلي. الأدوات وخطوات إعادة التنفيذ في `tools/decompile/`.
 
 ---
 
@@ -127,6 +127,27 @@ Recovered content is the real application logic, e.g.
    supports (or a listing construct missing from it) fails that module. 9 regression tests cover the
    checker itself, and `--json FILE` writes the full per-module result for auditing.
 
+5. **RegExp literal and exception-handler cross-check**: `tools/verify/semantics.py` reads the same
+   listings for the two constructs neither a syntax check nor the literal verifier can see, and compares
+   them with `recovered/` module by module:
+
+   | construct in `recovered/` | bytecode it is checked against | count | result |
+   |---|---|---:|---:|
+   | `new RegExp("pattern", "flags")` | `CreateRegExpLiteral` (pattern from the constant pool, flags from its compiled mask) | 113 | 18/18 ok |
+   | `try { … } catch { … }` clause count | `Handler Table` entries — one per protected region | 375 | 18/18 ok |
+
+   The comparison is a multiset match on (pattern, compiled flags) and an exact count
+   (375 handler entries against 375 `catch` clauses), so a dropped flag, an altered pattern or a lost
+   handler region fails its module; the report's last line, `modules: 18/18 with every RegExp literal and
+   every exception handler backed by the bytecode`, is the pass condition. **No** `CreateRegExpLiteral`
+   operand is left unresolved and every handler target resolves to an instruction offset of its own
+   bytecode array. 18 regression tests cover the reader, the multiset match and three defects it once
+   had: constant-pool entries printed after a nested function section, the `CreateRegExpLiteral.Wide`
+   encoding, and a RegExp source whose final quote View8 prints as a backslash.
+   `tools/verify/semantics.py --json FILE` writes the full per-module inventory, including the
+   catch-context bindings (`CreateCatchContext` names — 221 of the 375 entries; the remaining 154 are
+   the `finally`/iterator-close regions View8 also reconstructs as `catch {}` blocks).
+
 ### Lowering to JavaScript (`recovered/`)
 
 `tools/decompile/emit_source.py` lowers each register listing into a candidate module under
@@ -137,9 +158,11 @@ and all **44/44** `require()` names the running bytecode produced are present in
 This is a syntactic reconstruction, not a proof of equivalence. Literals are verified against the code
 cache's string table (see above). The loop and switch blocks View8 prints without their own braces —
 restored by `tools/decompile/normalize_listing.py` — are checked against the bytecode itself by
-`tools/verify/structure.py` (18/18 modules, every back edge and jump table accounted for), but RegExp
-flags, flattened exception handlers and V8 context lifetimes still require bytecode-level verification.
-The register-level listings in `decompiled/` remain the reference representation.
+`tools/verify/structure.py` (18/18 modules, every back edge and jump table accounted for), and every
+RegExp literal (pattern *and* compiled flags) and every exception handler is likewise checked by
+`tools/verify/semantics.py` (18/18 modules, 113 literals, 375 handler entries). V8 context lifetimes
+are the one construct that still has no bytecode-level check. The register-level listings in
+`decompiled/` remain the reference representation.
 
 ### Module table
 
@@ -208,6 +231,7 @@ See `tools/decompile/README.md`; the pipeline is
 
 Verification then runs from the repository alone (no Wine, no original runtime) with
 `python3 tools/verify/structure.py` — the loop and `switch` structure against the committed listings,
-18/18 — and the two regression suites (`tools/verify/test_structure.py`,
+18/18 — and `python3 tools/verify/semantics.py` — every RegExp literal and exception handler, 18/18 —
+plus their regression suites (`tools/verify/test_structure.py`, `tools/verify/test_semantics.py`,
 `tools/decompile/test_emit_source.py`). `python3 tools/verify/crosscheck.py` additionally loads the
 caches in a Node 18.5.0 container and compares the recovered names with the names they expose.

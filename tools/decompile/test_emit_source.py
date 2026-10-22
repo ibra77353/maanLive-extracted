@@ -26,8 +26,9 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def stats() -> dict:
+    """The per-literal counters `protect` writes, in the shape `emit` initializes them."""
     return {"strings": 0, "regexes": 0, "string_readings": {}, "regex_readings": {},
-            "unverified": []}
+            "regex_flags": 0, "regex_flags_unpaired": 0, "unverified": []}
 
 
 class StructureTests(unittest.TestCase):
@@ -184,6 +185,27 @@ class StructureTests(unittest.TestCase):
         self.assertEqual(counts['regexes'], 1)
         self.assertEqual(counts['strings'], 0)
         self.assertEqual(counts['unverified'], [])
+
+    def test_regex_quote_that_reaches_the_listing_as_a_backslash_is_recovered(self):
+        # View8 prints the quote that ends a RegExp source as a bare backslash; the code cache decides.
+        value = 'tvg-logo="([^"]*)"'
+        body = 'tvg-logo=\\"([^\\"]*)\\'                 # the printed form, without its delimiters
+        counts = stats()
+        lowered = emit_source.protect('\tr20 = \\' + body + '\\',
+                                      lambda candidate: candidate == value, counts)
+        self.assertEqual(lowered, '\tr20 = new RegExp(' + json.dumps(value) + ')')
+        self.assertEqual(counts['regex_readings'], {'halved-lost-quote': 1})
+        self.assertEqual(counts['unverified'], [])
+
+    def test_regex_source_that_really_ends_in_a_backslash_keeps_it(self):
+        # A source whose own last character is a backslash verifies as printed, so it is not repaired.
+        value = 'foo\\'
+        body = 'foo\\\\'                                # this printing doubles the source's backslash
+        counts = stats()
+        lowered = emit_source.protect('\tr1 = \\' + body + '\\',
+                                      lambda candidate: candidate == value, counts)
+        self.assertEqual(lowered, '\tr1 = new RegExp(' + json.dumps(value) + ')')
+        self.assertEqual(counts['regex_readings'], {'halved-hex-runs-max': 1})
 
     def test_string_content_is_not_rewritten_as_code(self):
         counts = stats()

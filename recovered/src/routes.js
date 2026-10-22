@@ -1677,7 +1677,7 @@ function func_unknown_0x10000008d(a0, a1)
 	}
 	r7 = accu
 	r6 = r7["replace"]
-	r8 = new RegExp("[^\\w\\u0600-\\u06FF-]+")
+	r8 = new RegExp("[^\\w\\u0600-\\u06FF-]+", "g")
 	r6 = r6(r8, "_")
 	r3 = r6["slice"](0, 50)
 	r5 = a1["setHeader"]

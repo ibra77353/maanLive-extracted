@@ -362,7 +362,7 @@ function func_parseCaps_0x100000018(a0)
 			r6 = r5[1]
 			r7 = r5[2]
 			r18 = r17["value"][r0(276)]
-			r20 = new RegExp("max s=(\\d+x\\d+) fps=([\\d.]+)")
+			r20 = new RegExp("max s=(\\d+x\\d+) fps=([\\d.]+)", "g")
 			r8 = r18(r20)
 			r18 = r17["value"][r0(276)]
 			r20 = new RegExp("min s=(\\d+x\\d+) fps=([\\d.]+)")
@@ -633,7 +633,7 @@ async function func_listDeviceOptions_0x100000017(a0)
 		{
 			accu = r29
 		}
-		r8 = new RegExp("s=(\\d+x\\d+)\\s+fps=([\\d.]+)")
+		r8 = new RegExp("s=(\\d+x\\d+)\\s+fps=([\\d.]+)", "g")
 		r9 = undefined
 		while (true)
 		{
@@ -923,14 +923,14 @@ async function func_diagnose_0x100000011()
 			accu = r9
 		}
 		r4 = r9
-		r10 = new RegExp("dshow")
+		r10 = new RegExp("dshow", "i")
 		r9 = r10["test"]
 		r5 = r9(r4)
-		r10 = new RegExp("\\((video|audio)\\)")
+		r10 = new RegExp("\\((video|audio)\\)", "i")
 		accu = r10["test"](r3)
 		if (!r10["test"](r3))
 		{
-			r10 = new RegExp("Alternative name")
+			r10 = new RegExp("Alternative name", "i")
 			r9 = r10["test"]
 			accu = r9(r3)
 		}
@@ -1213,7 +1213,7 @@ async function func_listDshowDevices_0x10000000a()
 					continue
 				}
 				r20 = r19["value"]["match"]
-				r22 = new RegExp("Alternative name\\s+\"(.+)\\")
+				r22 = new RegExp("Alternative name\\s+\"(.+)\"")
 				r10 = r20(r22)
 				if (!r20(r22)) continue
 				if (!r5) continue
