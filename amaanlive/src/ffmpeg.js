@@ -13,6 +13,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 const store = require('./store');
 const devices = require('./devices');
+const nginx = require('./nginx');
 
 /** حالة كل قناة قيد التشغيل أو المراقبة. */
 const runtime = new Map();
@@ -63,8 +64,7 @@ function rt(id) {
       stopping: false,
       stopReason: null,
       logDrain: null,
-      viewers: new Map(), // ip → آخر ظهور
-      heartbeats: new Map(), // ip → آخر نبضة
+      viewers: new Map(), // ip → آخر قراءة HLS
       lastViewerAt: null,
       servedBytes: 0,
       ingestFps: 0,
@@ -299,13 +299,7 @@ function noteHlsAccess(channelId, ip, bytes) {
   s.lastViewerAt = Date.now();
 }
 
-function heartbeat(channelId, ip) {
-  const s = rt(channelId);
-  if (ip) { s.heartbeats.set(ip, Date.now()); noteViewer(channelId, ip); }
-  s.lastViewerAt = Date.now();
-}
-
-/** مشاهدون فعليون = قراء HLS حديثون أو نبضات مشغّل حديثة. */
+/** مشاهدون فعليون = من قرأ قوائم/مقاطع HLS حديثاً (نبضات المتصفح لم تعد تُحتسب). */
 function viewerCount(channelId) {
   const s = runtime.get(channelId);
   if (!s) return 0;
@@ -313,11 +307,80 @@ function viewerCount(channelId) {
   const now = Date.now();
   const ips = new Set();
   for (const [ip, ts] of s.viewers) if (now - ts < windowMs) ips.add(ip);
-  for (const [ip, ts] of s.heartbeats) if (now - ts < windowMs) ips.add(ip);
-  // تنظيف القديم
-  for (const [ip, ts] of s.viewers) if (now - ts > windowMs * 5) s.viewers.delete(ip);
-  for (const [ip, ts] of s.heartbeats) if (now - ts > windowMs * 5) s.heartbeats.delete(ip);
+  for (const [ip, ts] of s.viewers) if (now - ts > windowMs * 5) s.viewers.delete(ip); // تنظيف القديم
   return ips.size;
+}
+
+// ---------------------------------------------------------------- سجل وصول Nginx
+
+/*
+ * عدّ المشاهدين من قراءات HLS الفعلية بدل نبضات المتصفح: كل مقطع .ts يخدِمه Nginx
+ * يُكتب في سجل الوصول (log_format hls)، فنقرأ المضاف منه فقط ونحتسب صاحبه مشاهداً.
+ * الفائدة: إخفاء تبويب المتصفح لا يُسقط العدّ ولا يُنشئ مشاهدة وهمية، ويُحتسب أيضاً
+ * كل مشغّل يقرأ المقاطع (VLC مثلاً) ولا يرسل نبضات. طلبات Node تُحتسب من server.js.
+ */
+let accessWatch = null;
+let accessOffset = 0;
+let accessPartial = '';
+
+/** معرّف القناة من مسار HLS: «/hls/<id>/seg_00012.ts» → <id>. */
+function channelIdFromHlsPath(p) {
+  const m = /^\/hls\/([^/]+)\//.exec(String(p || ''));
+  return m ? m[1] : null;
+}
+
+/** يحلّل سطر السجل بصيغة log_format hls: «IP STATUS BYTES "METHOD PATH PROTO"». */
+function handleAccessLine(line) {
+  const m = /^(\S+)\s+(\d{3})\s+(\d+)\s+"[A-Z]+\s+(\S+)/.exec(String(line || '').trim());
+  if (!m) return;
+  if (m[2] !== '200' && m[2] !== '206') return; // الطلب الفاشل ليس مشاهدة
+  const id = channelIdFromHlsPath(m[4]);
+  if (!id || !store.findChannel(id)) return;
+  noteHlsAccess(id, m[1], Number(m[3]) || 0);
+}
+
+/** يقرأ ما أُضيف إلى سجل الوصول منذ آخر قراءة، ويتعامل مع بدء Nginx ملفاً جديداً. */
+function readAccessLog() {
+  let stat;
+  try {
+    stat = fs.statSync(nginx.accessLogPath());
+  } catch (e) {
+    return; // لا سجل بعد
+  }
+  if (stat.size < accessOffset) {
+    accessOffset = 0;
+    accessPartial = '';
+  }
+  if (stat.size === accessOffset) return;
+  let text = '';
+  try {
+    const len = stat.size - accessOffset;
+    const fd = fs.openSync(nginx.accessLogPath(), 'r');
+    const buf = Buffer.alloc(len);
+    fs.readSync(fd, buf, 0, len, accessOffset);
+    fs.closeSync(fd);
+    text = buf.toString('utf8');
+  } catch (e) {
+    return;
+  }
+  accessOffset = stat.size;
+  const lines = (accessPartial + text).split('\n');
+  accessPartial = lines.pop(); // آخر سطر قد يكون غير مكتمل
+  for (const line of lines) handleAccessLine(line);
+}
+
+/** حلقة قراءة سجل الوصول (كل ثانية) — تُشغَّل عند الإقلاع مع بقية الحلقات. */
+function startAccessLogWatch() {
+  if (accessWatch) return accessWatch;
+  readAccessLog(); // نتخطّى ما في السجل قبل الإقلاع
+  accessWatch = setInterval(readAccessLog, 1000);
+  if (accessWatch.unref) accessWatch.unref();
+  return accessWatch;
+}
+
+function stopAccessLogWatch() {
+  if (accessWatch) clearInterval(accessWatch);
+  accessWatch = null;
 }
 
 function lastViewerAt(channelId) {
@@ -842,7 +905,8 @@ module.exports = {
   hlsRoot,
   channelDir,
   noteHlsAccess,
-  heartbeat,
+  startAccessLogWatch,
+  stopAccessLogWatch,
   viewerCount,
   totalViewersSeen,
   lastViewerAt,

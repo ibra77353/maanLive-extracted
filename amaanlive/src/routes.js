@@ -203,11 +203,12 @@ function createRouter() {
     });
   });
 
+  // عدّ المشاهدين صار من قراءات HLS نفسها (سجل وصول Nginx + بوابة Node) لا من نبضات
+  // المتصفح؛ النقطة باقية لقراءة العدد الحالي فقط.
   r.post('/api/public/heartbeat', async (req, res) => {
     const body = await readJson(req);
     const ch = store.findChannel(String(body.id || ''));
     if (!ch) return fail(res, 404, 'القناة غير موجودة');
-    ffmpeg.heartbeat(ch.id, clientIp(req));
     return ok(res, { viewers: ffmpeg.viewerCount(ch.id) });
   });
 

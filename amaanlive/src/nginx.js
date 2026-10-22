@@ -39,6 +39,11 @@ function errorLogPath() {
   return path.join(prefixDir(), 'logs', 'error.log');
 }
 
+/** سجل الوصول الذي يكتبه Nginx لقراءات مقاطع HLS — يقرأه ffmpeg.js لعدّ المشاهدين. */
+function accessLogPath() {
+  return path.join(prefixDir(), 'logs', 'access.log');
+}
+
 /** مسار ffmpeg التنفيذي أو اسمه في PATH — يُستخدم في تشخيص الواجهة. */
 function nginxBin() {
   const custom = (settings().nginxPath || '').trim();
@@ -81,6 +86,8 @@ function buildConf() {
     'http {',
     '    include       mime.types;',
     '    default_type  application/octet-stream;',
+    '# سجل وصول المقاطع: يقرأه البرنامج لعدّ المشاهدين من القراءات الحقيقية (IP + المسار + الحجم).',
+    '    log_format hls \'$remote_addr $status $body_bytes_sent "$request"\';',
     '    sendfile      on;',
     '    sendfile_max_chunk 512k;',
     '    tcp_nopush    on;',
@@ -110,10 +117,11 @@ function buildConf() {
     '            proxy_set_header X-Real-IP $remote_addr;',
     '        }',
     '',
-    '        # مقاطع .ts تُخدَم من القرص مباشرة: أخف على المعالج وأسرع للمشاهدين.',
+    '        # مقاطع .ts تُخدَم من القرص مباشرة: أخف على المعالج وأسرع للمشاهدين،',
+    '        # وتُكتب قراءاتها في سجل الوصول ليُحتسب المشاهدون من الطلبات الفعلية.',
     '        location /hls/ {',
     '            alias "' + root + '/' + hlsRoot + '/";',
-    '            access_log off;',
+    '            access_log "' + root + '/nginx/logs/access.log" hls;',
     '            add_header Access-Control-Allow-Origin *;',
     '            add_header Cache-Control "public, max-age=31536000, immutable";',
     '        }',
@@ -360,6 +368,7 @@ module.exports = {
   buildConf,
   writeConf,
   confPath,
+  accessLogPath,
   nginxBin,
   prefixDir,
   available,

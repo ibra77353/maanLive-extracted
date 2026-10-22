@@ -15,7 +15,6 @@ let CHANNELS = [];
 let current = null;
 let hls = null;
 let healthTimer = null;
-let heartbeatTimer = null;
 let filterCat = 'الكل';
 
 const video = $('#video');
@@ -33,7 +32,6 @@ function destroyPlayer() {
     video.load();
   } catch (e) { /* تجاهل */ }
   clearInterval(healthTimer);
-  clearInterval(heartbeatTimer);
 }
 
 function playerMsg(text, hideAfterMs) {
@@ -164,7 +162,6 @@ async function play(channelId) {
   }
 
   startHealthPolling(channelId);
-  startHeartbeat(channelId);
 }
 
 function startHealthPolling(channelId) {
@@ -185,20 +182,6 @@ function startHealthPolling(channelId) {
       play(channelId); // عاد البث: أعد التشغيل
     }
   }, 5000);
-}
-
-function startHeartbeat(channelId) {
-  const send = () => {
-    if (document.visibilityState === 'hidden') return;
-    fetch('/api/public/heartbeat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: channelId })
-    }).catch(() => undefined);
-  };
-  send();
-  clearInterval(heartbeatTimer);
-  heartbeatTimer = setInterval(send, 10000);
 }
 
 // ---------------------------------------------------------------- القائمة

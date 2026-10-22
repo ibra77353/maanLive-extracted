@@ -192,6 +192,7 @@ async function boot() {
   idle.startLoop();
   scheduler.startLoop();
   monitor.startLoop();
+  ffmpeg.startAccessLogWatch();
 
   // 4) خطوات الإيقاف المنظّم
   shutdown.register('إيقاف القنوات', () => ffmpeg.stopAll('shutdown'));
