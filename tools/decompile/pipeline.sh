@@ -42,7 +42,8 @@ for f in "$WORK"/out/*.disasm.txt; do
   rel=$name; [ "$name" = server.js ] || rel=src/$name
   python3 "$REPO/tools/decompile/resolve_strings.py" \
     --listing "$f" --view8 "$WORK/view8/$name.dec.js" --out "$REPO/decompiled/$rel" \
-    --packages "$REPO/node_modules" || echo "resolve_strings: $name needs review (see summary above)"
+    --binary "$REPO/$rel" --packages "$REPO/node_modules" \
+    || echo "resolve_strings: $name needs review (see summary above)"
   cp "$f" "$REPO/decompiled/bytecode/$name.disasm.txt"
 done
 
