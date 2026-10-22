@@ -44,6 +44,7 @@ function mergeDefaults(saved, defaults) {
   out.admin = Object.assign({}, defaults.admin, (saved && saved.admin) || {});
   if (!Array.isArray(out.sources)) out.sources = [];
   if (!Array.isArray(out.channels)) out.channels = [];
+  if (!Array.isArray(out.ads)) out.ads = [];
   return out;
 }
 

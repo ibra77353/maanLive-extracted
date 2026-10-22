@@ -1,5 +1,17 @@
 'use strict';
-/* بثي المحلي — منطق لوحة التحكم (4 أقسام: المراقبة والسجلات، القنوات، مصادر البث، الإعدادات) */
+/*
+ * بثي المحلي — منطق لوحة التحكم.
+ * القائمة الجانبية: المراقبة والسجلات · القنوات · مصادر البث · الجدولة · الإعلانات · الإعدادات
+ * أي نفس ترتيب البرنامج الأصلي بعد حذف الأقسام التي تحتاج إنترنت أو ترخيص
+ * (قنوات أونلاين، IPTV، كأس العالم 2026، الاشتراك والترخيص). كل قسم مربوط بمسارات
+ * النظام الأصلي التي أُعيد بناؤها محلياً:
+ *   المراقبة والسجلات → /api/stats · /api/channels/:id/log
+ *   القنوات            → /api/channels
+ *   مصادر البث         → /api/sources · /api/devices
+ *   الجدولة            → /api/channels (حقل schedule) · /api/channels/:id
+ *   الإعلانات          → /api/ads · /api/settings · /api/upload
+ *   الإعدادات          → /api/settings · /api/settings/password · /api/nginx/*
+ */
 
 const $ = (s, el) => (el || document).querySelector(s);
 const $$ = (s, el) => [...(el || document).querySelectorAll(s)];
@@ -12,8 +24,9 @@ const STATUS_LABELS = {
   running: 'تعمل ON AIR', starting: 'جارٍ التشغيل', stopping: 'جارٍ الإيقاف', restarting: 'إعادة تشغيل',
   stopped: 'متوقفة', error: 'خطأ', 'waiting-device': 'بانتظار الجهاز'
 };
+// مفاتيح الإعدادات التي يحرّرها قسم «الإعدادات» (الشريط والشعار في قسم «الإعلانات»)
 const S_KEYS = [
-  'siteName', 'siteNameLatin', 'logo', 'phone', 'ticker', 'tickerEnabled',
+  'siteName', 'siteNameLatin', 'phone',
   'useNginx', 'nginxPort', 'nginxPath', 'port', 'ffmpegPath',
   'hlsRoot', 'hlsTime', 'hlsListSize', 'hlsDeleteThreshold', 'gopSeconds',
   'x264Preset', 'x264Threads', 'audioBitrate',
@@ -23,11 +36,12 @@ const S_KEYS = [
   'logoImage', 'logoPosition', 'logoSizePct', 'logoOpacityPct'
 ];
 
-const DATA = { settings: {}, sources: [], channels: [], devices: { devices: [] }, nginx: null };
+const DATA = { settings: {}, sources: [], channels: [], ads: [], devices: { devices: [] }, nginx: null };
 let statusTimer = null;
 let logChannelId = null;
 let editingChannelId = null;
 let editingSourceId = null;
+let editingAdId = null;
 
 // ---------------------------------------------------------------- مساعدات
 
@@ -168,6 +182,8 @@ function switchView(name) {
   $$('.view').forEach((v) => v.classList.toggle('hidden', v.id !== 'view-' + name));
   if (name === 'channels') { loadChannels(); loadSources(); }
   if (name === 'sources') { loadDevices(); loadSources(); }
+  if (name === 'scheduler') loadSchedules();
+  if (name === 'ads') loadAds();
   if (name === 'settings') { loadSettings(); loadNginxStatus(); }
 }
 
@@ -749,16 +765,6 @@ async function saveSettings() {
 
 $('#saveSettingsBtn').addEventListener('click', saveSettings);
 
-$('#logoFile').addEventListener('change', async (e) => {
-  try {
-    const f = await upload(e.target, 'logo');
-    if (f) {
-      $('#s_logo').value = 'uploads/' + f.name;
-      toast('رُفع الشعار — اضغط «حفظ الإعدادات»');
-    }
-  } catch (err) { toast(err.message, true); }
-});
-
 $('#watermarkFile').addEventListener('change', async (e) => {
   try {
     const f = await upload(e.target, 'logo');
@@ -781,6 +787,215 @@ $('#changePwdBtn').addEventListener('click', async () => {
   } catch (e) {
     $('#pwdError').textContent = e.message;
   }
+});
+
+// ---------------------------------------------------------------- الجدولة
+// الجدولة مخزّنة داخل كل قناة (أيام + فترة) وتُدار من مسار /api/channels،
+// تماماً كما كانت لكل قناة جدولة في البرنامج الأصلي.
+
+function scheduleOf(ch) {
+  return Object.assign({ enabled: false, days: [], from: '08:00', to: '23:59' }, ch.schedule || {});
+}
+
+function scheduleDaysLabel(s) {
+  if (!s.enabled) return '—';
+  return (s.days && s.days.length) ? s.days.map((d) => DAYS[d]).join('، ') : 'كل الأيام';
+}
+
+function renderSchedulesTable() {
+  const tb = $('#schedulesTable tbody');
+  if (!DATA.channels.length) {
+    tb.innerHTML = '<tr><td colspan="6" class="hint" style="text-align:center;padding:24px">لا قنوات بعد — أضف قناة من قسم «القنوات» ثم فعّل جدولتها.</td></tr>';
+    return;
+  }
+  tb.innerHTML = DATA.channels.map((c) => {
+    const s = scheduleOf(c);
+    const next = !s.enabled ? '—'
+      : c.nextOpen === 0 ? 'مفتوحة الآن'
+        : c.nextOpen == null ? '—' : 'بعد ' + c.nextOpen + ' دقيقة';
+    return '<tr>' +
+      '<td><b>' + esc(c.name) + '</b><div class="cell-muted">' + esc(c.id) + '</div></td>' +
+      '<td>' + (s.enabled ? '<span class="chip running">مفعّلة</span>' : '<span class="chip">معطّلة</span>') + '</td>' +
+      '<td>' + esc(scheduleDaysLabel(s)) + '</td>' +
+      '<td>' + (s.enabled ? esc(s.from + ' → ' + s.to) : '—') + '</td>' +
+      '<td>' + esc(next) + '</td>' +
+      '<td><div class="row-actions">' +
+        '<button class="btn btn-sm" data-sac="toggle" data-id="' + c.id + '">' + (s.enabled ? 'تعطيل' : 'تفعيل') + '</button>' +
+        '<button class="btn btn-sm" data-sac="edit" data-id="' + c.id + '">تعديل المواعيد</button>' +
+      '</div></td></tr>';
+  }).join('');
+}
+
+async function loadSchedules() {
+  const r = await api('/channels');
+  DATA.channels = r.channels || [];
+  renderSchedulesTable();
+}
+
+$('#schedulesTable').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-sac]');
+  if (!btn) return;
+  const ch = DATA.channels.find((c) => c.id === btn.dataset.id);
+  if (!ch) return;
+  if (btn.dataset.sac === 'edit') return openChannelModal(ch.id);
+  const s = scheduleOf(ch);
+  try {
+    await api('/channels/' + ch.id, { method: 'PUT', body: { schedule: Object.assign({}, s, { enabled: !s.enabled }) } });
+    toast(s.enabled ? 'أُلغيت جدولة القناة' : 'فُعّلت جدولة القناة');
+    loadSchedules();
+    refreshStats();
+  } catch (err) { toast(err.message, true); }
+  return undefined;
+});
+
+$('#schedRefreshBtn').addEventListener('click', () => loadSchedules());
+
+// ---------------------------------------------------------------- الإعلانات
+// إعلانات محلية بلا إنترنت: إعلان نصي يُضاف إلى الشريط المتحرك، وإعلان صورة يُعرض
+// كسلايدر أسفل ترويسة صفحة المشاهدين. الشريط وشعار الموقع من مسار /api/settings.
+
+function mediaUrl(p) {
+  return '/' + String(p == null ? '' : p).replace(/^\//, '').replace(/^srv\/uploads\//, 'uploads/');
+}
+
+function loadAdsBar() {
+  const s = DATA.settings || {};
+  $('#a_ticker').value = s.ticker || '';
+  $('#a_tickerEnabled').checked = Boolean(s.tickerEnabled);
+  $('#a_logo').value = s.logo || '';
+  const img = $('#adLogoPreview');
+  if (s.logo) {
+    img.src = mediaUrl(s.logo);
+    img.classList.remove('hidden');
+  } else {
+    img.classList.add('hidden');
+  }
+}
+
+async function loadAds() {
+  const r = await api('/ads');
+  DATA.ads = r.ads || [];
+  renderAdsTable();
+  loadAdsBar();
+}
+
+async function saveAdsBar() {
+  try {
+    await api('/settings', {
+      method: 'PUT',
+      body: {
+        ticker: $('#a_ticker').value,
+        tickerEnabled: $('#a_tickerEnabled').checked,
+        logo: $('#a_logo').value.trim()
+      }
+    });
+    toast('حُفظ الشريط والشعار');
+    await loadSettings();
+    loadAdsBar();
+  } catch (e) { toast(e.message, true); }
+}
+
+$('#saveAdsBarBtn').addEventListener('click', saveAdsBar);
+
+$('#adLogoFile').addEventListener('change', async (e) => {
+  try {
+    const f = await upload(e.target, 'logo');
+    if (f) {
+      $('#a_logo').value = 'uploads/' + f.name;
+      toast('رُفع الشعار — اضغط «حفظ الشريط والشعار»');
+    }
+  } catch (err) { toast(err.message, true); }
+});
+
+function renderAdsTable() {
+  const tb = $('#adsTable tbody');
+  if (!DATA.ads.length) {
+    tb.innerHTML = '<tr><td colspan="4" class="hint" style="text-align:center;padding:24px">لا إعلانات بعد — أضف إعلاناً نصياً أو صورة.</td></tr>';
+    return;
+  }
+  tb.innerHTML = DATA.ads.map((a) => {
+    const content = a.type === 'image'
+      ? '<img class="ad-thumb" src="' + esc(mediaUrl(a.image)) + '" alt="">'
+      : esc(a.text || '');
+    return '<tr>' +
+      '<td>' + (a.type === 'image' ? 'صورة' : 'نص') + '</td>' +
+      '<td>' + content + '</td>' +
+      '<td>' + (a.enabled ? '<span class="chip running">مفعّل</span>' : '<span class="chip">معطّل</span>') + '</td>' +
+      '<td><div class="row-actions">' +
+        '<button class="btn btn-sm" data-aact="edit" data-id="' + a.id + '">تعديل</button>' +
+        '<button class="btn btn-sm" data-aact="toggle" data-id="' + a.id + '">' + (a.enabled ? 'تعطيل' : 'تفعيل') + '</button>' +
+        '<button class="btn btn-sm btn-danger" data-aact="delete" data-id="' + a.id + '">حذف</button>' +
+      '</div></td></tr>';
+  }).join('');
+}
+
+$('#adsTable').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-aact]');
+  if (!btn) return;
+  const ad = DATA.ads.find((a) => a.id === btn.dataset.id);
+  if (!ad) return;
+  const act = btn.dataset.aact;
+  if (act === 'edit') return openAdModal(ad.id);
+  try {
+    if (act === 'toggle') {
+      await api('/ads/' + ad.id, { method: 'PUT', body: { enabled: !ad.enabled } });
+      toast(ad.enabled ? 'أُعطّل الإعلان' : 'فُعّل الإعلان');
+    } else {
+      if (!confirm('حذف الإعلان؟')) return undefined;
+      await api('/ads/' + ad.id, { method: 'DELETE' });
+      toast('حُذف الإعلان');
+    }
+    loadAds();
+  } catch (err) { toast(err.message, true); }
+  return undefined;
+});
+
+function onAdTypeChange() {
+  const isText = $('#ad_type').value === 'text';
+  $('#ad_textWrap').classList.toggle('hidden', !isText);
+  $('#ad_imageWrap').classList.toggle('hidden', isText);
+}
+
+function openAdModal(id) {
+  editingAdId = id || null;
+  const ad = id ? DATA.ads.find((a) => a.id === id) : null;
+  $('#adModalTitle').textContent = ad ? 'تعديل إعلان' : 'إضافة إعلان';
+  $('#adError').textContent = '';
+  $('#ad_type').value = ad ? ad.type : 'text';
+  $('#ad_text').value = ad ? ad.text || '' : '';
+  $('#ad_image').value = ad ? ad.image || '' : '';
+  $('#ad_enabled').checked = ad ? ad.enabled !== false : true;
+  onAdTypeChange();
+  $('#adModal').classList.remove('hidden');
+}
+
+$('#addAdBtn').addEventListener('click', () => openAdModal(null));
+$('#ad_type').addEventListener('change', onAdTypeChange);
+
+$('#adImageFile').addEventListener('change', async (e) => {
+  try {
+    const f = await upload(e.target, 'ad');
+    if (f) {
+      $('#ad_image').value = f.path;
+      toast('رُفعت صورة الإعلان');
+    }
+  } catch (err) { toast(err.message, true); }
+});
+
+$('#adSave').addEventListener('click', async () => {
+  const body = {
+    type: $('#ad_type').value,
+    text: $('#ad_text').value.trim(),
+    image: $('#ad_image').value.trim(),
+    enabled: $('#ad_enabled').checked
+  };
+  try {
+    if (editingAdId) await api('/ads/' + editingAdId, { method: 'PUT', body });
+    else await api('/ads', { method: 'POST', body });
+    toast('حُفظ الإعلان');
+    $('#adModal').classList.add('hidden');
+    loadAds();
+  } catch (e) { $('#adError').textContent = e.message; }
 });
 
 // ---------------------------------------------------------------- Nginx

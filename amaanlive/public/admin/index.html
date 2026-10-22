@@ -33,6 +33,8 @@
       <button data-view="dashboard" class="nav-btn active">المراقبة والسجلات</button>
       <button data-view="channels" class="nav-btn">القنوات</button>
       <button data-view="sources" class="nav-btn">مصادر البث</button>
+      <button data-view="scheduler" class="nav-btn">الجدولة</button>
+      <button data-view="ads" class="nav-btn">الإعلانات</button>
       <button data-view="settings" class="nav-btn">الإعدادات</button>
     </nav>
     <div class="sidebar-foot">
@@ -129,6 +131,65 @@
       </div>
     </section>
 
+    <!-- ===== الجدولة ===== -->
+    <section id="view-scheduler" class="view hidden">
+      <header class="view-head">
+        <h1>الجدولة</h1>
+        <div class="head-actions">
+          <button class="btn" id="schedRefreshBtn">↻ تحديث</button>
+        </div>
+      </header>
+      <p class="hint">كل قناة تحمل جدولة اختيارية (أيام + فترة زمنية). القناة بلا جدولة تُعتبر <b>بثاً مستمراً</b>. الجدولة تعمل بتوقيت هذا الجهاز وتتجاوز «التشغيل التلقائي».</p>
+      <div class="table-wrap">
+        <table class="table" id="schedulesTable">
+          <thead><tr>
+            <th>القناة</th><th>الجدولة</th><th>الأيام</th><th>الفترة</th><th>الفتح القادم</th><th>إجراءات</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== الإعلانات ===== -->
+    <section id="view-ads" class="view hidden">
+      <header class="view-head">
+        <h1>الإعلانات</h1>
+        <div class="head-actions">
+          <button class="btn" id="saveAdsBarBtn">حفظ الشريط والشعار</button>
+          <button class="btn btn-primary" id="addAdBtn">+ إضافة إعلان</button>
+        </div>
+      </header>
+      <p class="hint">ما يراه المشاهدون: الشريط المتحرك أعلى الصفحة، شعار الموقع في الترويسة، ثم الإعلانات المحلية — الإعلان النصي يُضاف إلى الشريط، وإعلان الصورة يظهر كسلايدر أسفل الترويسة.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>الشريط المتحرك</h3>
+          <label>نص الشريط<input class="input" id="a_ticker" placeholder="أهلاً بكم في البث المباشر"></label>
+          <div class="switch-row"><input type="checkbox" id="a_tickerEnabled"><span>إظهار الشريط للمشاهدين</span></div>
+          <p class="hint">إعلانات النص المفعّلة تُعرض بعد هذا النص في نفس الشريط.</p>
+        </div>
+
+        <div class="card">
+          <h3>شعار الموقع</h3>
+          <label>ملف الشعار
+            <span class="with-browse">
+              <input class="input" id="a_logo" dir="ltr" placeholder="logo.png">
+              <label class="btn file-btn">رفع…<input type="file" id="adLogoFile" accept="image/*" hidden></label>
+            </span>
+          </label>
+          <img id="adLogoPreview" class="ad-logo-preview hidden" alt="">
+        </div>
+      </div>
+
+      <h3 class="sec-title">الإعلانات المحلية</h3>
+      <div class="table-wrap">
+        <table class="table" id="adsTable">
+          <thead><tr><th>النوع</th><th>المحتوى</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
     <!-- ===== الإعدادات ===== -->
     <section id="view-settings" class="view hidden">
       <header class="view-head">
@@ -142,14 +203,7 @@
           <label>اسم الموقع<input class="input" id="s_siteName"></label>
           <label>الاسم اللاتيني<input class="input" id="s_siteNameLatin"></label>
           <label>رقم الهاتف (يظهر للمشاهدين)<input class="input" id="s_phone" dir="ltr"></label>
-          <label>شريط الإعلان<input class="input" id="s_ticker"></label>
-          <div class="switch-row"><input type="checkbox" id="s_tickerEnabled"><span>إظهار شريط الإعلان</span></div>
-          <label>شعار الموقع
-            <span class="with-browse">
-              <input class="input" id="s_logo" dir="ltr" placeholder="logo.png">
-              <label class="btn file-btn">رفع…<input type="file" id="logoFile" accept="image/*" hidden></label>
-            </span>
-          </label>
+          <p class="hint">التحكم بشريط الإعلان وشعار الموقع انتقل إلى قسم <b>«الإعلانات»</b>.</p>
         </div>
 
         <div class="card">
@@ -347,6 +401,38 @@
     <div class="modal-foot">
       <button class="btn btn-primary" id="sourceSave">حفظ</button>
       <button class="btn" data-close="sourceModal">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======== نافذة الإعلان ======== -->
+<div id="adModal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-head"><h3 id="adModalTitle">إضافة إعلان</h3><button class="modal-x" data-close="adModal">✕</button></div>
+    <div class="modal-body">
+      <label>نوع الإعلان
+        <select class="input" id="ad_type">
+          <option value="text">نص — يظهر في الشريط المتحرك</option>
+          <option value="image">صورة — سلايدر أسفل الترويسة</option>
+        </select>
+      </label>
+      <div id="ad_textWrap">
+        <label>نص الإعلان<input class="input" id="ad_text" placeholder="إعلان محلي…"></label>
+      </div>
+      <div id="ad_imageWrap" class="hidden">
+        <label>صورة الإعلان
+          <span class="with-browse">
+            <input class="input" id="ad_image" dir="ltr" placeholder="srv/uploads/…">
+            <label class="btn file-btn">رفع…<input type="file" id="adImageFile" accept="image/*" hidden></label>
+          </span>
+        </label>
+      </div>
+      <div class="switch-row"><input type="checkbox" id="ad_enabled" checked><span>مفعّل (يظهر للمشاهدين)</span></div>
+      <p class="form-error" id="adError"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" id="adSave">حفظ</button>
+      <button class="btn" data-close="adModal">إلغاء</button>
     </div>
   </div>
 </div>

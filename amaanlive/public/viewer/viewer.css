@@ -18,6 +18,14 @@ a{color:var(--accent);text-decoration:none}
 @keyframes tick{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 @media (prefers-reduced-motion: reduce){.ticker-track span{animation:none;padding-right:0}}
 
+/* الإعلانات المحلية (سلايدر صور) */
+.ads-strip{display:flex;gap:12px;overflow-x:auto;padding:12px;background:var(--panel);
+  border-bottom:1px solid var(--line);scroll-snap-type:x mandatory}
+.ads-strip::-webkit-scrollbar{height:8px}
+.ads-strip::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
+.ads-item{flex:0 0 auto;scroll-snap-align:center}
+.ads-item img{height:80px;width:auto;display:block;border-radius:8px;border:1px solid var(--line)}
+
 /* الترويسة */
 .site-head{text-align:center;padding:26px 16px 0}
 .site-logo{max-height:64px;margin-bottom:6px}

@@ -240,9 +240,24 @@ async function loadSettings() {
     p.href = 'tel:' + SETTINGS.phone;
     p.classList.remove('hidden');
   }
-  if (SETTINGS.ticker) {
-    $('#tickerText').textContent = SETTINGS.ticker;
+  // الشريط المتحرك: نص الإعدادات + إعلانات النص المفعّلة (الإعلانات المحلية)
+  const ads = SETTINGS.ads || [];
+  const line = [SETTINGS.ticker].concat(ads.filter((a) => a.type === 'text' && a.text).map((a) => a.text))
+    .filter(Boolean).join('   •   ');
+  if (line) {
+    $('#tickerText').textContent = line;
     $('#tickerBar').classList.remove('hidden');
+  }
+
+  // سلايدر صور الإعلانات المحلية
+  const strip = $('#adsStrip');
+  const images = ads.filter((a) => a.type === 'image' && a.image);
+  if (images.length) {
+    strip.innerHTML = images.map((a) => '<div class="ads-item"><img src="' +
+      esc('/' + String(a.image).replace(/^\//, '').replace(/^srv\/uploads\//, 'uploads/')) + '" alt="إعلان"></div>').join('');
+    strip.classList.remove('hidden');
+  } else {
+    strip.classList.add('hidden');
   }
   if (SETTINGS.cpuSaverDefault) $('#cpuSaver').checked = true;
 }

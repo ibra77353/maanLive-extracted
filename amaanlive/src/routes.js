@@ -88,6 +88,24 @@ function sanitizeChannel(body, existing) {
   return ch;
 }
 
+/**
+ * الإعلانات المحلية (بلا إنترنت): إعلان نصي يظهر في الشريط المتحرك، أو صورة تظهر
+ * كسلايدر أسفل ترويسة صفحة المشاهدين — نفس نموذج الإعلانات في البرنامج الأصلي.
+ */
+function sanitizeAd(body, existing) {
+  const ad = existing ? Object.assign({}, existing) : { id: store.newId('ad') };
+  const pick = (k, def) => (body[k] === undefined ? (existing ? existing[k] : def) : body[k]);
+
+  ad.type = pick('type', 'text') === 'image' ? 'image' : 'text';
+  ad.text = String(pick('text', '') || '').trim().slice(0, 300);
+  ad.image = String(pick('image', '') || '').trim().slice(0, 300);
+  ad.enabled = Boolean(pick('enabled', true));
+  if (ad.type === 'text' && !ad.text) throw new Error('اكتب نص الإعلان');
+  if (ad.type === 'image' && !ad.image) throw new Error('اختر صورة الإعلان');
+  if (!ad.createdAt) ad.createdAt = Date.now();
+  return ad;
+}
+
 function publicChannel(ch) {
   const src = store.findSource(ch.sourceId);
   const st = ffmpeg.statusOf(ch.id);
@@ -152,7 +170,9 @@ function createRouter() {
         playerBackBufferLength: s.playerBackBufferLength,
         playerLiveSyncDuration: s.playerLiveSyncDuration,
         capLevelToPlayerSize: Boolean(s.capLevelToPlayerSize),
-        cpuSaverDefault: Boolean(s.cpuSaverDefault)
+        cpuSaverDefault: Boolean(s.cpuSaverDefault),
+        // الإعلانات المحلية المفعّلة فقط — تُعرض في الشريط المتحرك وكسلايدر للصور
+        ads: store.get().ads.filter((a) => a.enabled).map((a) => ({ type: a.type, text: a.text, image: a.image }))
       }
     });
   });
@@ -387,7 +407,7 @@ function createRouter() {
       channels: data.channels
         .slice()
         .sort((a, b) => (a.sort || 0) - (b.sort || 0))
-        .map((c) => Object.assign({}, c, ffmpeg.statusOf(c.id)))
+        .map((c) => Object.assign({}, c, ffmpeg.statusOf(c.id), { nextOpen: scheduler.nextOpenMinutes(c.schedule) }))
     });
   });
 
@@ -481,6 +501,37 @@ function createRouter() {
     return ok(res, { cleared: true });
   });
 
+  // ---------------- الإعلانات المحلية ----------------
+  r.get('/api/ads', async (req, res) => ok(res, { ads: store.get().ads }));
+
+  r.post('/api/ads', async (req, res) => {
+    const body = await readJson(req);
+    const ad = sanitizeAd(body);
+    store.get().ads.push(ad);
+    store.save();
+    return ok(res, { ad });
+  });
+
+  r.put('/api/ads/:id', async (req, res) => {
+    const body = await readJson(req);
+    const data = store.get();
+    const idx = data.ads.findIndex((a) => a.id === req.params.id);
+    if (idx === -1) return fail(res, 404, 'الإعلان غير موجود');
+    const ad = sanitizeAd(body, data.ads[idx]);
+    data.ads[idx] = ad;
+    store.save();
+    return ok(res, { ad });
+  });
+
+  r.del('/api/ads/:id', async (req, res) => {
+    const data = store.get();
+    const idx = data.ads.findIndex((a) => a.id === req.params.id);
+    if (idx === -1) return fail(res, 404, 'الإعلان غير موجود');
+    data.ads.splice(idx, 1);
+    store.save();
+    return ok(res, { deleted: true });
+  });
+
   // ---------------- الرفع ----------------
   r.post('/api/upload', async (req, res) => {
     if (!/multipart\/form-data/i.test(req.headers['content-type'] || '')) {
@@ -498,4 +549,4 @@ function createRouter() {
   return r;
 }
 
-module.exports = { createRouter, sanitizeSource, sanitizeChannel, publicChannel };
+module.exports = { createRouter, sanitizeSource, sanitizeChannel, sanitizeAd, publicChannel };
