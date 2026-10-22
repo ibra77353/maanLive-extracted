@@ -2,9 +2,9 @@
 //
 // Lowered from the View8 register listing of the V8 code cache in the repository root (5251 source
 // characters; Node 18.5.0 / V8 10.2.154.4-node.8) by tools/decompile/emit_source.py, after
-// tools/decompile/resolve_strings.py restored the obfuscated string array. The module is a faithful
-// reconstruction of the original control flow and data flow; see DECOMPILATION.md for the analysis and
-// its limitations.
+// tools/decompile/resolve_strings.py restored the obfuscated string array. This is a syntactic
+// reconstruction of View8's listing, not a proof of equivalence to the binary. Context lifetimes and
+// exception semantics still need verification; see tools/decompile/README.md and DECOMPILATION.md.
 //
 // How to read it:
 //   rN        a bytecode register (a local of the enclosing function)
@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   /.../     a RegExp literal (the code cache does not record its flags)
+//   RegExp    a recovered source string (flags are not recovered by this emitter)
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).
@@ -266,10 +266,7 @@ function func_unknown_0x100000004(a0)
 function func_verify_0x100000003(a0)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, accu;
-	if (!a0)
-	r5 = a0["indexOf"]
-	r5 = r5(".")
-		|| (r5 < 0)
+	if (((!a0) || (r5 = a0["indexOf"], r5 = r5("."), (r5 < 0))))
 	{
 		return null
 	}
@@ -281,11 +278,7 @@ function func_verify_0x100000003(a0)
 	r11 = ctx1
 	try
 	{
-		if (!false)
-		r8 = true
-		r12 = r7["next"]()
-		accu = r12["done"]
-			&& (!r12["done"])
+		if (((!false) && (r8 = true, r12 = r7["next"](), accu = r12["done"], (!r12["done"]))))
 		{
 			r8 = false
 			accu = r12["value"]
@@ -295,11 +288,7 @@ function func_verify_0x100000003(a0)
 			accu = undefined
 		}
 		r1 = accu
-		if (!r8)
-		r8 = true
-		r12 = r7["next"]()
-		accu = r12["done"]
-			&& (!r12["done"])
+		if (((!r8) && (r8 = true, r12 = r7["next"](), accu = r12["done"], (!r12["done"]))))
 		{
 			r8 = false
 			accu = r12["value"]
@@ -327,8 +316,8 @@ function func_verify_0x100000003(a0)
 			{
 				accu = r7["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r9 === 0)

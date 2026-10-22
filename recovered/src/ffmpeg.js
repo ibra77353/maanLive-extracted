@@ -2,9 +2,9 @@
 //
 // Lowered from the View8 register listing of the V8 code cache in the repository root (48691 source
 // characters; Node 18.5.0 / V8 10.2.154.4-node.8) by tools/decompile/emit_source.py, after
-// tools/decompile/resolve_strings.py restored the obfuscated string array. The module is a faithful
-// reconstruction of the original control flow and data flow; see DECOMPILATION.md for the analysis and
-// its limitations.
+// tools/decompile/resolve_strings.py restored the obfuscated string array. This is a syntactic
+// reconstruction of View8's listing, not a proof of equivalence to the binary. Context lifetimes and
+// exception semantics still need verification; see tools/decompile/README.md and DECOMPILATION.md.
 //
 // How to read it:
 //   rN        a bytecode register (a local of the enclosing function)
@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   /.../     a RegExp literal (the code cache does not record its flags)
+//   RegExp    a recovered source string (flags are not recovered by this emitter)
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).
@@ -72,8 +72,7 @@ function func_unknown_0x100000059()
 		r11 = ctx2
 		return undefined
 	}
-	if (!r0)
-		|| (!r0["channels"])
+	if (((!r0) || ((!r0["channels"]))))
 	{
 		return undefined
 	}
@@ -118,8 +117,7 @@ function func_unknown_0x100000059()
 			s4_2 = r16["value"]
 			r18 = s4_2["enabled"]
 			r16 = r16["value"]
-			if (r18 === !Boolean([]))
-				|| (s4_2["manualStopped"])
+			if (((r18 === !Boolean([])) || ((s4_2["manualStopped"]))))
 			{
 				continue
 			}
@@ -151,8 +149,7 @@ function func_unknown_0x100000059()
 					continue
 				}
 			}
-			if (r7)
-				&& (r7["status"] === "blocked")
+			if (((r7) && ((r7["status"] === "blocked"))))
 			{
 				accu = r7["blockedSince"]
 				r18 = r2
@@ -240,8 +237,8 @@ function func_unknown_0x100000059()
 			{
 				accu = r11["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r13 === 0)
@@ -291,11 +288,7 @@ function func_unknown_0x100000057()
 			r24 = ctx1
 			try
 			{
-				if (!false)
-				r21 = true
-				r25 = r20["next"]()
-				accu = r25["done"]
-					&& (!r25["done"])
+				if (((!false) && (r21 = true, r25 = r20["next"](), accu = r25["done"], (!r25["done"]))))
 				{
 					r21 = false
 					accu = r25["value"]
@@ -305,11 +298,7 @@ function func_unknown_0x100000057()
 					accu = undefined
 				}
 				r6 = accu
-				if (!r21)
-				r21 = true
-				r25 = r20["next"]()
-				accu = r25["done"]
-					&& (!r25["done"])
+				if (((!r21) && (r21 = true, r25 = r20["next"](), accu = r25["done"], (!r25["done"]))))
 				{
 					r21 = false
 					accu = r25["value"]
@@ -337,8 +326,8 @@ function func_unknown_0x100000057()
 					{
 						accu = r20["return"]()
 					}
-					catch {}
 				}
+				catch {}
 			}
 			accu = null
 			if (r22 === 0)
@@ -347,11 +336,7 @@ function func_unknown_0x100000057()
 				r15 = r23
 				break
 			}
-			if (r7)
-				&& (!r7[r0(429)])
-			r18 = r7[r0(478)]
-				&& (r18 === "running")
-				&& (!r7["procs"][r0(662)])
+			if (((((r7) && ((!r7[r0(429)]))) && (r18 = r7[r0(478)], (r18 === "running"))) && ((!r7["procs"][r0(662)]))))
 			{
 				continue
 			}
@@ -431,8 +416,8 @@ function func_unknown_0x100000057()
 					{
 						accu = r19["return"]()
 					}
-					catch {}
 				}
+				catch {}
 			}
 			accu = null
 			if (!r21 === 0) continue
@@ -459,8 +444,8 @@ function func_unknown_0x100000057()
 			{
 				accu = r12["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r14 === 0)
@@ -470,7 +455,7 @@ function func_unknown_0x100000057()
 	return undefined
 }
 
-function async func_unknown_0x100000056()
+async function func_unknown_0x100000056()
 {
 	let r0, r1, r4, r5, r6, r7, r11, r12, r13, r14, r15, r16, r17, r18, r19, r20, r21, r22, r23, r24, r25, r26, r27, r28, accu;
 	r14 = __closure
@@ -563,8 +548,8 @@ function async func_unknown_0x100000056()
 					{
 						accu = r19["return"]()
 					}
-					catch {}
 				}
+				catch {}
 			}
 			accu = null
 			accu = r21 === 0
@@ -617,8 +602,8 @@ function async func_unknown_0x100000056()
 						{
 							accu = r19["return"]()
 						}
-						catch {}
 					}
+					catch {}
 				}
 				accu = null
 				if (r21 === 0)
@@ -683,7 +668,7 @@ function async func_unknown_0x100000056()
 function func_looksLikeHls_0x100000055(a0)
 {
 	let r0, r1, r2, r3, accu;
-	r1 = /m3u8?([?#]|$)/
+	r1 = new RegExp("m3u8?([?#]|$)")
 	r0 = r1["test"]
 	accu = a0
 	if (!a0)
@@ -972,8 +957,8 @@ function func_runningCount_0x10000004a()
 			{
 				accu = r6["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r8 === 0)
@@ -1024,8 +1009,8 @@ function func_totalBytesOut_0x100000049()
 			{
 				accu = r5["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r7 === 0)
@@ -1137,16 +1122,11 @@ function func_0x3da77d_0x100000046(a0)
 function func_shouldClearRestartPenalty_0x100000045(a0, a1)
 {
 	let r1, accu;
-	if (!a0)
-		|| (a0["stopping"])
-	r1 = a0["status"]
-		|| (!r1 === "running")
+	if ((((!a0) || ((a0["stopping"]))) || (r1 = a0["status"], (!r1 === "running"))))
 	{
 		return !Boolean([])
 	}
-	if (!a0["procs"])
-	r1 = a0["procs"]
-		|| (!r1["length"])
+	if (((!a0["procs"]) || (r1 = a0["procs"], (!r1["length"]))))
 	{
 		return !Boolean([])
 	}
@@ -1165,7 +1145,7 @@ function func_shouldClearRestartPenalty_0x100000045(a0, a1)
 	return r1 >= 60000
 }
 
-function async func_measureChannelBytes_0x100000044(a0)
+async function func_measureChannelBytes_0x100000044(a0)
 {
 	let r5, r6, r7, r8, r9, r11, r12, r13, r19, r22, r23, r24, r25, r26, r27, r28, r29, r30, r31, r32, r33, r34, r35, r36, r37, r38, r39, r40, r41, r42, r43, accu;
 	r22 = ctx1
@@ -1267,8 +1247,8 @@ function async func_measureChannelBytes_0x100000044(a0)
 					{
 						accu = r26["return"]()
 					}
-					catch {}
 				}
+				catch {}
 			}
 			accu = null
 			if (r28 === 0)
@@ -1403,8 +1383,8 @@ function async func_measureChannelBytes_0x100000044(a0)
 							{
 								accu = r34["return"]()
 							}
-							catch {}
 						}
+						catch {}
 					}
 					accu = null
 					if (r36 === 0)
@@ -1460,8 +1440,8 @@ function async func_measureChannelBytes_0x100000044(a0)
 							{
 								accu = r34["return"]()
 							}
-							catch {}
 						}
+						catch {}
 					}
 					accu = null
 					if (!r36 === 0) continue
@@ -1488,8 +1468,8 @@ function async func_measureChannelBytes_0x100000044(a0)
 					{
 						accu = r26["return"]()
 					}
-					catch {}
 				}
+				catch {}
 			}
 			accu = null
 			if (r28 === 0)
@@ -1549,10 +1529,7 @@ function func_statusOf_0x100000041(a0)
 		accu = "stopped"
 	}
 	r2["status"] = accu
-	if (r1)
-	r3 = r1["procs"]
-	accu = r3[0]
-		&& (r3[0])
+	if (((r1) && (r3 = r1["procs"], accu = r3[0], (r3[0]))))
 	{
 		accu = r1["procs"][0]["pid"]
 	}
@@ -1659,8 +1636,7 @@ function func_0x8b9fa6_0x10000003f()
 		r0 = r3(func_unknown_0x10000003e)
 		if (!r3(func_unknown_0x10000003e))
 		{
-			if (s22_3["alwaysOn"])
-				|| (!s21_4)
+			if (((s22_3["alwaysOn"]) || ((!s21_4))))
 			{
 				accu = func_start_0x100000037(s22_3["id"])
 			}
@@ -1752,8 +1728,8 @@ function func_stopAll_0x10000003c()
 			{
 				accu = r5["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r7 === 0)
@@ -1854,8 +1830,8 @@ function func_stop_0x100000039(a0)
 			{
 				accu = r6["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r8 === 0)
@@ -1939,9 +1915,7 @@ function func_startProcesses_0x100000036(a0, a1)
 		accu = Error(r12)
 	}
 	r3 = s1_9["streamAuth"]()
-	if (!s1_9["streamAuth"]())
-	r11 = s1_9["isValid"]
-		|| (!r11())
+	if (((!s1_9["streamAuth"]()) || (r11 = s1_9["isValid"], (!r11()))))
 	{
 		r12 = "انتهى الاشتراك — لا يمكن تشغيل القنوات. يرجى تجديد الترخيص."
 		accu = Error
@@ -1976,7 +1950,7 @@ function func_startProcesses_0x100000036(a0, a1)
 	}
 	if (!Boolean(r4))
 	{
-		r11 = {"procs": [], "status": null, "startedAt": null, "restarts": 0, "stopping": null, "restartTimer": <null}
+		r11 = {"procs": [], "status": null, "startedAt": null, "restarts": 0, "stopping": null, "restartTimer": null}
 		r11["status"] = "starting"
 		r12 = Date["now"]
 		r11["startedAt"] = r12()
@@ -2057,8 +2031,8 @@ function func_startProcesses_0x100000036(a0, a1)
 				{
 					accu = r12["return"]()
 				}
-				catch {}
 			}
+			catch {}
 		}
 		accu = null
 		if (r14 === 0)
@@ -2214,7 +2188,7 @@ function func_unknown_0x100000033(a0)
 	r15 = accu
 	r14 = r15["join"]
 	r2 = r14(" ")
-	r15 = /\\b40[13]\\b|Forbidden|access denied|HTTP error 40[13]/
+	r15 = new RegExp("\\b40[13]\\b|Forbidden|access denied|HTTP error 40[13]")
 	r14 = r15["test"]
 	r3 = r14(r2)
 	r14 = Date["now"]()
@@ -2348,9 +2322,7 @@ function func_unknown_0x100000033(a0)
 		}
 	}
 	r7 = accu
-	if (r1["autoRestartCrashed"])
-	r14 = r0["restarts"]
-		&& (r14 < r7)
+	if (((r1["autoRestartCrashed"]) && (r14 = r0["restarts"], (r14 < r7))))
 	{
 		if (r0["restartTimer"])
 		{
@@ -2485,8 +2457,8 @@ function func_unknown_0x100000032()
 			{
 				accu = r6["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r8 === 0)
@@ -2539,8 +2511,7 @@ function func_unknown_0x100000030()
 	let r0, r1, r5, r6, r7, r8, r9, r10, r11, r12, r13, accu;
 	r5 = s1_18["get"]
 	r1 = r5(s28_3)
-	if (!r5(s28_3))
-		|| (r1["stopping"])
+	if (((!r5(s28_3)) || ((r1["stopping"]))))
 	{
 		return undefined
 	}
@@ -2584,8 +2555,8 @@ function func_unknown_0x100000030()
 			{
 				accu = r6["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r8 === 0)
@@ -2623,8 +2594,7 @@ function func_unknown_0x10000002f()
 	r1 = ctx29
 	s32_2 = func_0x1d1a_0x100000047
 	r0 = s1_18["get"](s28_3)
-	if (!s1_18["get"](s28_3))
-		|| (r0["stopping"])
+	if (((!s1_18["get"](s28_3)) || ((r0["stopping"]))))
 	{
 		return undefined
 	}
@@ -2645,8 +2615,7 @@ function func_unknown_0x10000002e()
 	let r0, r1, r5, r6, r7, r8, r9, r10, r11, r12, r13, accu;
 	r5 = s1_18["get"]
 	r1 = r5(s28_3)
-	if (!r5(s28_3))
-		|| (r1["stopping"])
+	if (((!r5(s28_3)) || ((r1["stopping"]))))
 	{
 		return undefined
 	}
@@ -2688,8 +2657,8 @@ function func_unknown_0x10000002e()
 			{
 				accu = r6["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r8 === 0)
@@ -2795,12 +2764,7 @@ function func_autoFixSource_0x100000028(a0)
 		accu = func_getSource_0x100000021(r0["sourceId"])
 	}
 	s34_4 = accu
-	if (!s34_4)
-		|| (!s34_4["url"])
-	r5 = /^https?:\\/\\//
-	r4 = r5["test"]
-	r6 = s34_4["url"]
-		|| (!r4(r6))
+	if ((((!s34_4) || ((!s34_4["url"]))) || (r5 = new RegExp("^https?:\\/\\/"), r4 = r5["test"], r6 = s34_4["url"], (!r4(r6)))))
 	{
 		return undefined
 	}
@@ -2858,6 +2822,7 @@ function func_autoFixSource_0x100000028(a0)
 	r2 = accu
 	r4 = ctx34
 	accu = ctx36
+	try
 	{
 		accu = PushContext("Block")
 		r5 = ctx34
@@ -2929,32 +2894,22 @@ function func_0x398616_0x100000024()
 	r10 = r10(r12, 2048)
 	r1 = s38_5["toString"]("utf8", 0, r10)
 	r2 = ""
-	r7 = /#EXTM3U/
-	if (r7["test"](r1))
-	r7 = /mpegurl/
-	r6 = r7["test"]
-		|| (r6(s38_4))
+	r7 = new RegExp("#EXTM3U")
+	if (((r7["test"](r1)) || (r7 = new RegExp("mpegurl"), r6 = r7["test"], (r6(s38_4)))))
 	{
 		r2 = "m3u8"
 	}
 	else
 	{
-		r7 = /mp2t/
+		r7 = new RegExp("mp2t")
 		r6 = r7["test"]
-		if (r6(s38_4))
-		r7 = /^\\x47/
-		r6 = r7["test"]
-		r10 = "binary"
-		r8 = s38_5["toString"](r10, 0, 1)
-			|| (r6(r8))
+		if (((r6(s38_4)) || (r7 = new RegExp("^\\x47"), r6 = r7["test"], r10 = "binary", r8 = s38_5["toString"](r10, 0, 1), (r6(r8)))))
 		{
 			r2 = "ts"
 		}
 	}
 	r3 = null
-	if (r2 === "m3u8")
-	r6 = s34_4["type"]
-		&& (!r6 === "hls")
+	if (((r2 === "m3u8") && (r6 = s34_4["type"], (!r6 === "hls"))))
 	{
 		r3 = "hls"
 	}
@@ -3148,8 +3103,8 @@ function func_buildCopyJobs_0x10000001d(a0, a1)
 			{
 				accu = r9["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r11 === 0)
@@ -3386,7 +3341,7 @@ function func_buildTranscodeArgs_0x10000001b(a0, a1)
 		r18 = String(r19)
 		r17 = r18["trim"]
 		r14 = r17()
-		r18 = /^\\d+$/
+		r18 = new RegExp("^\\d+$")
 		r17 = r18["test"]
 		accu = r17(r14)
 		if (r17(r14))
@@ -3507,7 +3462,7 @@ function func_x264BufsizeFor_0x10000001a(a0, a1)
 	}
 	r3 = String(a1)
 	r2 = r3["match"]
-	r4 = /^(\\d+)k$/
+	r4 = new RegExp("^(\\d+)k$")
 	accu = r2(r4)
 	r1 = r2(r4)
 	if (r2(r4))
@@ -3622,8 +3577,7 @@ function func_logoPath_0x100000017(a0)
 		accu = !(!Boolean(a0["logoOverlay"]))
 	}
 	r2 = accu
-	if (!accu)
-		|| (!r4["settings"]["logoImage"])
+	if (((!accu) || ((!r4["settings"]["logoImage"]))))
 	{
 		return null
 	}
@@ -3666,9 +3620,7 @@ function func_channelQuality_0x100000016(a0, a1)
 	r1 = a0["quality"]
 	if (!a0["quality"])
 	{
-		if (a1)
-		accu = a1["passthrough"]
-			&& (a1["passthrough"])
+		if (((a1) && (accu = a1["passthrough"], (a1["passthrough"]))))
 		{
 			accu = "copy"
 		}
@@ -3697,9 +3649,7 @@ function func_channelQuality_0x100000016(a0, a1)
 	if (a1)
 	{
 		r2 = a1["type"]
-		if (r2 === "screen")
-		r2 = a1["type"]
-			|| (r2 === "usb")
+		if (((r2 === "screen") || (r2 = a1["type"], (r2 === "usb"))))
 		{
 			if (r1 === "copy")
 			{
@@ -3746,9 +3696,7 @@ function func_writeMasterPlaylist_0x100000015(a0, a1)
 				accu = 1500000
 			}
 			r8 = accu
-			if (r3)
-			accu = r7
-				&& (r7)
+			if (((r3) && (accu = r7, (r7))))
 			{
 				accu = (((",RESOLUTION=" + r7["w"]) + "x") + r7["h"])
 			}
@@ -3786,8 +3734,8 @@ function func_writeMasterPlaylist_0x100000015(a0, a1)
 			{
 				accu = r11["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r13 === 0)
@@ -3836,7 +3784,7 @@ function func_hlsOutputArgs_0x100000014(a0)
 				if (r13["done"]) break
 				r9 = false
 				r5 = r13["value"]
-				r15 = /^seg_.*\\.ts$/
+				r15 = new RegExp("^seg_.*\\.ts$")
 				accu = r15["test"](r13["value"])
 				r13 = r13["value"]
 				if (!accu) continue
@@ -3878,8 +3826,8 @@ function func_hlsOutputArgs_0x100000014(a0)
 				{
 					accu = r8["return"]()
 				}
-				catch {}
 			}
+			catch {}
 		}
 		accu = null
 		accu = r10 === 0
@@ -3937,6 +3885,7 @@ function func_buildInputArgs_0x100000013(a0, a1)
 	r2 = []
 	r10 = a0["type"]
 	switch (void 0)
+	{
 	case r10 === "usb":
 	{
 		if (s1_15)
@@ -4032,7 +3981,7 @@ function func_buildInputArgs_0x100000013(a0, a1)
 					accu = r11(r13, r14)
 				}
 			}
-			r12 = /^\\/dev\\//
+			r12 = new RegExp("^\\/dev\\/")
 			accu = a0["videoDevice"]
 			if (!a0["videoDevice"])
 			{
@@ -4215,6 +4164,7 @@ function func_buildInputArgs_0x100000013(a0, a1)
 		accu = Error(r12)
 	}
 	return r2
+	}
 }
 
 function func_hlsExtensionFlags_0x100000012()
@@ -4299,8 +4249,8 @@ function func_cleanHlsRoot_0x100000011()
 				{
 					accu = r8["return"]()
 				}
-				catch {}
 			}
+			catch {}
 		}
 		accu = null
 		accu = r10 === 0
@@ -4372,8 +4322,8 @@ function func_killStaleProcesses_0x100000010()
 					{
 						accu = r7["return"]()
 					}
-					catch {}
 				}
+				catch {}
 			}
 			accu = null
 			accu = r9 === 0
@@ -4412,9 +4362,7 @@ function func_killPid_0x10000000f(a0)
 	let r1, r2, r3, r4, r5, r6, accu;
 	r1 = parseInt(a0, 10)
 	r2 = Number["isInteger"]
-	if (!r2(r1))
-	accu = r1 <= 0
-		|| (r1 <= 0)
+	if (((!r2(r1)) || (accu = r1 <= 0, (r1 <= 0))))
 	{
 		accu = undefined
 		return undefined
@@ -4484,11 +4432,7 @@ function func_savePids_0x10000000e()
 						r18 = false
 					}
 				}
-				if (!r18)
-				r18 = true
-				r22 = r17["next"]()
-				accu = r22["done"]
-					&& (!r22["done"])
+				if (((!r18) && (r18 = true, r22 = r17["next"](), accu = r22["done"], (!r22["done"]))))
 				{
 					r18 = false
 					accu = r22["value"]
@@ -4516,8 +4460,8 @@ function func_savePids_0x10000000e()
 					{
 						accu = r17["return"]()
 					}
-					catch {}
 				}
+				catch {}
 			}
 			accu = null
 			if (r19 === 0)
@@ -4563,8 +4507,8 @@ function func_savePids_0x10000000e()
 					{
 						accu = r16["return"]()
 					}
-					catch {}
 				}
+				catch {}
 			}
 			accu = null
 			if (!r18 === 0) continue
@@ -4591,8 +4535,8 @@ function func_savePids_0x10000000e()
 			{
 				accu = r9["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	accu = r11 === 0
@@ -4658,13 +4602,13 @@ function func_classifySeverity_0x10000000c(a0)
 	}
 	r3 = accu
 	r1 = String(r3)
-	r3 = /\\b40[13]\\b|Forbidden|access denied|HTTP error 40[13]|Name does not resolve|Failed to resolve|Connection refused|No route to host|Protocol not found|Invalid data|No such file|could not open|Server returned 404/
+	r3 = new RegExp("\\b40[13]\\b|Forbidden|access denied|HTTP error 40[13]|Name does not resolve|Failed to resolve|Connection refused|No route to host|Protocol not found|Invalid data|No such file|could not open|Server returned 404")
 	r2 = r3["test"]
 	if (r2(r1))
 	{
 		return "high"
 	}
-	r3 = /\\b5\\d{2}\\b|I\\/O error|Input\\/output error|Connection reset|\\b406\\b|Operation timed out|Server returned 4/
+	r3 = new RegExp("\\b5\\d{2}\\b|I\\/O error|Input\\/output error|Connection reset|\\b406\\b|Operation timed out|Server returned 4")
 	r2 = r3["test"]
 	if (r2(r1))
 	{
@@ -4694,7 +4638,7 @@ function func_appendLog_0x10000000b(a0, a1)
 	r6 = s1_27["set"]
 	accu = r6(s52_3, r1)
 	r7 = s52_2["split"]
-	r9 = /\\r?\\n/
+	r9 = new RegExp("\\r?\\n")
 	r7 = r7(r9)
 	r2 = r7["filter"](func_unknown_0x10000000a)
 	if (r2["length"])
@@ -4728,7 +4672,7 @@ function func_appendLog_0x10000000b(a0, a1)
 function func_unknown_0x10000000a(a0)
 {
 	let r0, r1;
-	r1 = /error|invalid|failed|denied|not found|no such|could not|unable/
+	r1 = new RegExp("error|invalid|failed|denied|not found|no such|could not|unable")
 	r0 = r1["test"]
 	return r0(a0)
 }
@@ -4841,8 +4785,8 @@ function func_ensureDirs_0x100000004()
 			{
 				accu = r5["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r7 === 0)
@@ -4885,11 +4829,7 @@ function func_hlsViewerCount_0x100000003(a0)
 			r22 = ctx1
 			try
 			{
-				if (!false)
-				r19 = true
-				r23 = r18["next"]()
-				accu = r23["done"]
-					&& (!r23["done"])
+				if (((!false) && (r19 = true, r23 = r18["next"](), accu = r23["done"], (!r23["done"]))))
 				{
 					r19 = false
 					accu = r23["value"]
@@ -4899,11 +4839,7 @@ function func_hlsViewerCount_0x100000003(a0)
 					accu = undefined
 				}
 				r7 = accu
-				if (!r19)
-				r19 = true
-				r23 = r18["next"]()
-				accu = r23["done"]
-					&& (!r23["done"])
+				if (((!r19) && (r19 = true, r23 = r18["next"](), accu = r23["done"], (!r23["done"]))))
 				{
 					r19 = false
 					accu = r23["value"]
@@ -4931,8 +4867,8 @@ function func_hlsViewerCount_0x100000003(a0)
 					{
 						accu = r18["return"]()
 					}
-					catch {}
 				}
+				catch {}
 			}
 			accu = null
 			if (r20 === 0)
@@ -4967,8 +4903,8 @@ function func_hlsViewerCount_0x100000003(a0)
 			{
 				accu = r10["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r12 === 0)
@@ -5014,10 +4950,7 @@ function func_lastErrorInfo_0x100000001(a0)
 	let r1, r2;
 	r2 = s1_20["get"]
 	r1 = r2(a0)
-	if (!r2(a0))
-	r2 = Date["now"]()
-	r2 = (r2 - r1["ts"])
-		|| (r2 > 600000)
+	if (((!r2(a0)) || (r2 = Date["now"](), r2 = (r2 - r1["ts"]), (r2 > 600000))))
 	{
 		return null
 	}

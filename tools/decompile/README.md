@@ -81,7 +81,7 @@ For each `src/NAME.js`, use `--ir decompiled/src/NAME.js --binary src/NAME.js
 --out recovered/src/NAME.js`. The emitter still reads the corresponding committed disassembler dump
 and reports verified/unverified literal counts; structural repairs do not bypass that verifier.
 
-The five targeted repairs are:
+The targeted repairs are:
 
 1. Join extended `if` headers and keep intervening register assignments inside the appropriate
    short-circuit operand, rather than eagerly evaluating them before the condition.
@@ -93,6 +93,18 @@ The five targeted repairs are:
 5. Scan backslash-delimited RegExp sources before interpreting quotes inside them, and emit
    `new RegExp(sourceString)` so JavaScript decodes escapes once. Literal braces do not affect
    function splitting, and literal text is not renamed as if it were code.
+6. Add the block a switch statement needs. View8 prints `switch (r8)` directly followed by the
+   clauses, each carrying its own block, and keeps the statements the bytecode still runs inside the
+   switch — a trailing `return`, `break` or assignment run — after the last clause. The added block
+   ends after that trailing run, and only simple statements are absorbed, so the repair never
+   swallows a neighbouring region.
+7. Restore the `while (true)` View8 omits around a loop body it prints as a bare block. A V8 loop
+   body is a `Block` scope; without its loop header the loop's condition check and its
+   `break`/`continue` sit in a bare block, where JavaScript rejects them. A bare block — one that no
+   `if`/`else`/`try`/`catch`/loop/`switch` clause or function owns — with a `break`/`continue`
+   directly inside it is wrapped in `while (true)`. Nothing is moved, added or reordered.
+8. Lower View8's `<null` object-literal values (a `null` that carries no character data of its own)
+   to `null`.
 
 Run the focused regression checks and the 18-module syntax audit:
 
@@ -105,10 +117,14 @@ removes them afterwards. Only synthetic fixtures are executed in the behavioural
 recovered application modules. A passing syntax check is **not** proof of runtime equivalence.
 Node-dependent tests are marked skipped if Node is unavailable; that is not a successful audit.
 
-**Verification status for these changes:** the tests have been added but have not been run in the
-current session, and the existing `recovered/` files have not been regenerated. RegExp flags,
-flattened exception handlers and V8 context lifetimes still require bytecode-level verification.
-The original `server.js`, `src/` binaries and `decompiled/` listings are left untouched.
+**Verification status:** the 30 tests pass, including the 18-module syntax audit, and `recovered/`
+has been regenerated from the listings — all **18/18** modules are emitted and each one passes
+`node --check`. `tools/verify/crosscheck.py` still reports 18/18 modules whose every `require()` name
+the running bytecode produced is present in the output, and all 44 such names appear in
+`recovered/` as well. RegExp flags, flattened exception handlers, V8 context lifetimes and the loop
+and switch structure restored by `normalize_listing.py` still require bytecode-level verification:
+a passing syntax check is not runtime equivalence. The original `server.js`, `src/` binaries and
+`decompiled/` listings are left untouched.
 
 ## Caveats
 

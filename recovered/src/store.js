@@ -2,9 +2,9 @@
 //
 // Lowered from the View8 register listing of the V8 code cache in the repository root (5371 source
 // characters; Node 18.5.0 / V8 10.2.154.4-node.8) by tools/decompile/emit_source.py, after
-// tools/decompile/resolve_strings.py restored the obfuscated string array. The module is a faithful
-// reconstruction of the original control flow and data flow; see DECOMPILATION.md for the analysis and
-// its limitations.
+// tools/decompile/resolve_strings.py restored the obfuscated string array. This is a syntactic
+// reconstruction of View8's listing, not a proof of equivalence to the binary. Context lifetimes and
+// exception semantics still need verification; see tools/decompile/README.md and DECOMPILATION.md.
 //
 // How to read it:
 //   rN        a bytecode register (a local of the enclosing function)
@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   /.../     a RegExp literal (the code cache does not record its flags)
+//   RegExp    a recovered source string (flags are not recovered by this emitter)
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).
@@ -257,8 +257,8 @@ function func_load_0x100000005()
 			{
 				accu = r9["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r11 === 0)
@@ -309,8 +309,8 @@ function func_load_0x100000005()
 			{
 				accu = r9["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r11 === 0)

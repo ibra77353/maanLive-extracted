@@ -1,6 +1,6 @@
 # AmaanLive — binary module analysis and decompilation
 
-**ملخّص بالعربية:** ملفات `server.js` وجميع ملفات `src/*.js` في هذا المستودع ليست جافاسكربت ولا كوداً تنفيذياً للآلة، بل **ذاكرة مؤقتة لكود V8 (V8 code cache)** — أي "بایت‌كود المحرك Ignition" مُسلسَل مع جدول الثوابت (constant pool) وشجرة `SharedFunctionInfo`. النسخة المولِّدة لها: **Node.js v18.5.0 / V8 10.2.154.4-node.8** مع إعدادات V8 الافتراضية، وتم تصنيفها بنسخ مُشوَّش (javascript-obfuscator). تم تحويلها كلها (18/18 وحدة) إلى جافاسكربت مقروء مع استعادة مصفوفة النصوص المُشفّرة، والنتائج في مجلد `decompiled/`. الأدوات وخطوات إعادة التنفيذ في `tools/decompile/`.
+**ملخّص بالعربية:** ملفات `server.js` وجميع ملفات `src/*.js` في هذا المستودع ليست جافاسكربت ولا كوداً تنفيذياً للآلة، بل **ذاكرة مؤقتة لكود V8 (V8 code cache)** — أي "بایت‌كود المحرك Ignition" مُسلسَل مع جدول الثوابت (constant pool) وشجرة `SharedFunctionInfo`. النسخة المولِّدة لها: **Node.js v18.5.0 / V8 10.2.154.4-node.8** مع إعدادات V8 الافتراضية، وتم تصنيفها بنسخ مُشوَّش (javascript-obfuscator). تم تحويلها كلها (18/18 وحدة) إلى جافاسكربت مقروء مع استعادة مصفوفة النصوص المُشفّرة، والنتائج في مجلد `decompiled/` (سجلات على مستوى السجلات). ثم يُخفّض كل سجل إلى وحدة جافاسكربت صالحة نحوياً في مجلد `recovered/` عبر `tools/decompile/emit_source.py`: الوحدات الثماني عشرة كلها مُولّدة وكلها تنجح في `node --check`، مع بقاء التحقق الدلالي على مستوى البايت‌كود مطلوباً. الأدوات وخطوات إعادة التنفيذ في `tools/decompile/`.
 
 ---
 
@@ -108,6 +108,19 @@ Recovered content is the real application logic, e.g.
 3. **String resolution cross-check**: all **44/44** `require()` module names recovered from the obfuscated
    string array across the modules are exactly the module specifiers the bytecode requested at runtime;
    for 12 modules the recovered and observed sets are identical.
+
+### Lowering to JavaScript (`recovered/`)
+
+`tools/decompile/emit_source.py` lowers each register listing into a candidate module under
+`recovered/`, one file per original module, keeping every recovered name so a module can be read
+against its listing. All **18/18** modules are emitted and every one of them passes `node --check`,
+and all **44/44** `require()` names the running bytecode produced are present in them as well.
+
+This is a syntactic reconstruction, not a proof of equivalence. Literals are verified against the code
+cache's string table (see above), but RegExp flags, flattened exception handlers, V8 context lifetimes,
+and the loop and switch blocks View8 prints without their own braces — restored by
+`tools/decompile/normalize_listing.py` — still require bytecode-level verification. The register-level
+listings in `decompiled/` remain the reference representation.
 
 ### Module table
 

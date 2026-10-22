@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regression tests for the five emitter defects and a non-executing, 18-module syntax audit.
+"""Regression tests for the emitter's structural repairs and a non-executing, 18-module syntax audit.
 
 Run with Python 3.10+ and Node on PATH:
     python3 -m unittest discover -s tools/decompile -p 'test_emit_source.py' -v
@@ -18,7 +18,8 @@ import tempfile
 import unittest
 
 import emit_source
-from normalize_listing import code_only, join_conditions, mask_literals, normalize_body
+from normalize_listing import (code_only, join_conditions, mask_literals, normalize_body,
+                               repair_switches, wrap_loop_body_blocks)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -84,6 +85,53 @@ class StructureTests(unittest.TestCase):
     def test_unrecognized_orphan_catch_is_rejected(self):
         with self.assertRaises(ValueError):
             normalize_body(['\t{', '\t}', '\tcatch {}'])
+
+    def test_switch_gets_the_block_view8_omits(self):
+        lines = ['\tswitch (r8)', '\tdefault:', '\t{', '\t\tbreak', '\t}', '\tcase (0):',
+                 '\t{', '\t\tACCU = r9', '\t}', '\treturn "1.0.0"']
+        expected = ['\tswitch (r8)', '\t{', '\tdefault:', '\t{', '\t\tbreak', '\t}', '\tcase (0):',
+                    '\t{', '\t\tACCU = r9', '\t}', '\treturn "1.0.0"', '\t}']
+        self.assertEqual(repair_switches(lines), expected)
+
+    def test_consecutive_switch_labels_share_one_block(self):
+        lines = ['\t\tswitch (r10)', '\t\tcase "http":', '\t\tcase "hls":', '\t\t{',
+                 '\t\t\tACCU = 2', '\t\t}']
+        expected = ['\t\tswitch (r10)', '\t\t{', '\t\tcase "http":', '\t\tcase "hls":', '\t\t{',
+                    '\t\t\tACCU = 2', '\t\t}', '\t\t}']
+        self.assertEqual(repair_switches(lines), expected)
+
+    def test_switch_that_already_has_its_block_is_unchanged(self):
+        lines = ['\tswitch (r8)', '\t{', '\t\tcase (0):', '\t\t\tbreak', '\t}']
+        self.assertEqual(repair_switches(lines), lines)
+
+    def test_switch_clause_without_a_block_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "switch clause without a block"):
+            repair_switches(['\tswitch (r8)', '\tdefault:', '\t\tACCU = 1'])
+
+    def test_bare_block_holding_a_loop_jump_gets_its_loop_header(self):
+        lines = ['\tr6 = 1', '\t{', '\t\tACCU = PushContext("Block")', '\t\tif (1 <= 5)',
+                 '\t\t{', '\t\t\tbreak', '\t\t}', '\t\twhile (true)', '\t\t{', '\t\t\tACCU = 1',
+                 '\t\t}', '\t\tif (!r5 == 1) continue', '\t\tbreak', '\t}']
+        wrapped = wrap_loop_body_blocks(lines)
+        self.assertEqual(wrapped[0], '\tr6 = 1')
+        self.assertEqual(wrapped[1], '\twhile (true)')
+        self.assertEqual(wrapped[2:], lines[1:])
+
+    def test_blocks_owned_by_a_statement_are_not_wrapped(self):
+        for owner in ['\ttry', '\telse', '\tcatch', '\tcatch (r1)', '\tfinally', '\tif (a0)',
+                      '\twhile (r1)', '\tswitch (r2)', '\tcase (0):', '\tdefault:',
+                      '\tfunction func_x(a0)', '\t} else']:
+            lines = [owner, '\t{', '\t\tbreak', '\t}']
+            self.assertEqual(wrap_loop_body_blocks(lines), lines, owner)
+
+    def test_null_constant_placeholder_is_lowered(self):
+        counts = stats()
+        self.assertEqual(emit_source.protect('\tr20 = {"name": null, "altName": <null}',
+                                             lambda value: True, counts),
+                         '\tr20 = {"name": null, "altName": null}')
+        self.assertEqual(emit_source.protect('\tr20 = {"port": <null, "x": 1}',
+                                             lambda value: True, counts),
+                         '\tr20 = {"port": null, "x": 1}')
 
     def test_entry_wrapper_needs_no_exports_assignment(self):
         funcs = emit_source.split_functions([
@@ -217,6 +265,60 @@ function func_task(a0)
 if (!match || match[1] !== "Camera" || match[2] !== "video") throw Error("pattern changed");
 console.log("ok");'''
         self.assertEqual(self.run_node(source), 'ok')
+
+    def test_emitted_switch_loop_body_and_null_placeholder_parse(self):
+        # The three shapes the 18-module audit exposed: a switch without its own block, a loop body
+        # printed as a bare block holding the loop's jumps, and `<null` object-literal values.
+        listing = '''function func_outer()
+{
+\tr0 = func_entry
+\treturn r0
+}
+function func_entry(a0, a1, a2, a3, a4)
+{
+\tr1 = {"name": null, "altName": <null}
+\tr2 = 1
+\t{
+\t\tACCU = PushContext("Block")
+\t\tr3 = 1
+\t\tif (1 <= 5)
+\t\t{
+\t\t\tbreak
+\t\t}
+\t\twhile (true)
+\t\t{
+\t\t\tACCU = r3
+\t\t}
+\t\tif (!r3 == 1) continue
+\t\tbreak
+\t}
+\tswitch (r1["name"])
+\tdefault:
+\t{
+\t\tbreak
+\t}
+\tcase (0):
+\t{
+\t\tACCU = r2
+\t}
+\treturn "1.0.0"
+}
+'''
+        with tempfile.TemporaryDirectory() as directory:
+            directory = Path(directory)
+            ir, binary, disassembly, output = [directory / name for name in
+                                               ('input.js', 'cache.bin', 'dump.txt', 'output.cjs')]
+            ir.write_text(listing, encoding='utf-8')
+            binary.write_bytes(struct.pack('<6I', 0xC0DE0562, 0xAF632352, 100, 0xA8C5122F, 0, 0))
+            disassembly.write_text('', encoding='utf-8')
+            emit_source.emit(str(ir), str(binary), str(output), str(disassembly))
+            source = output.read_text(encoding='utf-8')
+            checked = subprocess.run(['node', '--check', str(output)], capture_output=True,
+                                     text=True, timeout=10)
+            self.assertEqual(checked.returncode, 0, checked.stderr)
+            self.assertNotIn('<null', source)
+            self.assertIn('"altName": null', source)
+            self.assertIn('\twhile (true)', source)
 
     def test_all_eighteen_modules_parse_without_executing_them(self):
         modules = [ROOT / 'decompiled/server.js'] + sorted((ROOT / 'decompiled/src').glob('*.js'))

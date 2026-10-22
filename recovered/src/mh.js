@@ -2,9 +2,9 @@
 //
 // Lowered from the View8 register listing of the V8 code cache in the repository root (11897 source
 // characters; Node 18.5.0 / V8 10.2.154.4-node.8) by tools/decompile/emit_source.py, after
-// tools/decompile/resolve_strings.py restored the obfuscated string array. The module is a faithful
-// reconstruction of the original control flow and data flow; see DECOMPILATION.md for the analysis and
-// its limitations.
+// tools/decompile/resolve_strings.py restored the obfuscated string array. This is a syntactic
+// reconstruction of View8's listing, not a proof of equivalence to the binary. Context lifetimes and
+// exception semantics still need verification; see tools/decompile/README.md and DECOMPILATION.md.
 //
 // How to read it:
 //   rN        a bytecode register (a local of the enclosing function)
@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   /.../     a RegExp literal (the code cache does not record its flags)
+//   RegExp    a recovered source string (flags are not recovered by this emitter)
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).
@@ -102,7 +102,7 @@ function func_0x2adb_0x100000017()
 	return s3_2
 }
 
-function async func_resolveBatch_0x100000016(a0, a1, a2)
+async function func_resolveBatch_0x100000016(a0, a1, a2)
 {
 	let r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r12, accu;
 	r5 = ctx1
@@ -166,7 +166,7 @@ function async func_resolveBatch_0x100000016(a0, a1, a2)
 	return s5_2
 }
 
-function async func_0x166ec8_0x100000015()
+async function func_0x166ec8_0x100000015()
 {
 	let r0, r1, r2, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, accu;
 	r5 = __closure
@@ -234,7 +234,7 @@ function async func_0x166ec8_0x100000015()
 	return s7_2
 }
 
-function async func_resolveChannel_0x100000014(a0, a1)
+async function func_resolveChannel_0x100000014(a0, a1)
 {
 	let r0, r2, r3, r4, r5, r6, accu;
 	r3 = __closure
@@ -285,7 +285,7 @@ function async func_resolveChannel_0x100000014(a0, a1)
 	return s8_2
 }
 
-function async func_fetchChannels_0x100000013(a0)
+async function func_fetchChannels_0x100000013(a0)
 {
 	let r0, r1, r4, r5, r6, r7, r8, r11, r12, r13, r14, r15, r16, r17, r18, r19, r20, r21, r22, r23, r24, accu;
 	r11 = ctx1
@@ -316,9 +316,7 @@ function async func_fetchChannels_0x100000013(a0)
 	try
 	{
 		s11_2 = func_0x1255_0x100000001
-		if (!r0)
-			|| (!s9_2)
-			|| (!s9_3)
+		if ((((!r0) || ((!s9_2))) || ((!s9_3))))
 		{
 			r15 = "الهوست واسم المستخدم وكلمة المرور مطلوبة"
 			accu = Error
@@ -365,10 +363,7 @@ function async func_fetchChannels_0x100000013(a0)
 			accu = Error
 			accu = Error(r17)
 		}
-		if (!r6)
-			|| (!r6["user_info"])
-		r14 = r6["user_info"]
-			|| (r14["auth"] === 0)
+		if ((((!r6) || ((!r6["user_info"]))) || (r14 = r6["user_info"], (r14["auth"] === 0))))
 		{
 			r15 = "بيانات الدخول مرفوضة — تحقق من الهوست/الاسم/الكلمة أو انتهاء الاشتراك"
 			accu = Error
@@ -433,8 +428,8 @@ function async func_fetchChannels_0x100000013(a0)
 						{
 							accu = r16["return"]()
 						}
-						catch {}
 					}
+					catch {}
 				}
 				accu = null
 				if (r18 === 0)
@@ -482,8 +477,7 @@ function async func_fetchChannels_0x100000013(a0)
 			accu = Error(r17)
 		}
 		r14 = Array["isArray"]
-		if (!r14(r7))
-			|| (!r7["length"])
+		if (((!r14(r7)) || ((!r7["length"]))))
 		{
 			r15 = "لم يتم العثور على قنوات في هذا الاشتراك"
 			accu = Error
@@ -549,9 +543,9 @@ function func_normalizeHost_0x100000011(a0)
 	r4 = String(r5)
 	r3 = r4["trim"]()
 	r2 = r3["replace"]
-	r4 = /\\/+$/
+	r4 = new RegExp("\\/+$")
 	r1 = r2(r4, "")
-	r3 = /^https?:\\/\\//
+	r3 = new RegExp("^https?:\\/\\/")
 	r2 = r3["test"]
 	if (!r2(r1))
 	{
@@ -687,9 +681,7 @@ function func_unknown_0x10000000c(a0)
 		}
 	}
 	r1 = a0["statusCode"]
-	if (r1 === 401)
-	r1 = a0["statusCode"]
-		|| (r1 === 403)
+	if (((r1 === 401) || (r1 = a0["statusCode"], (r1 === 403))))
 	{
 		r1 = a0["resume"]
 		accu = r1()
@@ -838,9 +830,7 @@ function func_unknown_0x100000007(a0)
 		}
 		else
 		{
-			if (a0["code"] === "ETIMEDOUT")
-			r2 = a0["code"]
-				|| (r2 === "EHOSTUNREACH")
+			if (((a0["code"] === "ETIMEDOUT") || (r2 = a0["code"], (r2 === "EHOSTUNREACH"))))
 			{
 				r1 = "تعذّر الوصول للخادم"
 			}
@@ -939,29 +929,16 @@ function func_0x3d26ce_0x100000003()
 	r7 = r7(r9, 1024)
 	r1 = r3(r5, 0, r7)
 	r2 = "other"
-	r4 = /#EXTM3U/
+	r4 = new RegExp("#EXTM3U")
 	r3 = r4["test"]
-	if (r3(r1))
-	r4 = /\\.m3u8(\\?|$)/
-	r3 = r4["test"]
-	r5 = s21_5["pathname"]
-	r5 = (r5 + s21_5["search"])
-		|| (r3(r5))
-	r4 = /mpegurl/
-	r3 = r4["test"]
-		|| (r3(s23_4))
+	if ((((r3(r1)) || (r4 = new RegExp("\\.m3u8(\\?|$)"), r3 = r4["test"], r5 = s21_5["pathname"], r5 = (r5 + s21_5["search"]), (r3(r5)))) || (r4 = new RegExp("mpegurl"), r3 = r4["test"], (r3(s23_4)))))
 	{
 		r2 = "m3u8"
 	}
 	else
 	{
-		r4 = /mp2t/
-		if (r4["test"](s23_4))
-		r4 = /\\.ts(\\?|$)/
-		r3 = r4["test"]
-		r5 = s21_5["pathname"]
-		r5 = (r5 + s21_5["search"])
-			|| (r3(r5))
+		r4 = new RegExp("mp2t")
+		if (((r4["test"](s23_4)) || (r4 = new RegExp("\\.ts(\\?|$)"), r3 = r4["test"], r5 = s21_5["pathname"], r5 = (r5 + s21_5["search"]), (r3(r5)))))
 		{
 			r2 = "ts"
 		}

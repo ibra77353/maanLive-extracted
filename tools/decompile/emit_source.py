@@ -226,6 +226,9 @@ def protect(line: str, verify, stats: dict) -> str:
     masked = SCOPE_PUSH.sub(lambda m: "ctx%s" % m.group(1), masked)
     masked = re.sub(r"\bACCU\b", "accu", masked)
     masked = masked.replace("<closure>", "__closure").replace("<this>", "this")
+    # View8 prints a null that has no character data of its own as `<null` (an object literal's
+    # constant value), always followed by the separator or the closing brace of its literal.
+    masked = re.sub(r"<null(?=[,}\]])", "null", masked)
     return restore_literals(masked, decoded)
 
 

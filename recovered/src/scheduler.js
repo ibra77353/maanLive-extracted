@@ -2,9 +2,9 @@
 //
 // Lowered from the View8 register listing of the V8 code cache in the repository root (5748 source
 // characters; Node 18.5.0 / V8 10.2.154.4-node.8) by tools/decompile/emit_source.py, after
-// tools/decompile/resolve_strings.py restored the obfuscated string array. The module is a faithful
-// reconstruction of the original control flow and data flow; see DECOMPILATION.md for the analysis and
-// its limitations.
+// tools/decompile/resolve_strings.py restored the obfuscated string array. This is a syntactic
+// reconstruction of View8's listing, not a proof of equivalence to the binary. Context lifetimes and
+// exception semantics still need verification; see tools/decompile/README.md and DECOMPILATION.md.
 //
 // How to read it:
 //   rN        a bytecode register (a local of the enclosing function)
@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   /.../     a RegExp literal (the code cache does not record its flags)
+//   RegExp    a recovered source string (flags are not recovered by this emitter)
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).
@@ -127,10 +127,7 @@ function func_nextOpenMinutes_0x10000000b(a0, a1)
 				r27 = 302
 				r25 = r22["value"]["days"]
 				r22 = r22["value"]
-				if (Array["isArray"](r25))
-				r23 = r9["days"]
-				accu = r23["length"]
-					&& (r23["length"])
+				if (((Array["isArray"](r25)) && (r23 = r9["days"], accu = r23["length"], (r23["length"]))))
 				{
 					accu = r9["days"]
 				}
@@ -213,8 +210,8 @@ function func_nextOpenMinutes_0x10000000b(a0, a1)
 						{
 							accu = r24["return"]()
 						}
-						catch {}
 					}
+					catch {}
 				}
 				accu = null
 				if (!r26 === 0) continue
@@ -241,8 +238,8 @@ function func_nextOpenMinutes_0x10000000b(a0, a1)
 				{
 					accu = r17["return"]()
 				}
-				catch {}
 			}
+			catch {}
 		}
 		accu = null
 		if (!r19 === 0) continue
@@ -330,9 +327,7 @@ function func_tick_0x100000008()
 			r15 = ctx1
 			try
 			{
-				if (r6)
-				accu = r7
-					&& (!r7)
+				if (((r6) && (accu = r7, (!r7))))
 				{
 					r16 = s1_3[r0(314)]
 					accu = r16(r14["value"]["id"])
@@ -374,8 +369,8 @@ function func_tick_0x100000008()
 			{
 				accu = r9["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r11 === 0)
@@ -425,9 +420,7 @@ function func_shouldRunNow_0x100000007(a0, a1)
 			r23 = 302
 			r21 = r18["value"]["days"]
 			r18 = r18["value"]
-			if (r19(r21))
-			accu = r7["days"]["length"]
-				&& (r7["days"]["length"])
+			if (((r19(r21)) && (accu = r7["days"]["length"], (r7["days"]["length"]))))
 			{
 				accu = r7["days"]
 			}
@@ -487,11 +480,12 @@ function func_shouldRunNow_0x100000007(a0, a1)
 					{
 						accu = r20["return"]()
 					}
-					catch {}
 				}
+				catch {}
 			}
 			accu = null
 			switch (r22)
+			{
 			default:
 			{
 				continue
@@ -508,6 +502,7 @@ function func_shouldRunNow_0x100000007(a0, a1)
 			r15 = 1
 			r16 = r23
 			break
+			}
 		}
 		accu = -1
 		r16 = -1
@@ -527,11 +522,12 @@ function func_shouldRunNow_0x100000007(a0, a1)
 			{
 				accu = r13["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	switch (r15)
+	{
 	default:
 	{
 		break
@@ -545,6 +541,7 @@ function func_shouldRunNow_0x100000007(a0, a1)
 		return r16
 	}
 	return !Boolean([])
+	}
 }
 
 function func_unknown_0x100000006(a0)
@@ -566,8 +563,7 @@ function func_slotActive_0x100000005(a0, a1, a2)
 	r1 = func_toMinutes_0x100000004(a0["start"])
 	r4 = a0["end"]
 	r2 = func_toMinutes_0x100000004(r4)
-	if (undetectable === r1)
-		|| (undetectable === r2)
+	if (((undetectable === r1) || ((undetectable === r2))))
 	{
 		return !Boolean([])
 	}
@@ -591,7 +587,7 @@ function func_slotActive_0x100000005(a0, a1, a2)
 function func_toMinutes_0x100000004(a0)
 {
 	let r1, r2, r3, r4, accu;
-	r3 = /^(\\d{1,2}):(\\d{2})$/
+	r3 = new RegExp("^(\\d{1,2}):(\\d{2})$")
 	r2 = r3["exec"]
 	accu = a0
 	if (!a0)

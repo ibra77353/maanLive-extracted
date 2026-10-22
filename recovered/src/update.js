@@ -2,9 +2,9 @@
 //
 // Lowered from the View8 register listing of the V8 code cache in the repository root (11509 source
 // characters; Node 18.5.0 / V8 10.2.154.4-node.8) by tools/decompile/emit_source.py, after
-// tools/decompile/resolve_strings.py restored the obfuscated string array. The module is a faithful
-// reconstruction of the original control flow and data flow; see DECOMPILATION.md for the analysis and
-// its limitations.
+// tools/decompile/resolve_strings.py restored the obfuscated string array. This is a syntactic
+// reconstruction of View8's listing, not a proof of equivalence to the binary. Context lifetimes and
+// exception semantics still need verification; see tools/decompile/README.md and DECOMPILATION.md.
 //
 // How to read it:
 //   rN        a bytecode register (a local of the enclosing function)
@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   /.../     a RegExp literal (the code cache does not record its flags)
+//   RegExp    a recovered source string (flags are not recovered by this emitter)
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).
@@ -104,11 +104,12 @@ function func_unknown_0x100000016()
 			{
 				accu = r6["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	switch (r8)
+	{
 	default:
 	{
 		break
@@ -122,6 +123,7 @@ function func_unknown_0x100000016()
 		return r9
 	}
 	return "1.0.0"
+	}
 }
 
 function func_unknown_0x100000015(a0, a1)
@@ -177,7 +179,7 @@ function func_unknown_0x100000015(a0, a1)
 	return undefined
 }
 
-function async func_apply_0x100000014()
+async function func_apply_0x100000014()
 {
 	let r0, r2, r3, r4, r5, r6, r7, r8, r9, r10, r12, r13, r15, r16, r17, r18, r19, r20, r21, r22, accu;
 	r16 = __closure
@@ -201,9 +203,7 @@ function async func_apply_0x100000014()
 			accu = r17
 		}
 		r2 = accu
-		if (!accu)
-			|| (!r2["url"])
-			|| (!r2["version"])
+		if ((((!accu) || ((!r2["url"]))) || ((!r2["version"]))))
 		{
 			r18 = "لا يوجد تحديث منشور"
 			accu = Error
@@ -224,7 +224,7 @@ function async func_apply_0x100000014()
 		r20 = {"recursive": null}
 		r20["recursive"] = !(!Boolean([]))
 		accu = r17(r3, r20)
-		r18 = /\\.exe(\\?|$)/
+		r18 = new RegExp("\\.exe(\\?|$)")
 		r17 = r18["test"]
 		r19 = r2["url"]
 		accu = r18["test"](r19)
@@ -497,8 +497,8 @@ function func_copyDir_0x100000013(a0, a1, a2)
 			{
 				accu = r7["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r9 === 0)
@@ -753,7 +753,7 @@ function func_0x5cf205_0x100000009(a0)
 	return decodeURIComponent(r2)
 }
 
-function async func_status_0x100000008(a0)
+async function func_status_0x100000008(a0)
 {
 	let r0, r2, r3, r4, r5, r6, r7, accu;
 	r5 = __closure
@@ -764,8 +764,7 @@ function async func_status_0x100000008(a0)
 	{
 		r6 = s1_11["getUpdateInfo"]
 		r2 = s1_11["getUpdateInfo"]()
-		if (!s1_11["getUpdateInfo"]())
-			|| (a0)
+		if (((!s1_11["getUpdateInfo"]()) || ((a0))))
 		{
 			r7 = func_fetchVersionInfo_0x100000007()
 			r6 = r0
@@ -820,9 +819,7 @@ function async func_status_0x100000008(a0)
 			}
 		}
 		r6["mandatory"] = !(!Boolean(accu))
-		if (r2)
-		accu = r3
-			&& (r3)
+		if (((r2) && (accu = r3, (r3))))
 		{
 			accu = r2["changelog"]
 		}
@@ -859,12 +856,13 @@ function func_unknown_0x100000006(a0)
 	s11_3 = func_0x370b_0x10000000a
 	r3 = ctx11
 	accu = ctx12
+	try
 	{
 		accu = PushContext("Block")
 		r4 = ctx11
 		r7 = s1_11["LICENSE_SERVER"]
 		r6 = r7["replace"]
-		r8 = /\\/+$/
+		r8 = new RegExp("\\/+$")
 		r6 = r6(r8, "")
 		r6 = (r6 + "/api/version")
 		accu = URL

@@ -2,9 +2,9 @@
 //
 // Lowered from the View8 register listing of the V8 code cache in the repository root (71799 source
 // characters; Node 18.5.0 / V8 10.2.154.4-node.8) by tools/decompile/emit_source.py, after
-// tools/decompile/resolve_strings.py restored the obfuscated string array. The module is a faithful
-// reconstruction of the original control flow and data flow; see DECOMPILATION.md for the analysis and
-// its limitations.
+// tools/decompile/resolve_strings.py restored the obfuscated string array. This is a syntactic
+// reconstruction of View8's listing, not a proof of equivalence to the binary. Context lifetimes and
+// exception semantics still need verification; see tools/decompile/README.md and DECOMPILATION.md.
 //
 // How to read it:
 //   rN        a bytecode register (a local of the enclosing function)
@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   /.../     a RegExp literal (the code cache does not record its flags)
+//   RegExp    a recovered source string (flags are not recovered by this emitter)
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).
@@ -200,6 +200,7 @@ function func_unknown_0x1000000aa(a0, a1)
 	s5_3 = func_0x4405_0x100000001
 	r3 = ctx5
 	accu = ctx6
+	try
 	{
 		accu = PushContext("Block")
 		r4 = ctx5
@@ -275,7 +276,7 @@ function func_unknown_0x1000000a8()
 	return undefined
 }
 
-function async func_unknown_0x1000000a7(a0, a1)
+async function func_unknown_0x1000000a7(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r9, accu;
 	r2 = ctx1
@@ -339,7 +340,7 @@ function func_unknown_0x1000000a6()
 	return r0(42)
 }
 
-function async func_unknown_0x1000000a5(a0, a1)
+async function func_unknown_0x1000000a5(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r8, accu;
 	r2 = __closure
@@ -387,7 +388,7 @@ function async func_unknown_0x1000000a5(a0, a1)
 	return s14_2
 }
 
-function async func_unknown_0x1000000a4(a0, a1)
+async function func_unknown_0x1000000a4(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, accu;
 	r2 = __closure
@@ -460,7 +461,7 @@ function func_unknown_0x1000000a3(a0, a1)
 	return func_ok_0x100000036(a1, r2)
 }
 
-function async func_unknown_0x1000000a2(a0, a1)
+async function func_unknown_0x1000000a2(a0, a1)
 {
 	let r0, r1, r3, r4, r5, r6, r8, r9, r12, r13, r14, r15, r16, r17, r18, r19, r20, r21, r22, r23, r24, accu;
 	r13 = __closure
@@ -484,11 +485,7 @@ function async func_unknown_0x1000000a2(a0, a1)
 				accu = r15
 			}
 			r3 = r15
-			if (a0["body"]["ids"])
-			r15 = a0["body"]
-			r15 = r15["ids"]
-			accu = r15["length"]
-				&& (r15["length"])
+			if (((a0["body"]["ids"]) && (r15 = a0["body"], r15 = r15["ids"], accu = r15["length"], (r15["length"]))))
 			{
 				r16 = a0["body"]
 				r18 = 558
@@ -559,8 +556,8 @@ function async func_unknown_0x1000000a2(a0, a1)
 					{
 						accu = r16["return"]()
 					}
-					catch {}
 				}
+				catch {}
 			}
 			accu = null
 			if (r18 === 0)
@@ -644,7 +641,7 @@ function func_unknown_0x1000000a0()
 	return undefined
 }
 
-function async func_unknown_0x10000009f(a0, a1)
+async function func_unknown_0x10000009f(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r8, accu;
 	r2 = __closure
@@ -693,7 +690,7 @@ function async func_unknown_0x10000009f(a0, a1)
 	return s22_2
 }
 
-function async func_unknown_0x10000009e(a0, a1)
+async function func_unknown_0x10000009e(a0, a1)
 {
 	let r0, r1, r2, r3, r4, r5, r6, r10, r11, r12, r13, r14, r15, r16, r17, r18, r19, r20, r21, r22, r23, r24, accu;
 	r11 = ctx1
@@ -724,8 +721,7 @@ function async func_unknown_0x10000009e(a0, a1)
 		r1 = accu
 		r16 = 228
 		r13 = Array["isArray"]
-		if (!r13(r0))
-			|| (!r0["length"])
+		if (((!r13(r0)) || ((!r0["length"]))))
 		{
 			r16 = "\\x644\\x627 \\x62a\\x648\\x62c\\x62f \\x642\\x646\\x648\\x627\\x62a \\x645\\x62d\\x62f\\x62f\\x629"
 			r14 = a1
@@ -794,9 +790,7 @@ function async func_unknown_0x10000009e(a0, a1)
 					accu = r10["url"]
 				}
 				s25_2 = accu
-				if (!r10)
-					|| (!r10["name"])
-					|| (!s25_2)
+				if ((((!r10) || ((!r10["name"]))) || ((!s25_2))))
 				{
 					r5 = (r5 + 1)
 					continue
@@ -862,8 +856,8 @@ function async func_unknown_0x10000009e(a0, a1)
 				{
 					accu = r14["return"]()
 				}
-				catch {}
 			}
+			catch {}
 		}
 		accu = null
 		if (r16 === 0)
@@ -905,7 +899,7 @@ function func_unknown_0x10000009c(a0)
 	return !Boolean(a0["realUrl"])
 }
 
-function async func_unknown_0x10000009b(a0, a1)
+async function func_unknown_0x10000009b(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, accu;
 	r4 = __closure
@@ -959,7 +953,7 @@ function async func_unknown_0x10000009b(a0, a1)
 	return s29_2
 }
 
-function async func_unknown_0x10000009a(a0, a1)
+async function func_unknown_0x10000009a(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, accu;
 	r5 = __closure
@@ -987,9 +981,7 @@ function async func_unknown_0x10000009a(a0, a1)
 		r2 = accu
 		r7 = Array
 		r6 = Array["isArray"]
-		if (!r6(r1))
-		accu = r1["length"]
-			|| (!r1["length"])
+		if (((!r6(r1)) || (accu = r1["length"], (!r1["length"]))))
 		{
 			r9 = "لا توجد قنوات لحلّها"
 			r7 = a1
@@ -1046,7 +1038,7 @@ function async func_unknown_0x10000009a(a0, a1)
 	return s31_2
 }
 
-function async func_unknown_0x100000099(a0, a1)
+async function func_unknown_0x100000099(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, accu;
 	r7 = __closure
@@ -1109,7 +1101,7 @@ function async func_unknown_0x100000099(a0, a1)
 	return s33_2
 }
 
-function async func_unknown_0x100000098(a0, a1)
+async function func_unknown_0x100000098(a0, a1)
 {
 	let r0, r1, r2, r3, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, r17, r18, r19, accu;
 	r7 = ctx1
@@ -1132,8 +1124,7 @@ function async func_unknown_0x100000098(a0, a1)
 		}
 		r0 = accu
 		r9 = Array["isArray"]
-		if (!r9(r0))
-			|| (!r0["length"])
+		if (((!r9(r0)) || ((!r0["length"]))))
 		{
 			r10 = a1
 			r10 = func_fail_0x100000037(r10, 400, "\\x644\\x627 \\x62a\\x648\\x62c\\x62f \\x642\\x646\\x648\\x627\\x62a \\x645\\x62d\\x62f\\x62f\\x629")
@@ -1161,9 +1152,7 @@ function async func_unknown_0x100000098(a0, a1)
 				r16 = ctx34
 				s35_2 = r15["value"]
 				r15 = r15["value"]
-				if (!s35_2)
-					|| (!s35_2["name"])
-					|| (!s35_2["url"])
+				if ((((!s35_2) || ((!s35_2["name"]))) || ((!s35_2["url"]))))
 				{
 					r3 = (r3 + 1)
 					continue
@@ -1218,8 +1207,8 @@ function async func_unknown_0x100000098(a0, a1)
 				{
 					accu = r10["return"]()
 				}
-				catch {}
 			}
+			catch {}
 		}
 		accu = null
 		if (r12 === 0)
@@ -1254,7 +1243,7 @@ function func_unknown_0x100000097(a0)
 	return a0["url"] === s35_2["url"]
 }
 
-function async func_unknown_0x100000096(a0, a1)
+async function func_unknown_0x100000096(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, accu;
 	r8 = __closure
@@ -1271,8 +1260,7 @@ function async func_unknown_0x100000096(a0, a1)
 		r2 = r9["url"]
 		r3 = r9["logo"]
 		r4 = r9["group"]
-		if (!r9["name"])
-			|| (!r9["url"])
+		if (((!r9["name"]) || ((!r9["url"]))))
 		{
 			r10 = a1
 			r10 = func_fail_0x100000037(r10, 400, "\\x627\\x633\\x645 \\x627\\x644\\x642\\x646\\x627\\x629 \\x648\\x631\\x627\\x628\\x637\\x647\\x627 \\x645\\x637\\x644\\x648\\x628\\x627\\x646")
@@ -1310,7 +1298,7 @@ function async func_unknown_0x100000096(a0, a1)
 	return s38_2
 }
 
-function async func_unknown_0x100000095(a0, a1)
+async function func_unknown_0x100000095(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r8, r9, accu;
 	r3 = __closure
@@ -1372,7 +1360,7 @@ function async func_unknown_0x100000095(a0, a1)
 	return s40_2
 }
 
-function async func_unknown_0x100000094(a0, a1)
+async function func_unknown_0x100000094(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r9, accu;
 	r3 = __closure
@@ -1428,7 +1416,7 @@ function async func_unknown_0x100000094(a0, a1)
 	return s42_2
 }
 
-function async func_unknown_0x100000093(a0, a1)
+async function func_unknown_0x100000093(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r13, accu;
 	r5 = __closure
@@ -1523,7 +1511,7 @@ function async func_unknown_0x100000093(a0, a1)
 	return s45_2
 }
 
-function async func_unknown_0x100000092(a0, a1)
+async function func_unknown_0x100000092(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r8, accu;
 	r2 = __closure
@@ -1605,9 +1593,7 @@ function func_unknown_0x10000008f(a0, a1)
 	r1 = r6["home"]
 	r2 = r6["away"]
 	r3 = r6["kickoffUtc"]
-	if (!r6["home"])
-		|| (!r6["away"])
-		|| (!r6["kickoffUtc"])
+	if ((((!r6["home"]) || ((!r6["away"]))) || ((!r6["kickoffUtc"]))))
 	{
 		r7 = a1
 		return func_fail_0x100000037(r7, 400, "\\x627\\x644\\x641\\x631\\x64a\\x642\\x627\\x646 \\x648\\x648\\x642\\x62a \\x627\\x644\\x645\\x628\\x627\\x631\\x627\\x629 \\x645\\x637\\x644\\x648\\x628\\x629")
@@ -1691,7 +1677,7 @@ function func_unknown_0x10000008d(a0, a1)
 	}
 	r7 = accu
 	r6 = r7["replace"]
-	r8 = /[^\\w\\u0600-\\u06FF-]+/
+	r8 = new RegExp("[^\\w\\u0600-\\u06FF-]+")
 	r6 = r6(r8, "_")
 	r3 = r6["slice"](0, 50)
 	r5 = a1["setHeader"]
@@ -1848,11 +1834,7 @@ function func_unknown_0x100000086(a0, a1)
 			r25 = ctx1
 			try
 			{
-				if (!false)
-				r22 = true
-				r26 = r21["next"]()
-				accu = r26["done"]
-					&& (!r26["done"])
+				if (((!false) && (r22 = true, r26 = r21["next"](), accu = r26["done"], (!r26["done"]))))
 				{
 					r22 = false
 					accu = r26["value"]
@@ -1862,11 +1844,7 @@ function func_unknown_0x100000086(a0, a1)
 					accu = undefined
 				}
 				r10 = accu
-				if (!r22)
-				r22 = true
-				r26 = r21["next"]()
-				accu = r26["done"]
-					&& (!r26["done"])
+				if (((!r22) && (r22 = true, r26 = r21["next"](), accu = r26["done"], (!r26["done"]))))
 				{
 					r22 = false
 					accu = r26["value"]
@@ -1894,8 +1872,8 @@ function func_unknown_0x100000086(a0, a1)
 					{
 						accu = r21["return"]()
 					}
-					catch {}
 				}
+				catch {}
 			}
 			accu = null
 			if (r23 === 0)
@@ -1928,8 +1906,8 @@ function func_unknown_0x100000086(a0, a1)
 			{
 				accu = r13["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r15 === 0)
@@ -2665,8 +2643,7 @@ function func_unknown_0x10000006c(a0, a1)
 	}
 	r1 = accu
 	r5 = Array["isArray"]
-	if (!r5(r1))
-		|| (!r1["length"])
+	if (((!r5(r1)) || ((!r1["length"]))))
 	{
 		r8 = "لا توجد قنوات محددة"
 		r6 = a1
@@ -2732,8 +2709,7 @@ function func_unknown_0x100000068(a0, a1)
 	s64_2 = r7["url"]
 	r2 = r7["logo"]
 	r3 = r7["group"]
-	if (!r7["name"])
-		|| (!s64_2)
+	if (((!r7["name"]) || ((!s64_2))))
 	{
 		r10 = "الاسم والرابط مطلوبان"
 		r8 = a1
@@ -2783,7 +2759,7 @@ function func_unknown_0x100000067(a0)
 	return a0["url"] === s64_2
 }
 
-function async func_unknown_0x100000066(a0, a1)
+async function func_unknown_0x100000066(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r8, r9, accu;
 	r2 = __closure
@@ -2964,7 +2940,7 @@ function func_unknown_0x10000005f(a0)
 	return a0["id"] === r1["id"]
 }
 
-function async func_unknown_0x10000005e(a0, a1)
+async function func_unknown_0x10000005e(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r8, r9, accu;
 	r4 = __closure
@@ -3006,7 +2982,7 @@ function async func_unknown_0x10000005e(a0, a1)
 			accu = "VLC/3.0.20 LibVLC/3.0.20"
 		}
 		r2 = accu
-		r6 = /^https?:\\/\\//
+		r6 = new RegExp("^https?:\\/\\/")
 		r8 = 254
 		r5 = r6["test"]
 		accu = r5(r1)
@@ -3099,7 +3075,7 @@ function func_unknown_0x10000005c(a0, a1)
 	return func_ok_0x100000036(a1, r2)
 }
 
-function async func_unknown_0x10000005b(a0, a1)
+async function func_unknown_0x10000005b(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r8, r9, accu;
 	r2 = __closure
@@ -3155,7 +3131,7 @@ function async func_unknown_0x10000005b(a0, a1)
 	return s73_2
 }
 
-function async func_unknown_0x10000005a(a0, a1)
+async function func_unknown_0x10000005a(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r8, r9, accu;
 	r2 = __closure
@@ -3211,7 +3187,7 @@ function async func_unknown_0x10000005a(a0, a1)
 	return s75_2
 }
 
-function async func_unknown_0x100000059(a0, a1)
+async function func_unknown_0x100000059(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r8, accu;
 	r2 = __closure
@@ -3259,7 +3235,7 @@ function async func_unknown_0x100000059(a0, a1)
 	return s77_2
 }
 
-function async func_unknown_0x100000058(a0, a1)
+async function func_unknown_0x100000058(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, accu;
 	r2 = __closure
@@ -3340,10 +3316,7 @@ function func_unknown_0x100000056(a0, a1)
 		r4 = a1
 		return func_fail_0x100000037(r4, 400, r6)
 	}
-	if (!r2)
-	r3 = String(r2)
-	r3 = r3["length"]
-		|| (r3 < 6)
+	if (((!r2) || (r3 = String(r2), r3 = r3["length"], (r3 < 6))))
 	{
 		r6 = "كلمة المرور الجديدة قصيرة (6 أحرف على الأقل)"
 		r4 = a1
@@ -3400,7 +3373,7 @@ function func_unknown_0x100000055(a0, a1)
 	r7 = null
 	if (r3["nginxPath"])
 	{
-		r13 = /nginx\\.exe$/
+		r13 = new RegExp("nginx\\.exe$")
 		r12 = r13["test"]
 		r14 = r3["nginxPath"]
 		accu = r12(r14)
@@ -3461,7 +3434,7 @@ function func_unknown_0x100000055(a0, a1)
 			accu = r13(r8, r4)
 			r13 = r5["push"]
 			r15 = r8["replace"]
-			r17 = /\\\\/
+			r17 = new RegExp("\\\\")
 			r15 = r15(r17, "/")
 			accu = r13(r15)
 			r13 = ctx1
@@ -3470,7 +3443,7 @@ function func_unknown_0x100000055(a0, a1)
 				r15 = "child_process"
 				r14 = s1_2(r15)
 				r9 = r14["spawnSync"]
-				r15 = /nginx\\.exe$/
+				r15 = new RegExp("nginx\\.exe$")
 				r14 = r15["test"]
 				accu = r3["nginxPath"]
 				if (!r3["nginxPath"])
@@ -3632,8 +3605,8 @@ function func_unknown_0x100000054(a0, a1)
 			{
 				accu = r11["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r13 === 0)
@@ -3661,9 +3634,7 @@ function func_unknown_0x100000054(a0, a1)
 			r18 = r18[r16["value"]]
 			r7 = parseInt(r18, 10)
 			r17 = Number[r0(257)]
-			if (!r17(r7))
-				|| (r7 < 1)
-				|| (r7 > 65535)
+			if ((((!r17(r7)) || ((r7 < 1))) || ((r7 > 65535))))
 			{
 				r20 = r0(241)
 				r18 = a1
@@ -3693,11 +3664,12 @@ function func_unknown_0x100000054(a0, a1)
 			{
 				accu = r11["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	switch (r13)
+	{
 	default:
 	{
 		break
@@ -3713,6 +3685,7 @@ function func_unknown_0x100000054(a0, a1)
 	r10 = r1["settings"]
 	r10 = r10["port"]
 	r11 = r1["settings"]
+	}
 	if (r10 === r11["nginxPort"])
 	{
 		r11 = a1
@@ -3777,7 +3750,7 @@ function func_unknown_0x100000051()
 	return process["exit"](0)
 }
 
-function async func_unknown_0x100000050(a0, a1)
+async function func_unknown_0x100000050(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r8, accu;
 	r2 = __closure
@@ -3825,7 +3798,7 @@ function async func_unknown_0x100000050(a0, a1)
 	return s85_2
 }
 
-function async func_unknown_0x10000004f(a0, a1)
+async function func_unknown_0x10000004f(a0, a1)
 {
 	let r1, r2, r3, r4, r5, r6, r7, r8, accu;
 	r2 = __closure
@@ -3984,8 +3957,8 @@ function func_unknown_0x10000004c(a0, a1)
 						{
 							accu = r9["return"]()
 						}
-						catch {}
 					}
+					catch {}
 				}
 				accu = null
 				if (r11 === 0)
@@ -4049,10 +4022,7 @@ function func_unknown_0x10000004a(a0)
 		}
 	}
 	r3 = s88_3["sources"]["find"](func_unknown_0x100000049)
-	if (s88_3["sources"]["find"](func_unknown_0x100000049))
-	r6 = r3["type"]
-	accu = r6 === "multi-m3u8"
-		&& (r6 === "multi-m3u8")
+	if (((s88_3["sources"]["find"](func_unknown_0x100000049)) && (r6 = r3["type"], accu = r6 === "multi-m3u8", (r6 === "multi-m3u8"))))
 	{
 		accu = "master.m3u8"
 	}
@@ -4357,19 +4327,13 @@ function func_unknown_0x10000003b(a0, a1)
 	r4 = r7["phone"]
 	r5 = r7["city"]
 	r6 = r7["password"]
-	if (!r7["ownerName"])
-		|| (!r7["networkName"])
-		|| (!r7["phone"])
-		|| (!r7["city"])
+	if (((((!r7["ownerName"]) || ((!r7["networkName"]))) || ((!r7["phone"]))) || ((!r7["city"]))))
 	{
 		r10 = "يرجى تعبئة كل الحقول"
 		r8 = a1
 		return func_fail_0x100000037(r8, 400, r10)
 	}
-	if (!r6)
-	r7 = String(r6)
-	r7 = r7["length"]
-		|| (r7 < 6)
+	if (((!r6) || (r7 = String(r6), r7 = r7["length"], (r7 < 6))))
 	{
 		r8 = a1
 		return func_fail_0x100000037(r8, 400, "\\x643\\x644\\x645\\x629 \\x627\\x644\\x645\\x631\\x648\\x631 \\x64a\\x62c\\x628 \\x623\\x646 \\x62a\\x643\\x648\\x646 6 \\x623\\x62d\\x631\\x641 \\x639\\x644\\x649 \\x627\\x644\\x623\\x642\\x644")
@@ -4478,7 +4442,7 @@ function func_filename_0x100000035(a0, a1, a2)
 	let r1, r2, r3, r4, accu;
 	r3 = a1["originalname"]
 	r2 = r3["replace"]
-	r4 = /[^\\w.\\-\\u0600-\\u06FF]+/
+	r4 = new RegExp("[^\\w.\\-\\u0600-\\u06FF]+")
 	r1 = r2(r4, "_")
 	r4 = Date["now"]
 	r4 = r4()
@@ -4555,7 +4519,7 @@ function func_0x3cec_0x100000032()
 	return s93_2
 }
 
-function async func_addOneXtream_0x100000031(a0, a1)
+async function func_addOneXtream_0x100000031(a0, a1)
 {
 	let r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, accu;
 	r11 = __closure
@@ -4612,7 +4576,7 @@ function async func_addOneXtream_0x100000031(a0, a1)
 		r7 = accu
 		if (accu)
 		{
-			r14 = /^https?:\\/\\//
+			r14 = new RegExp("^https?:\\/\\/")
 			r13 = r14["test"]
 			if (r13(r7))
 			{
@@ -4658,7 +4622,7 @@ function async func_addOneXtream_0x100000031(a0, a1)
 		}
 		r14 = r0["channels"]
 		r8 = r14["reduce"](func_unknown_0x100000030, 0)
-		r13 = {"id": null, "chanId": null, "name": null, "sourceId": null, "category": null, "sort": null, "cover": null, "logoOverlay": "", "quality": "copy", "fps": <null, "autoStart": null, "enabled": null}
+		r13 = {"id": null, "chanId": null, "name": null, "sourceId": null, "category": null, "sort": null, "cover": null, "logoOverlay": "", "quality": "copy", "fps": null, "autoStart": null, "enabled": null}
 		r14 = s1_8["newId"]
 		r13["id"] = r14("ch")
 		r13["chanId"] = s95_5
@@ -4732,8 +4696,7 @@ function func_unknown_0x10000002d(a0)
 function func_nginxBinding_0x10000002c()
 {
 	let r1, accu;
-	if (s1_45)
-		|| (!s1_22["isWindows"])
+	if (((s1_45) || ((!s1_22["isWindows"]))))
 	{
 		return null
 	}
@@ -4751,9 +4714,7 @@ function func_refreshNginxBinding_0x10000002b()
 	let r0, r1, r2, r3, r5, accu;
 	r0 = ctx1
 	s97_2 = func_0x4405_0x100000001
-	if (s1_51)
-		|| (s1_45)
-		|| (!s1_22["isWindows"])
+	if ((((s1_51) || ((s1_45))) || ((!s1_22["isWindows"]))))
 	{
 		return undefined
 	}
@@ -4772,7 +4733,7 @@ function func_refreshNginxBinding_0x10000002b()
 	r3 = r3(r5, "nginx.exe")
 	if (!r1(r3))
 	{
-		r1 = {"at": null, "checked": null, "listening": <null, "reason": <null, "port": null}
+		r1 = {"at": null, "checked": null, "listening": null, "reason": null, "port": null}
 		r2 = Date["now"]
 		r1["at"] = r2()
 		r1["checked"] = !(!Boolean([]))
@@ -4910,7 +4871,7 @@ function func_readNginxBindError_0x100000025(a0)
 		r13 = "utf8"
 		r10 = r10(r1, r13)
 		r9 = r10["split"]
-		r11 = /\\r?\\n/
+		r11 = new RegExp("\\r?\\n")
 		r9 = r9(r11)
 		r8 = r9["slice"]
 		r2 = r8(-100)
@@ -5046,7 +5007,7 @@ function func_unknown_0x100000020(a0, a1)
 	accu = !Boolean(a0)
 	if (!Boolean(a0))
 	{
-		r2 = /nginx\\.exe/
+		r2 = new RegExp("nginx\\.exe")
 		r1 = r2["test"]
 		accu = a1
 		if (!a1)
@@ -5112,7 +5073,7 @@ function func_validateSchedule_0x10000001e(a0, a1)
 			if (r11["done"]) break
 			r7 = false
 			r3 = r11["value"]
-			r13 = /^\\d{1,2}:\\d{2}$/
+			r13 = new RegExp("^\\d{1,2}:\\d{2}$")
 			r12 = r13["test"]
 			accu = r11["value"]["start"]
 			r11 = r11["value"]
@@ -5123,7 +5084,7 @@ function func_validateSchedule_0x10000001e(a0, a1)
 			r14 = accu
 			if (r12(r14))
 			{
-				r13 = /^\\d{1,2}:\\d{2}$/
+				r13 = new RegExp("^\\d{1,2}:\\d{2}$")
 				accu = r3["end"]
 				if (!r3["end"])
 				{
@@ -5155,11 +5116,12 @@ function func_validateSchedule_0x10000001e(a0, a1)
 			{
 				accu = r6["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	switch (r8)
+	{
 	default:
 	{
 		break
@@ -5173,6 +5135,7 @@ function func_validateSchedule_0x10000001e(a0, a1)
 		return r9
 	}
 	return null
+	}
 }
 
 function func_unknown_0x10000001d(a0)
@@ -5293,9 +5256,9 @@ function func_autoChanId_0x100000019(a0, a1)
 	r7 = r8["toLowerCase"]
 	r7 = r7()
 	r6 = r7["replace"]
-	r8 = /[^a-z0-9]+/
+	r8 = new RegExp("[^a-z0-9]+")
 	r6 = r6(r8, "-")
-	r7 = /^-+|-+$/
+	r7 = new RegExp("^-+|-+$")
 	r5 = r6["replace"](r7, "")
 	r1 = r5["slice"](0, 24)
 	if (!r5["slice"](0, 24))
@@ -5369,7 +5332,7 @@ function func_validateChannel_0x100000016(a0, a1, a2)
 	{
 		return "معرّف القناة مطلوب"
 	}
-	r2 = /^[a-zA-Z0-9_-]+$/
+	r2 = new RegExp("^[a-zA-Z0-9_-]+$")
 	if (!r2["test"](s106_6))
 	{
 		return "معرّف القناة: أحرف إنجليزية وأرقام فقط"
@@ -5536,30 +5499,22 @@ function func_0x47df7a_0x10000000c()
 	r8 = r8(s110_5["length"], 2048)
 	r1 = r4(r6, 0, r8)
 	r2 = "other"
-	r5 = /#EXTM3U/
+	r5 = new RegExp("#EXTM3U")
 	r4 = r5["test"]
-	if (r4(r1))
-	r5 = /\\.m3u8/
-	r4 = r5["test"]
-		|| (r4(s107_3))
-	r5 = /mpegurl/
-		|| (r5["test"](s110_4))
+	if ((((r4(r1)) || (r5 = new RegExp("\\.m3u8"), r4 = r5["test"], (r4(s107_3)))) || (r5 = new RegExp("mpegurl"), (r5["test"](s110_4)))))
 	{
 		r2 = "m3u8"
 	}
 	else
 	{
-		r5 = /mp2t|video\\/mp2t/
-		if (r5["test"](s110_4))
-		r5 = /\\.ts(\\?|$)/
-		r4 = r5["test"]
-			|| (r4(s107_3))
+		r5 = new RegExp("mp2t|video\\/mp2t")
+		if (((r5["test"](s110_4)) || (r5 = new RegExp("\\.ts(\\?|$)"), r4 = r5["test"], (r4(s107_3)))))
 		{
 			r2 = "ts"
 		}
 		else
 		{
-			r5 = /^\\x47/
+			r5 = new RegExp("^\\x47")
 			r8 = "binary"
 			r6 = s110_5["toString"](r8, 0, 1)
 			if (r5["test"](r6))
@@ -5586,7 +5541,7 @@ function func_0x47df7a_0x10000000c()
 	r5["statusText"] = accu
 	r5["contentType"] = s110_4
 	r5["kind"] = r2
-	r9 = /[^\\x09\\x0A\\x0D\\x20-\\x7E؀-ۿ]/
+	r9 = new RegExp("[^\\x09\\x0A\\x0D\\x20-\\x7E؀-ۿ]")
 	r7 = r1["replace"](r9, ".")
 	r5["preview"] = r7["slice"](0, 1200)
 	accu = r3
@@ -5698,8 +5653,7 @@ function func_validateSource_0x10000000a(a0, a1, a2)
 			accu = []
 		}
 		r0 = accu
-		if (!r0["length"])
-			|| (r0["some"](func_unknown_0x100000009))
+		if (((!r0["length"]) || ((r0["some"](func_unknown_0x100000009)))))
 		{
 			return "أضف رابطاً واحداً على الأقل مع تحديد الجودة"
 		}
@@ -5821,8 +5775,8 @@ function func_watchedChannelsCount_0x100000005()
 			{
 				accu = r6["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r8 === 0)
@@ -5875,8 +5829,8 @@ function func_totalCurrentViewers_0x100000004()
 			{
 				accu = r6["return"]()
 			}
-			catch {}
 		}
+		catch {}
 	}
 	accu = null
 	if (r8 === 0)
@@ -5918,11 +5872,7 @@ function func_viewerCount_0x100000003(a0)
 				r22 = ctx1
 				try
 				{
-					if (!false)
-					r19 = true
-					r23 = r18["next"]()
-					accu = r23["done"]
-						&& (!r23["done"])
+					if (((!false) && (r19 = true, r23 = r18["next"](), accu = r23["done"], (!r23["done"]))))
 					{
 						r19 = false
 						accu = r23["value"]
@@ -5932,11 +5882,7 @@ function func_viewerCount_0x100000003(a0)
 						accu = undefined
 					}
 					r7 = accu
-					if (!r19)
-					r19 = true
-					r23 = r18["next"]()
-					accu = r23["done"]
-						&& (!r23["done"])
+					if (((!r19) && (r19 = true, r23 = r18["next"](), accu = r23["done"], (!r23["done"]))))
 					{
 						r19 = false
 						accu = r23["value"]
@@ -5964,8 +5910,8 @@ function func_viewerCount_0x100000003(a0)
 						{
 							accu = r18["return"]()
 						}
-						catch {}
 					}
+					catch {}
 				}
 				accu = null
 				if (r20 === 0)
@@ -6000,8 +5946,8 @@ function func_viewerCount_0x100000003(a0)
 				{
 					accu = r10["return"]()
 				}
-				catch {}
 			}
+			catch {}
 		}
 		accu = null
 		if (r12 === 0)
@@ -6019,7 +5965,7 @@ function func_buildNginxConf_0x100000002(a0)
 {
 	let r1, r2, r3, r4, r6, accu;
 	r4 = s1_8["ROOT"]["replace"]
-	r6 = /\\\\/
+	r6 = new RegExp("\\\\")
 	r1 = r4(r6, "/")
 	accu = a0["nginxPort"]
 	if (!a0["nginxPort"])
@@ -6377,7 +6323,7 @@ function __module__(exports, require, module, __filename, __dirname)
 	r7["val"] = !Boolean([])
 	s1_46 = r7
 	s1_47 = !Boolean([])
-	r7 = {"at": 0, "checked": null, "listening": <null, "reason": <null, "port": <null}
+	r7 = {"at": 0, "checked": null, "listening": null, "reason": null, "port": null}
 	r7["checked"] = !Boolean([])
 	s1_50 = r7
 	s1_51 = !Boolean([])

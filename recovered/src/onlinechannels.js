@@ -2,9 +2,9 @@
 //
 // Lowered from the View8 register listing of the V8 code cache in the repository root (11998 source
 // characters; Node 18.5.0 / V8 10.2.154.4-node.8) by tools/decompile/emit_source.py, after
-// tools/decompile/resolve_strings.py restored the obfuscated string array. The module is a faithful
-// reconstruction of the original control flow and data flow; see DECOMPILATION.md for the analysis and
-// its limitations.
+// tools/decompile/resolve_strings.py restored the obfuscated string array. This is a syntactic
+// reconstruction of View8's listing, not a proof of equivalence to the binary. Context lifetimes and
+// exception semantics still need verification; see tools/decompile/README.md and DECOMPILATION.md.
 //
 // How to read it:
 //   rN        a bytecode register (a local of the enclosing function)
@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   /.../     a RegExp literal (the code cache does not record its flags)
+//   RegExp    a recovered source string (flags are not recovered by this emitter)
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).
@@ -139,7 +139,7 @@ function func_refreshImportedUrls_0x100000021(a0)
 	return s5_2
 }
 
-function async func_unknown_0x100000020()
+async function func_unknown_0x100000020()
 {
 	let r3, r4, r5, r6, r7, r8, r10, r11, r12, r13, r14, r15, r18, r19, r20, r21, r22, r23, r24, r25, r26, r27, r28, r29, r30, r31, r32, r33, r34, r36, accu;
 	r18 = ctx4
@@ -152,6 +152,7 @@ function async func_unknown_0x100000020()
 		s6_2 = func_0x1663_0x100000001
 		r22 = ctx6
 		accu = ctx7
+		try
 		{
 			accu = PushContext("Block")
 			r23 = ctx6
@@ -221,8 +222,8 @@ function async func_unknown_0x100000020()
 						{
 							accu = r25["return"]()
 						}
-						catch {}
 					}
+					catch {}
 				}
 				accu = null
 				if (r27 === 0)
@@ -268,7 +269,7 @@ function async func_unknown_0x100000020()
 								r34 = accu
 								r33 = String(r34)
 								r32 = r33["replace"]
-								r34 = /^أونلاين:\\s*/
+								r34 = new RegExp("^أونلاين:\\s*")
 								r32 = r32(r34, "")
 								r31 = r32["trim"]
 								r14 = r31()
@@ -357,8 +358,8 @@ function async func_unknown_0x100000020()
 							{
 								accu = r25["return"]()
 							}
-							catch {}
 						}
+						catch {}
 					}
 					accu = null
 					if (r27 === 0)
@@ -393,6 +394,7 @@ function async func_unknown_0x100000020()
 		accu = s1_17
 		accu = null
 		switch (r20)
+		{
 		default:
 		{
 			break
@@ -411,6 +413,7 @@ function async func_unknown_0x100000020()
 		r20 = ctx6
 		accu = r21
 		return r21
+		}
 	}
 	catch {}
 	r20 = accu
@@ -470,7 +473,7 @@ function func_unknown_0x10000001a(a0)
 	return a0["onlineId"]
 }
 
-function async func_importChannel_0x100000019(a0)
+async function func_importChannel_0x100000019(a0)
 {
 	let r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, r17, accu;
 	r11 = ctx1
@@ -610,7 +613,7 @@ function async func_importChannel_0x100000019(a0)
 		r8 = accu
 		if (accu)
 		{
-			r14 = /^https?:\\/\\//
+			r14 = new RegExp("^https?:\\/\\/")
 			r13 = r14["test"]
 			if (r14["test"](r8))
 			{
@@ -638,7 +641,7 @@ function async func_importChannel_0x100000019(a0)
 			r13 = ctx10
 			r14 = "oc_"
 			r15 = s10_2["id"]["replace"]
-			r17 = /[^a-zA-Z0-9_-]/
+			r17 = new RegExp("[^a-zA-Z0-9_-]")
 			s11_2 = (r14 + r15(r17, ""))
 			s11_3 = s10_2["name"]
 			while (true)
@@ -653,7 +656,7 @@ function async func_importChannel_0x100000019(a0)
 				if (!r1["channels"]["some"](func_unknown_0x100000018)) break
 				s11_2 = (s11_2 + "_")
 			}
-			r14 = {"id": null, "onlineId": null, "chanId": null, "name": null, "sourceId": null, "category": null, "sort": null, "cover": null, "logoOverlay": "", "quality": null, "fps": <null, "autoStart": null, "enabled": null}
+			r14 = {"id": null, "onlineId": null, "chanId": null, "name": null, "sourceId": null, "category": null, "sort": null, "cover": null, "logoOverlay": "", "quality": null, "fps": null, "autoStart": null, "enabled": null}
 			r15 = s1_9["newId"]
 			r14["id"] = r15("ch")
 			r14["onlineId"] = s10_2["id"]
@@ -757,7 +760,7 @@ function func_unknown_0x100000013(a0)
 	return accu
 }
 
-function async func_listAllowed_0x100000012()
+async function func_listAllowed_0x100000012()
 {
 	let r0, r2, r3, r4, r5, r6, r7, r8, accu;
 	r4 = __closure
@@ -792,10 +795,7 @@ function async func_listAllowed_0x100000012()
 		r5 = r5["status"]
 		if (!r5 === 200)
 		{
-			if (r3["json"])
-			r6 = r3["json"]
-			accu = r6["message"]
-				&& (r6["message"])
+			if (((r3["json"]) && (r6 = r3["json"], accu = r6["message"], (r6["message"]))))
 			{
 				r6 = r3["json"]
 				accu = r6["message"]
@@ -845,7 +845,7 @@ function func_unknown_0x100000010(a0, a1)
 	s15_2 = a1
 	s15_4 = func_0x1663_0x100000001
 	r5 = s1_10["LICENSE_SERVER"]["replace"]
-	r7 = /\\/+$/
+	r7 = new RegExp("\\/+$")
 	r5 = r5(r7, "")
 	r5 = (r5 + s14_3)
 	accu = URL
@@ -984,9 +984,7 @@ function func_unknown_0x100000007(a0)
 	r5 = ctx19
 	s20_2 = a0
 	s20_3 = func_0x1663_0x100000001
-	if (!s19_2)
-	r7 = /^https?:\\/\\//
-		|| (!r7["test"](s19_2))
+	if (((!s19_2) || (r7 = new RegExp("^https?:\\/\\/"), (!r7["test"](s19_2)))))
 	{
 		return s20_2("")
 	}
@@ -1011,7 +1009,7 @@ function func_unknown_0x100000007(a0)
 	r10 = r0["pathname"]
 	r8 = r8(r10)
 	r7 = r8["match"]
-	r9 = /\\.(png|jpg|jpeg|gif|webp)/
+	r9 = new RegExp("\\.(png|jpg|jpeg|gif|webp)")
 	accu = r7(r9)
 	if (!r7(r9))
 	{

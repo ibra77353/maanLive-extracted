@@ -2,9 +2,9 @@
 //
 // Lowered from the View8 register listing of the V8 code cache in the repository root (16265 source
 // characters; Node 18.5.0 / V8 10.2.154.4-node.8) by tools/decompile/emit_source.py, after
-// tools/decompile/resolve_strings.py restored the obfuscated string array. The module is a faithful
-// reconstruction of the original control flow and data flow; see DECOMPILATION.md for the analysis and
-// its limitations.
+// tools/decompile/resolve_strings.py restored the obfuscated string array. This is a syntactic
+// reconstruction of View8's listing, not a proof of equivalence to the binary. Context lifetimes and
+// exception semantics still need verification; see tools/decompile/README.md and DECOMPILATION.md.
 //
 // How to read it:
 //   rN        a bytecode register (a local of the enclosing function)
@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   /.../     a RegExp literal (the code cache does not record its flags)
+//   RegExp    a recovered source string (flags are not recovered by this emitter)
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).
@@ -87,7 +87,7 @@ function func_unknown_0x10000001f(a0, a1)
 	return undefined
 }
 
-function async func_reportSetup_0x10000001e(a0)
+async function func_reportSetup_0x10000001e(a0)
 {
 	let r0, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, accu;
 	r4 = __closure
@@ -204,7 +204,7 @@ function func_startRevalidationLoop_0x10000001d()
 	return undefined
 }
 
-function async func_unknown_0x10000001c()
+async function func_unknown_0x10000001c()
 {
 	let r1, r2, r3, r4, r5, r6, r7, accu;
 	r4 = __closure
@@ -216,10 +216,7 @@ function async func_unknown_0x10000001c()
 		r6 = s1_8
 		r5 = s1_8["get"]
 		r1 = r5()
-		if (r1["license"]["key"])
-		r5 = r1["license"]
-		accu = r5["token"]
-			|| (r5["token"])
+		if (((r1["license"]["key"]) || (r5 = r1["license"], accu = r5["token"], (r5["token"]))))
 		{
 			accu = clearInterval(s1_25)
 			accu = s1_25
@@ -527,7 +524,7 @@ function func_0x1ad9fe_0x100000014(a0)
 	return decodeURIComponent(r2)
 }
 
-function async func_revalidate_0x100000013()
+async function func_revalidate_0x100000013()
 {
 	let r0, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, accu;
 	r8 = __closure
@@ -586,8 +583,7 @@ function async func_revalidate_0x100000013()
 			}
 			r3 = r10
 			r10 = r10["status"]
-			if (r10 === 200)
-				&& (r3["json"]["token"])
+			if (((r10 === 200) && ((r3["json"]["token"]))))
 			{
 				r11 = r3["json"]
 				r11 = r11["token"]
@@ -776,7 +772,7 @@ function func_0x311f_0x100000011()
 	return s14_2
 }
 
-function async func_ensureTrial_0x100000010()
+async function func_ensureTrial_0x100000010()
 {
 	let r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, accu;
 	r8 = __closure
@@ -789,15 +785,14 @@ function async func_ensureTrial_0x100000010()
 		r9 = s1_8["get"]
 		r2 = r9()
 		r9 = r2["license"]
-		if (r9["token"])
-		r11 = 310
-			|| (r2["license"]["key"])
+		if (((r9["token"]) || (r11 = 310, (r2["license"]["key"]))))
 		{
 			r10 = undefined
 			r9 = r0
 			return r10
 		}
 		r6 = 1
+		while (true)
 		{
 			accu = PushContext("Block")
 			r9 = ctx1
@@ -897,7 +892,7 @@ function func_unknown_0x10000000f(a0)
 	return setTimeout(a0, (1 * 3000))
 }
 
-function async func_tryTrial_0x10000000e()
+async function func_tryTrial_0x10000000e()
 {
 	let r0, r2, r3, r4, r5, r6, r7, r8, accu;
 	r5 = __closure
@@ -920,9 +915,7 @@ function async func_tryTrial_0x10000000e()
 			accu = r6
 		}
 		r3 = r6
-		if (!r6["status"] === 200)
-		r6 = r3["json"]
-			|| (!r6["token"])
+		if (((!r6["status"] === 200) || (r6 = r3["json"], (!r6["token"]))))
 		{
 			r6 = {"ok": null, "trialEnded": null, "message": null}
 			r6["ok"] = !Boolean([])
@@ -1007,7 +1000,7 @@ function async func_tryTrial_0x10000000e()
 	return s18_2
 }
 
-function async func_activate_0x10000000d(a0)
+async function func_activate_0x10000000d(a0)
 {
 	let r0, r2, r3, r4, r5, r6, r7, r8, accu;
 	r5 = __closure
@@ -1031,13 +1024,9 @@ function async func_activate_0x10000000d(a0)
 			accu = r6
 		}
 		r3 = r6
-		if (!r6["status"] === 200)
-		r6 = r3["json"]
-			|| (!r6["token"])
+		if (((!r6["status"] === 200) || (r6 = r3["json"], (!r6["token"]))))
 		{
-			if (r3["json"])
-			accu = r3["json"]["message"]
-				&& (r3["json"]["message"])
+			if (((r3["json"]) && (accu = r3["json"]["message"], (r3["json"]["message"]))))
 			{
 				r7 = r3["json"]
 				accu = r7["message"]
@@ -1129,7 +1118,7 @@ function func_unknown_0x10000000b(a0, a1)
 	s21_2 = a1
 	s21_4 = func_0x1886_0x100000015
 	r5 = s1_9["replace"]
-	r7 = /\\/+$/
+	r7 = new RegExp("\\/+$")
 	r5 = r5(r7, "")
 	r5 = (r5 + s20_3)
 	accu = URL
@@ -1387,7 +1376,7 @@ function func_hardwareId_0x100000002()
 				r9 = r10["toString"]
 				r4 = r9()
 				r9 = r4["match"]
-				r11 = /MachineGuid\\s+REG_SZ\\s+([\\w-]+)/
+				r11 = new RegExp("MachineGuid\\s+REG_SZ\\s+([\\w-]+)")
 				accu = r9(r11)
 				r5 = r9(r11)
 				if (r9(r11))
@@ -1415,7 +1404,7 @@ function func_hardwareId_0x100000002()
 					r9 = r10["toString"]
 					r2 = r9()
 					r11 = r2["split"]
-					r13 = /\\r?\\n/
+					r13 = new RegExp("\\r?\\n")
 					r11 = r11(r13)
 					r10 = r11["map"](func_unknown_0x100000000)
 					r9 = r10["filter"]
@@ -1504,7 +1493,7 @@ function func_unknown_0x100000001(a0)
 	accu = a0
 	if (a0)
 	{
-		r1 = /UUID/
+		r1 = new RegExp("UUID")
 		r0 = r1["test"]
 		accu = !Boolean(r0(a0))
 	}
