@@ -76,7 +76,7 @@ function setup(behaviour) {
   });
   data.channels.push({
     id: CHANNEL_ID, name: 'قناة اختبار المراقبة', sourceId: SOURCE_ID, category: 'عام', cover: '', sort: 0,
-    enabled: true, autoStart: false, manualStopped: false, quality: 'copy', fps: null, threads: null,
+    enabled: true, autoStart: false, manualStopped: false, quality: '480p', fps: null, threads: null,
     schedule: { enabled: false, days: [], from: '08:00', to: '23:59' }, createdAt: Date.now()
   });
   Object.assign(data.settings, {

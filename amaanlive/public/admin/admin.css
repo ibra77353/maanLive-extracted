@@ -1,13 +1,15 @@
-/* بثي المحلي — لوحة التحكم (تنسيق مطابق للوحة AmaanLive الأصلية)
+/* بثي المحلي — لوحة التحكم (هوية «البرنس لايف»: كحلي داكن + برتقالي وذهبي)
    Palette: page #0B171E · sidebar/panels #101D26 · cards #162731 · line #1E3A47
-            teal #2C6E61 (حالة سليمة) · blue #3498DB (قيمة مميزة)
-            live red #E0574A · text #FFFFFF · muted #A0AAB2 */
+            orange #E08A3C (أساسي) · gold #D9A03A (تمييز) · teal #2C6E61 (حالة سليمة)
+            live red #E0574A · text #FFFFFF · muted #A0AAB2
+   مقاسات موحّدة لكل الصفحات: --ctl-h ارتفاع الأزرار والحقول، --gap/--gap-lg المسافات */
 :root{
   --bg:#0b171e; --panel:#101d26; --card:#162731; --panel2:#1b2f3c; --line:#1e3a47;
   --capsule:#1e3a47;
-  --accent:#3498db; --ok:#2c6e61; --ok-ink:#d7f2e8; --live:#e0574a; --warn:#d9a03a;
+  --accent:#e08a3c; --accent-ink:#13232c; --gold:#d9a03a;
+  --ok:#2c6e61; --ok-ink:#d7f2e8; --live:#e0574a; --warn:#d9a03a;
   --text:#ffffff; --muted:#a0aab2;
-  --radius:10px; --sidebar-w:236px;
+  --radius:10px; --sidebar-w:236px; --ctl-h:40px; --gap:12px; --gap-lg:16px;
   --font:"Tajawal","Segoe UI",Tahoma,Arial,sans-serif;
 }
 *{box-sizing:border-box}
@@ -75,18 +77,21 @@ a{color:var(--accent)}
 
 /* ---- controls ---- */
 .btn{font-family:inherit;font-size:14px;padding:9px 16px;border-radius:8px;cursor:pointer;
-  background:var(--card);color:#dbe7ef;border:1px solid var(--line)}
+  background:var(--card);color:#dbe7ef;border:1px solid var(--line);
+  min-height:var(--ctl-h);display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .btn:hover{border-color:var(--accent);color:#fff}
-.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
-.btn-primary:hover{filter:brightness(1.1);color:#fff}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.btn-primary:hover{filter:brightness(1.08);color:var(--accent-ink)}
 .btn-ghost{background:transparent}
 .btn-danger{color:#ffb3aa;border-color:#5a2f2b}
 .btn-danger:hover{border-color:var(--live);color:#fff}
 .btn-block{width:100%}
-.btn-sm{padding:5px 12px;font-size:12.5px;border-radius:99px}
+.btn-sm{padding:5px 12px;font-size:12.5px;border-radius:99px;min-height:32px}
 .file-btn{position:relative;display:inline-flex;align-items:center;cursor:pointer}
 .input, .login-card input{background:#0a141b;border:1px solid var(--line);color:var(--text);
-  border-radius:8px;padding:9px 12px;font-family:inherit;font-size:14px;width:100%}
+  border-radius:8px;padding:9px 12px;font-family:inherit;font-size:14px;width:100%;min-height:var(--ctl-h)}
+.tag-warn{display:inline-block;font-size:11.5px;color:#ffd8a8;background:rgba(217,160,58,.16);
+  border:1px solid rgba(217,160,58,.45);border-radius:99px;padding:2px 8px;margin-inline-start:6px}
 .input:focus,.login-card input:focus,.btn:focus-visible,.nav-btn:focus-visible{
   outline:2px solid var(--accent);outline-offset:1px}
 label{display:block;margin-bottom:12px;color:var(--muted);font-size:13px}
@@ -235,12 +240,16 @@ label .input{margin-top:6px}
 @media (max-width:620px){
   .dash-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
-@media (max-width:700px){
+@media (max-width:900px){
   .app{grid-template-columns:1fr}
   .sidebar{position:static;height:auto;border-left:0;border-bottom:1px solid var(--line)}
-  .nav{flex-direction:row;flex-wrap:wrap}
-  .nav-btn{border-right:0;border-bottom:3px solid transparent}
+  .brand{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px}
+  .brand-name{font-size:19px}
+  .onair-strip{margin-top:0}
+  .nav{flex-direction:row;flex-wrap:nowrap;overflow-x:auto;gap:6px;padding:8px 10px}
+  .nav-btn{white-space:nowrap;border-right:0;border-bottom:3px solid transparent}
   .nav-btn.active{border-right-color:transparent;border-bottom-color:var(--accent)}
-  .sidebar-foot{flex-direction:row}
+  .sidebar-foot{flex-direction:row;align-items:center}
+  .sidebar-foot .btn{flex:1}
   .admin-footer{right:0}
 }

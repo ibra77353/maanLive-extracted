@@ -23,6 +23,9 @@ const USB_SOURCE = {
   captureSafeMode: false
 };
 
+// مصدر يخرج H.264 (جهاز يرمّز داخلياً) — الوحيد الذي يعمل معه «نسخ المصدر بلا ترميز»
+const H264_SOURCE = Object.assign({}, USB_SOURCE, { pixelFormat: '', vcodec: 'h264' });
+
 test('وسائط الإدخال على Windows: dshow مع الحجم والمعدل والصيغة', () => {
   const args = ffmpeg.buildInputArgs(USB_SOURCE, 'win32');
   assert.deepStrictEqual(args, [
@@ -80,10 +83,28 @@ test('إخراج HLS: تقسيم مقاطع وقائمة تشغيل في مجل�
   assert.ok(joined.includes('independent_segments'));
 });
 
-test('نسخ المصدر (copy) بلا ترميز', () => {
-  const args = ffmpeg.buildOutputArgs({ id: 'ch_2', quality: 'copy' }, USB_SOURCE, '/tmp/hls/ch_2', null);
+test('نسخ المصدر (copy): يُنسخ فعلاً من مصدر H.264', () => {
+  const args = ffmpeg.buildOutputArgs({ id: 'ch_2', quality: 'copy' }, H264_SOURCE, '/tmp/hls/ch_2', null);
   assert.ok(args.join(' ').includes('-c:v copy'));
   assert.ok(!args.join(' ').includes('libx264'));
+});
+
+test('نسخ المصدر لا يُنفَّذ لمصدر غير H.264 (يُرمَّز بدلاً منه)', () => {
+  // كرت الالتقاط «USB Video» يخرج mjpeg، ونسخه في HLS لا يفتحه مشغّل المشاهد
+  assert.strictEqual(ffmpeg.sourceVideoCodec(USB_SOURCE), 'mjpeg');
+  assert.strictEqual(ffmpeg.copySupported(USB_SOURCE), false);
+  const joined = ffmpeg.buildOutputArgs({ id: 'ch_2b', quality: 'copy' }, USB_SOURCE, '/tmp/hls/ch_2b', null).join(' ');
+  assert.ok(!joined.includes('-c:v copy'), 'لا نسخ لمصدر غير H.264');
+  assert.ok(joined.includes('-c:v libx264'));
+});
+
+test('«نسخ المصدر» لمصادر H.264 وحدها: الشاشة والصيغ الخام لا تقبله', () => {
+  assert.strictEqual(ffmpeg.copySupported(H264_SOURCE), true);
+  assert.strictEqual(ffmpeg.copySupported({ type: 'usb', pixelFormat: 'yuyv422' }), false);
+  assert.strictEqual(ffmpeg.copySupported({ type: 'usb', videoDevice: 'USB Video' }), false,
+    'مصدر بلا كودك معلن لا نعده قابلاً للنسخ');
+  assert.strictEqual(ffmpeg.sourceVideoCodec({ type: 'screen', videoSize: '1280x720' }), 'rawvideo');
+  assert.strictEqual(ffmpeg.copySupported({ type: 'screen', videoSize: '1280x720' }), false);
 });
 
 test('الشعار المائي: مرشّح overlay مع الإدخال الثاني', () => {
@@ -94,6 +115,14 @@ test('الشعار المائي: مرشّح overlay مع الإدخال الثا
   assert.ok(joined.includes('-map [v]'));
   assert.ok(joined.includes('-map 0:a?'));
   assert.ok(!joined.includes('-c:v copy'), 'الشعار يفرض الترميز');
+});
+
+test('الشعار المائي يمنع النسخ حتى من مصدر H.264', () => {
+  const joined = ffmpeg
+    .buildOutputArgs({ id: 'ch_3b', quality: 'copy' }, H264_SOURCE, '/tmp/hls/ch_3b', '/tmp/logo.png')
+    .join(' ');
+  assert.ok(!joined.includes('-c:v copy'));
+  assert.ok(joined.includes('-c:v libx264'));
 });
 
 /** تشغيل مقطع بضبط قيمة إعداد في الذاكرة ثم إعادتها كما كانت (بلا كتابة في ملف المستخدم). */
@@ -124,7 +153,7 @@ test('وضع الجودة مفعّل: بلا zerolatency مع مخزن مضاع�
 
 test('وضع الجودة لا يمسّ نسخ المصدر (copy)', () => {
   const joined = withSetting('x264QualityMode', true, () =>
-    ffmpeg.buildOutputArgs({ id: 'ch_q3', quality: 'copy' }, USB_SOURCE, '/tmp/hls/ch_q3', null).join(' '));
+    ffmpeg.buildOutputArgs({ id: 'ch_q3', quality: 'copy' }, H264_SOURCE, '/tmp/hls/ch_q3', null).join(' '));
   assert.ok(joined.includes('-c:v copy'));
   assert.ok(!joined.includes('bufsize'));
 });

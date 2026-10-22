@@ -195,6 +195,31 @@ function outputHeight(channel, source) {
 }
 
 /**
+ * كودك الفيديو الذي يخرج من المصدر: `vcodec` (مرمّز الجهاز مثل h264/mjpeg) وإلا
+ * `pixelFormat` (صيغة خام مثل yuyv422). الشاشة المُلتقطة تُعدّ خاماً.
+ */
+function sourceVideoCodec(source) {
+  if (!source) return '';
+  if (source.type === 'screen' && !source.vcodec && !source.pixelFormat) return 'rawvideo';
+  return String(source.vcodec || source.pixelFormat || '').toLowerCase();
+}
+
+/**
+ * هل يمكن «نسخ المصدر بلا ترميز» لهذا المصدر؟
+ * المقاطع المنسوخة لا يفتحها متصفح المشاهد في HLS إلا إذا كان المصدر H.264 أصلاً،
+ * وكروت الالتقاط الشائعة (مثل USB Video) تخرج mjpeg/yuyv422 — فنسخها يُنتج مقاطع
+ * لا تُعرض. لذلك «نسخ المصدر» خيار عامل لمصادر H.264 وحدها، وما عداها يُرمَّز.
+ */
+function copySupported(source) {
+  return sourceVideoCodec(source) === 'h264';
+}
+
+/** هل النسخ الفعلي هو ما سيُنفَّذ؟ (الشعار المائي يفرض الترميز دائماً). */
+function streamCopyActive(channel, source, watermark) {
+  return String(channel.quality || '') === 'copy' && !watermark && copySupported(source);
+}
+
+/**
  * وسائط إخراج HLS: ترميز x264 أو نسخ المصدر، تقسيم المقاطع،
  * وإضافة الشعار المائي (اختياري) عبر مرشّح overlay.
  */
@@ -206,7 +231,7 @@ function buildOutputArgs(channel, source, dir, watermark) {
 
   const gop = Math.max(1, Math.round((Number(settings.gopSeconds) || 2) * (Number(channel.fps) || Number(source.fps) || 25)));
 
-  if (quality === 'copy' && !watermark) {
+  if (streamCopyActive(channel, source, watermark)) {
     args.push('-c:v', 'copy');
   } else {
     args.push('-c:v', 'libx264');
@@ -466,9 +491,19 @@ async function start(channelId, opts) {
     if (dev && !dev.present) throw new Error('جهاز الالتقاط «' + name + '» غير موصول');
   }
 
+  // «نسخ المصدر» لا يفتحه مشغّل المشاهد إلا من مصدر H.264: نرفض التشغيل مبكراً برسالة
+  // واضحة بدل إنتاج مقاطع لا تُعرض، ونرشد إلى جودة إخراج تُرمَّز بـH.264.
+  if (String(channel.quality || '') === 'copy' && !copySupported(source)) {
+    throw new Error('«نسخ المصدر بلا ترميز» غير ممكن لهذا المصدر («' + sourceVideoCodec(source) +
+      '») — اختر جودة إخراج (240p…1080p) لتُرمَّز القناة بـH.264');
+  }
+
   fs.mkdirSync(channelDir(channelId), { recursive: true });
   const bin = devices.ffmpegBin();
   const watermark = resolveLogo();
+  if (String(channel.quality || '') === 'copy' && watermark) {
+    appendLog(channelId, '[warn] الشعار المائي المفعّل يمنع نسخ المصدر — ستُرمَّز القناة بـH.264');
+  }
   // الإدخال الفعلي: المجموعة التي يفتحها الجهاز فعلاً (تُجرَّب قبل التشغيل عند وجود بدائل)
   const variant = await pickVariant(source);
   const inputArgs = variant.args;
@@ -984,6 +1019,9 @@ module.exports = {
   handleDeviceReturned,
   classify,
   buildInputArgs,
+  sourceVideoCodec,
+  copySupported,
+  streamCopyActive,
   buildOutputArgs,
   on
 };

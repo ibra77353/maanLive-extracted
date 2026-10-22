@@ -307,8 +307,13 @@ $('#statusTable').addEventListener('click', async (e) => {
   btn.disabled = true;
   try {
     const r = await api('/channels/' + id + '/' + act, { method: 'POST', body: {} });
-    toast(act === 'start' ? 'بدأ التشغيل' : act === 'stop' ? 'أُوقفت القناة' : 'أُعيد تشغيل القناة');
-    if (r.status && r.status.state === 'starting') toast('جارٍ التشغيل…');
+    // لا نعلن النجاح قبل قراءة حالة ffmpeg التي أرجعها الخادم فعلياً.
+    const st = (r && r.status) || {};
+    if (st.state === 'error') toast('لم يبدأ البث: ' + (st.lastError || 'راجع سجل القناة'), true);
+    else if (st.state === 'running') toast(act === 'stop' ? 'توقفت القناة' : 'القناة تعمل الآن (ON AIR)');
+    else if (st.state === 'starting' || st.state === 'restarting') toast('جارٍ التشغيل… تحقّق من الحالة بعد لحظات');
+    else if (st.state === 'stopped') toast('توقفت القناة');
+    else toast(act === 'start' ? 'أُرسل أمر التشغيل' : act === 'stop' ? 'أُرسل أمر الإيقاف' : 'أُرسل أمر إعادة التشغيل');
   } catch (err) {
     toast(err.message, true);
   } finally {
@@ -370,6 +375,20 @@ async function loadChannels() {
   renderChannelsTable();
 }
 
+/**
+ * خلية «الجودة»: توضّح إن كان «نسخ المصدر» ممكناً فعلاً لهذه القناة — فالقناة التي
+ * مصدرها غير H.264 لن تُشغَّل بالنسخ (الخادم يرفض التشغيل برسالة واضحة).
+ */
+function qualityCell(c) {
+  const q = c.quality || 'copy';
+  if (q !== 'copy') return esc(QUALITY_LABELS[q] || q);
+  if (c.copySupported === false) {
+    return 'نسخ المصدر <span class="tag-warn" title="المصدر لا يخرج H.264 — نسخه لا يعمل في HLS">غير ممكن · ' +
+      esc(c.sourceCodec || '—') + '</span>';
+  }
+  return 'نسخ المصدر';
+}
+
 function renderChannelsTable() {
   const tb = $('#channelsTable tbody');
   if (!DATA.channels.length) {
@@ -389,7 +408,7 @@ function renderChannelsTable() {
       '<td><b>' + esc(c.name) + '</b><div class="cell-muted">' + esc(c.id) + '</div></td>' +
       '<td>' + esc(c.category || '—') + '</td>' +
       '<td>' + esc(sourceName) + '</td>' +
-      '<td>' + esc(c.quality || 'copy') + '</td>' +
+      '<td>' + qualityCell(c) + '</td>' +
       '<td>' + (c.autoStart ? 'نعم' : 'لا') + '</td>' +
       '<td>' + sched + '</td>' +
       '<td><div class="cell-status">' + chip(c.state) + restartBadge(c.restarts) + '</div>' +
@@ -446,6 +465,82 @@ function channelSourceDevice() {
       : '');
 }
 
+/** أسماء جودة الإخراج كما تُعرض في الجداول، وبنفس مصدرها في src/ffmpeg.js. */
+const QUALITY_LABELS = {
+  copy: 'نسخ المصدر', '240p': '240p', '360p': '360p', '480p': '480p', '720p': '720p', '1080p': '1080p'
+};
+const QUALITY_HEIGHTS = { '240p': 240, '360p': 360, '480p': 480, '720p': 720, '1080p': 1080 };
+const QUALITY_BITRATES = { 240: '400k', 360: '800k', 480: '1400k', 720: '2500k', 1080: '4500k' };
+
+/**
+ * هل مصدر هذه القناة يخرج H.264؟ «نسخ المصدر بلا ترميز» لا يفتحه متصفح المشاهد في HLS
+ * إلا من مصدر H.264، والخادم يرفض التشغيل بغيره — فالواجهة تعرض الخيار على حقيقته.
+ * الحكم يأتي من الخادم (`copySupported`) وبسقوط آمن لو لم يُرسل.
+ */
+function sourceCopySupported(source) {
+  if (!source) return false;
+  if (typeof source.copySupported === 'boolean') return source.copySupported;
+  const codec = String(source.vcodec || source.pixelFormat ||
+    (source.type === 'screen' ? 'rawvideo' : '')).toLowerCase();
+  return codec === 'h264';
+}
+
+/** جودة إخراج افتراضية لمصدر لا يقبل النسخ: دقة الالتقاط مقيّدة بالجدول المتاح. */
+function defaultQualityFor(source) {
+  if (sourceCopySupported(source)) return 'copy';
+  const m = /^(\d+)x(\d+)$/.exec((source && source.videoSize) || '');
+  const h = m ? Number(m[2]) : 720;
+  const pick = [240, 360, 480, 720, 1080].filter((x) => x <= h).pop() || 480;
+  return pick + 'p';
+}
+
+/**
+ * خيارات جودة الإخراج الصدقية: «نسخ المصدر» معطّل ومُوضَّح إن كان المصدر لا يخرج H.264،
+ * فلا يظهر خيار «بلا ترميز» وهو لا يعمل فعلاً.
+ */
+function applyQualityOptions(source, desired) {
+  const sel = $('#ch_quality');
+  const copyOk = sourceCopySupported(source);
+  const codec = source ? (source.vcodec || source.pixelFormat || (source.type === 'screen' ? 'الشاشة' : '—')) : '—';
+  sel.innerHTML = ['copy', '240p', '360p', '480p', '720p', '1080p'].map((q) => {
+    const isCopy = q === 'copy';
+    const label = isCopy
+      ? (copyOk ? 'نسخ المصدر (بلا ترميز — المصدر H.264)' : 'نسخ المصدر — غير ممكن (المصدر ' + codec + ')')
+      : QUALITY_LABELS[q];
+    return '<option value="' + q + '"' + (isCopy && !copyOk ? ' disabled' : '') + '>' + esc(label) + '</option>';
+  }).join('');
+  sel.value = (desired && (desired !== 'copy' || copyOk)) ? desired : defaultQualityFor(source);
+  return sel.value;
+}
+
+/** ملخص يفرّق صراحةً بين الالتقاط من الجهاز وجودة إخراج القناة (ترميز أو نسخ). */
+function updateChannelOutputSummary() {
+  const box = $('#ch_outSummary');
+  const s = DATA.sources.find((x) => x.id === $('#ch_sourceId').value);
+  if (!s) {
+    box.textContent = 'اختر مصدراً لعرض ملخص الالتقاط والإخراج.';
+    return;
+  }
+  const q = $('#ch_quality').value;
+  const caps = s.liveCaps || s.caps || {};
+  const modes = (caps.modes || []).length;
+  const capture = (s.type === 'screen' ? 'التقاط الشاشة' : (s.videoDeviceLabel || s.videoDevice || 'جهاز التقاط')) +
+    ' · ' + (s.videoSize || 'دقة تلقائية') + ' · ' + (s.fps ? s.fps + 'fps' : 'معدل تلقائي') +
+    ' · ' + (s.vcodec || s.pixelFormat || 'صيغة تلقائية') + (modes ? ' (' + modes + ' وضع معلن)' : '');
+  const wm = DATA.settings && DATA.settings.logoImage;
+  let output;
+  if (q === 'copy') {
+    output = sourceCopySupported(s) && !wm
+      ? 'نسخ المصدر بلا ترميز (كما هو) — الأخف على المعالج'
+      : 'ترميز H.264 (نسخ المصدر غير ممكن' + (wm ? ' — الشعار المائي مفعّل' : ' لهذا المصدر') + ')';
+  } else {
+    const h = QUALITY_HEIGHTS[q] || 720;
+    output = 'ترميز H.264 بدقة ' + h + 'p · ' + (QUALITY_BITRATES[h] || 'تلقائي') + ' · x264 ' +
+      (DATA.settings.x264Preset || 'veryfast');
+  }
+  box.textContent = 'الالتقاط: ' + capture + ' — الإخراج: ' + output;
+}
+
 function openChannelModal(id) {
   editingChannelId = id || null;
   const ch = id ? DATA.channels.find((c) => c.id === id) : null;
@@ -454,7 +549,6 @@ function openChannelModal(id) {
   $('#ch_name').value = ch ? ch.name : '';
   $('#ch_category').value = ch ? ch.category || '' : '';
   $('#ch_cover').value = ch ? ch.cover || '' : '';
-  $('#ch_quality').value = ch ? ch.quality || 'copy' : 'copy';
   $('#ch_sort').value = ch ? ch.sort || 0 : DATA.channels.length;
   $('#ch_enabled').checked = ch ? ch.enabled !== false : true;
   $('#ch_autoStart').checked = ch ? Boolean(ch.autoStart) : false;
@@ -470,13 +564,25 @@ function openChannelModal(id) {
         esc(s.videoDevice ? deviceLabel(s.videoDevice, s.videoDeviceLabel) : 'الشاشة') + ')</option>').join('')
     : '<option value="">— لا مصادر، أضف مصدراً أولاً —</option>';
   if (ch) $('#ch_sourceId').value = ch.sourceId;
-  channelSourceDevice();
+  onChannelSourceChange(ch ? ch.quality || '' : '');
 
   $('#channelModal').classList.remove('hidden');
 }
 
+/**
+ * تغيير المصدر أو الجودة: نعيد بناء خيارات الجودة على حقيقة المصدر، ونحدّث ملخص
+ * «الالتقاط ← الإخراج» ليظهر الفرق بين دقة الالتقاط وجودة القناة قبل الحفظ.
+ */
+function onChannelSourceChange(desired) {
+  channelSourceDevice();
+  const s = DATA.sources.find((x) => x.id === $('#ch_sourceId').value);
+  applyQualityOptions(s, desired === undefined ? $('#ch_quality').value : desired);
+  updateChannelOutputSummary();
+}
+
 $('#addChannelBtn').addEventListener('click', () => openChannelModal(null));
-$('#ch_sourceId').addEventListener('change', channelSourceDevice);
+$('#ch_sourceId').addEventListener('change', () => onChannelSourceChange());
+$('#ch_quality').addEventListener('change', updateChannelOutputSummary);
 // زر إظهار/إخفاء معرّف جهاز المصدر داخل نافذة القناة
 $('#channelModal').addEventListener('click', (e) => {
   const btn = e.target.closest('button[data-devid]');
@@ -673,6 +779,25 @@ $('#sourcesTable').addEventListener('click', async (e) => {
   if (!btn) return;
   const id = btn.dataset.id;
   if (btn.dataset.sact === 'edit') return openSourceModal(id);
+  if (btn.dataset.sact === 'test') {
+    // اختبار التقاط حقيقي على المصدر المحفوظ (ثانيتان): لا يعدّل المصدر ولا يحفظ شيئاً،
+    // ويبلغ بنتيجة ffmpeg نفسها أو سبب الفشل بلفظه — لتشخيص مصدر لا يعمل.
+    const s = DATA.sources.find((x) => x.id === id);
+    if (!s) return undefined;
+    const label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'جارٍ الاختبار…';
+    try {
+      const r = await api('/devices/test', { method: 'POST', body: Object.assign({}, s, { seconds: 2 }) });
+      toast((r.result.ok ? '✅ ' : '❌ ') + r.result.message, !r.result.ok);
+    } catch (err) {
+      toast('❌ ' + err.message, true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = label;
+    }
+    return undefined;
+  }
   if (btn.dataset.sact === 'delete') {
     if (!confirm('حذف المصدر؟')) return undefined;
     try {
@@ -746,6 +871,7 @@ function renderSourcesTable() {
       '<td>' + state + '</td>' +
       '<td>' + (s.usedByChannels && s.usedByChannels.length ? esc(s.usedByChannels.join('، ')) : '—') + '</td>' +
       '<td><div class="row-actions">' +
+        '<button class="btn btn-sm" data-sact="test" data-id="' + s.id + '">🎥 اختبار</button>' +
         '<button class="btn btn-sm" data-sact="edit" data-id="' + s.id + '">تعديل</button>' +
         '<button class="btn btn-sm btn-danger" data-sact="delete" data-id="' + s.id + '">حذف</button>' +
       '</div></td></tr>';

@@ -420,6 +420,10 @@ function createRouter() {
           devicePresent: s.type === 'screen' ? true : Boolean(dev && dev.present),
           audioPresent: s.audioDevice ? Boolean(aud && aud.present) : true,
           liveCaps: dev ? dev.caps : null,
+          // كودك المصدر الفعلي وهل يقبل «نسخ المصدر بلا ترميز» — تقرأه اللوحة لعرض
+          // خيارات الجودة الصدقية بدل عرض خيار لا يعمل.
+          videoCodec: ffmpeg.sourceVideoCodec(s),
+          copySupported: ffmpeg.copySupported(s),
           usedByChannels: data.channels.filter((c) => c.sourceId === s.id).map((c) => c.name)
         });
       })
@@ -471,8 +475,11 @@ function createRouter() {
         .map((c) => {
           const src = store.findSource(c.sourceId);
           // اسم المصدر يأتي مع القناة نفسها، فلا يعتمد العمود على وصول قائمة المصادر أولاً.
+          // ويأتي معها كودك المصدر: هل «نسخ المصدر» ممكن فعلاً لهذه القناة أم لا.
           return Object.assign({}, c, ffmpeg.statusOf(c.id), {
             sourceName: src ? src.name : '',
+            sourceCodec: ffmpeg.sourceVideoCodec(src),
+            copySupported: ffmpeg.copySupported(src),
             nextOpen: scheduler.nextOpenMinutes(c.schedule)
           });
         })
