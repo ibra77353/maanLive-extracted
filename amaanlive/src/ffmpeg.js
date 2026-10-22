@@ -138,47 +138,50 @@ function sourceOf(channel) {
 }
 
 /**
- * وسائط الإدخال: DirectShow على Windows، v4l2 على غيرها، وgdigrab/x11grab لالتقاط الشاشة.
- * `platform` قابل للتمرير لاختبار فرع ويندوز من أي منصة.
+ * وسائط الإدخال لمصدر. البناء نفسه في devices.js (مالك منطق أجهزة الالتقاط)، ويُصدَّر من
+ * هنا لأن اختبارات الوسائط وقواعد الإدخال تعتمد هذا الاسم.
  */
 function buildInputArgs(source, platform) {
-  const win = (platform || process.platform) === 'win32';
-  const args = [];
+  return devices.buildInputArgs(source, platform);
+}
 
-  if (source.type === 'screen') {
-    args.push('-f', win ? 'gdigrab' : 'x11grab', '-framerate', String(source.fps || 15));
-    if (source.videoSize) args.push('-video_size', source.videoSize);
-    args.push('-i', win ? 'desktop' : (process.env.DISPLAY || ':0'));
-    if (source.audioDevice && win) {
-      args.push('-f', 'dshow', '-i', 'audio="' + source.audioDevice + '"');
-    }
-    return args;
+/** مدة تجربة الالتقاط قبل تشغيل القناة (ثانية واحدة تكفي لكشف الجهاز الذي لا يُفتح). */
+const PROBE_SECONDS = 1;
+
+/** آخر مجموعة إدخال نجحت لكل مصدر، فلا نعيد التجربة في كل تشغيل. */
+const variantCache = new Map();
+
+function sourceFingerprint(source) {
+  return JSON.stringify([source.type, source.videoDevice, source.audioDevice, source.videoSize,
+    source.fps, source.pixelFormat, source.vcodec, Boolean(source.captureSafeMode)]);
+}
+
+/**
+ * اختيار مجموعة إدخال تعمل فعلاً لهذا المصدر.
+ *
+ * إن لم يكن للمصدر إلا احتمال واحد (بلا صوت وبلا إعدادات مفروضة) نستخدمه بلا تجربة حتى
+ * لا نضيف زمناً لتشغيل القنوات السليمة. وإلا نجرّب الاحتمالات مرة واحدة ونتذكّر الناجح،
+ * فتُفتح القناة بالإعدادات التي يقبلها الجهاز فعلاً بدل تكرار الفشل («I/O error»).
+ * عند فشل كل الاحتمالات نعيد المحفوظ ونتيح للمراقب إعادة المحاولة كما كان.
+ */
+async function pickVariant(source) {
+  const variants = devices.inputVariants(source);
+  if (variants.length === 1) return variants[0];
+
+  const key = sourceFingerprint(source);
+  const cached = variantCache.get(key);
+  if (cached) {
+    const known = variants.find((v) => v.key === cached);
+    if (known) return known;
   }
 
-  if (win) {
-    args.push('-f', 'dshow', '-rtbufsize', '256M', '-thread_queue_size', '1024');
-    if (source.pixelFormat) args.push('-pixel_format', source.pixelFormat);
-    else if (source.vcodec) args.push('-vcodec', source.vcodec);
-    if (!source.captureSafeMode) {
-      if (source.videoSize) args.push('-video_size', source.videoSize);
-      if (source.fps) args.push('-framerate', String(source.fps));
-    }
-    args.push('-i', 'video="' + source.videoDevice + '"' +
-      (source.audioDevice ? ':audio="' + source.audioDevice + '"' : ''));
-    return args;
+  const tried = await devices.tryCapture(source, PROBE_SECONDS);
+  if (tried.ok && tried.variant) {
+    variantCache.set(key, tried.variant.key);
+    return tried.variant;
   }
-
-  // Linux (تطوير/اختبار)
-  args.push('-f', 'v4l2', '-thread_queue_size', '1024');
-  if (source.pixelFormat) args.push('-input_format', source.pixelFormat);
-  else if (source.vcodec === 'mjpeg') args.push('-input_format', 'mjpeg');
-  if (!source.captureSafeMode) {
-    if (source.videoSize) args.push('-video_size', source.videoSize);
-    if (source.fps) args.push('-framerate', String(source.fps));
-  }
-  args.push('-i', source.videoDevice || '/dev/video0');
-  if (source.audioDevice) args.push('-f', 'alsa', '-i', source.audioDevice);
-  return args;
+  variantCache.delete(key);
+  return variants[0];
 }
 
 /** ارتفاع الإخراج الفعلي (للترميز ولتحجيم الشعار المائي). */
@@ -448,7 +451,9 @@ async function start(channelId, opts) {
   fs.mkdirSync(channelDir(channelId), { recursive: true });
   const bin = devices.ffmpegBin();
   const watermark = resolveLogo();
-  const inputArgs = buildInputArgs(source);
+  // الإدخال الفعلي: المجموعة التي يفتحها الجهاز فعلاً (تُجرَّب قبل التشغيل عند وجود بدائل)
+  const variant = await pickVariant(source);
+  const inputArgs = variant.args;
   const outputArgs = buildOutputArgs(channel, source, channelDir(channelId), watermark);
 
   // ترتيب الأمر: الإدخال المباشر (صفر)، ثم الشعار المائي (واحد) إن وُجد، ثم الإخراج.
@@ -462,6 +467,9 @@ async function start(channelId, opts) {
   s.deviceLost = false;
   s.lastError = null;
   appendLog(channelId, '\n=== [' + new Date().toISOString() + '] تشغيل: ' + bin + ' ' + args.join(' ') + ' ===');
+  if (variant.label !== 'الإعدادات المحفوظة') {
+    appendLog(channelId, '[warn] الجهاز لا يفتح بالإعدادات المحفوظة — الالتقاط بـ«' + variant.label + '»');
+  }
 
   let child;
   try {
@@ -490,7 +498,8 @@ async function start(channelId, opts) {
       if (!line.trim()) continue;
       parseStats(line, s);
       const level = classify(line);
-      if (level === 'high') s.lastError = line.trim();
+      // السبب المفهوم للإنسان أولى من سطر ffmpeg الخام في عمود «آخر الأخطاء»
+      if (level === 'high') s.lastError = devices.explainError(line) || line.trim();
       if (level || /Error|error|warning|frame=/.test(line)) {
         appendLog(channelId, '[' + level + '] ' + line.trim());
       }

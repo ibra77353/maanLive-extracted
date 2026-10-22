@@ -32,6 +32,9 @@ const state = {
 let watcherTimer = null;
 const listeners = [];
 
+/** مهلة إعادة محاولة قراءة قدرات جهاز فشلت قراءته (لا نلحّ على جهاز مشغول). */
+const CAPS_RETRY_MS = 30000;
+
 // ---------------------------------------------------------------- ffmpeg bin
 
 function ffmpegBin() {
@@ -227,7 +230,144 @@ function buildCaps(videoFormats, audioOptions) {
   };
 }
 
+// ---------------------------------------------------------------- وسائط الإدخال
+
+/**
+ * وسائط إدخال ffmpeg لمصدر: DirectShow على Windows، v4l2 على غيرها، وgdigrab/x11grab
+ * لالتقاط الشاشة. `platform` قابل للتمرير لاختبار فرع ويندوز من أي منصة.
+ */
+function buildInputArgs(source, platform) {
+  const win = (platform || process.platform) === 'win32';
+  const args = [];
+
+  if (source.type === 'screen') {
+    args.push('-f', win ? 'gdigrab' : 'x11grab', '-framerate', String(source.fps || 15));
+    if (source.videoSize) args.push('-video_size', source.videoSize);
+    args.push('-i', win ? 'desktop' : (process.env.DISPLAY || ':0'));
+    if (source.audioDevice && win) {
+      args.push('-f', 'dshow', '-i', 'audio="' + source.audioDevice + '"');
+    }
+    return args;
+  }
+
+  if (win) {
+    args.push('-f', 'dshow', '-rtbufsize', '256M', '-thread_queue_size', '1024');
+    if (source.pixelFormat) args.push('-pixel_format', source.pixelFormat);
+    else if (source.vcodec) args.push('-vcodec', source.vcodec);
+    if (!source.captureSafeMode) {
+      if (source.videoSize) args.push('-video_size', source.videoSize);
+      if (source.fps) args.push('-framerate', String(source.fps));
+    }
+    args.push('-i', 'video="' + source.videoDevice + '"' +
+      (source.audioDevice ? ':audio="' + source.audioDevice + '"' : ''));
+    return args;
+  }
+
+  // Linux (تطوير/اختبار)
+  args.push('-f', 'v4l2', '-thread_queue_size', '1024');
+  if (source.pixelFormat) args.push('-input_format', source.pixelFormat);
+  else if (source.vcodec === 'mjpeg') args.push('-input_format', 'mjpeg');
+  if (!source.captureSafeMode) {
+    if (source.videoSize) args.push('-video_size', source.videoSize);
+    if (source.fps) args.push('-framerate', String(source.fps));
+  }
+  args.push('-i', source.videoDevice || '/dev/video0');
+  if (source.audioDevice) args.push('-f', 'alsa', '-i', source.audioDevice);
+  return args;
+}
+
+/** هل يفرض المصدر صيغة/دقة/معدلاً على جهاز قد لا يقبلها؟ */
+function forcesSettings(source) {
+  if (!source || source.type === 'screen' || source.captureSafeMode) return false;
+  return Boolean(source.pixelFormat || source.vcodec || source.videoSize || source.fps);
+}
+
+/**
+ * مجموعات وسائط الإدخال الممكنة بالترتيب: الأخصّ أولاً ثم الأعمّ.
+ *
+ * السبب واقعي: كثير من أجهزة الالتقاط ترفض الفتح بالفيديو والصوت معاً (جهاز صوت مشغول
+ * أو اسم غير مطابق) أو ترفض الصيغة/الدقة المفروضة، فيطبع ffmpeg خطأً عاماً مثل
+ * «I/O error» وتفشل القناة بلا داعٍ مع أن الجهاز سليم. لذلك نجرب المحفوظ أولاً،
+ * ثم الفيديو وحده، ثم الإعدادات التلقائية للجهاز.
+ */
+function inputVariants(source, platform) {
+  const list = [];
+  const seen = new Set();
+  const add = (s, label) => {
+    const args = buildInputArgs(s, platform);
+    const key = args.join(' ');
+    if (seen.has(key)) return;
+    seen.add(key);
+    list.push({ key, label, args });
+  };
+
+  add(source, 'الإعدادات المحفوظة');
+  if (source.type !== 'screen' && source.audioDevice) {
+    add(Object.assign({}, source, { audioDevice: '' }), 'فيديو فقط بلا صوت');
+  }
+  if (forcesSettings(source)) {
+    const auto = Object.assign({}, source, { pixelFormat: '', vcodec: '', videoSize: '', fps: null });
+    add(auto, 'الإعدادات التلقائية للجهاز');
+    if (source.audioDevice) {
+      add(Object.assign({}, auto, { audioDevice: '' }), 'الإعدادات التلقائية بلا صوت');
+    }
+  }
+  return list;
+}
+
+/**
+ * تجربة التقاط فعلي: يجرّب المجموعات بالترتيب ويعيد أول مجموعة نجحت التقاطها فعلاً.
+ * تُستخدم في زر «اختبار الالتقاط» وقبل تشغيل القناة.
+ */
+async function tryCapture(source, seconds, platform) {
+  const secs = Math.max(1, Number(seconds) || 2);
+  const attempts = [];
+  let lastStderr = '';
+  for (const variant of inputVariants(source, platform)) {
+    const args = ['-hide_banner', ...variant.args, '-t', String(secs), '-f', 'null', '-'];
+    const res = await run(args, { timeout: (secs + 12) * 1000 });
+    const text = res.stderr || '';
+    lastStderr = text;
+    const frames = (text.match(/frame=\s*(\d+)/g) || []).map((s) => Number(s.replace(/\D/g, ''))).pop() || 0;
+    // نجاح = خروج سليم من ffmpeg، أو وصول إطارات فعلية (لو أنهت المهلة عملية متجمّدة بعدها)
+    const ok = res.code === 0 || frames > 0;    attempts.push({ label: variant.label, ok, frames, error: ok ? null : firstError(text) });
+    if (ok) return { ok: true, variant, frames, attempts, stderr: text.slice(-2000) };
+  }
+  return { ok: false, variant: null, frames: 0, attempts, stderr: lastStderr.slice(-2000) };
+}
+
+/** شرح عربي موجز لأشهر أعطال فتح جهاز الالتقاط (null إن لم نعرف السبب). */
+function explainError(text) {
+  const t = String(text || '');
+  if (/i\/o error|device or resource busy|already in use|could not run graph|access is denied|cannot open/i.test(t)) {
+    return 'تعذّر فتح الجهاز — يبدو مشغولاً ببرنامج آخر (I/O error). أغلق أي برنامج يستخدم الكاميرا/بطاقة الالتقاط ثم أعد المحاولة';
+  }
+  if (/could not find|couldn't find|no such device|not found|no such file/i.test(t)) {
+    return 'لم يُعثر على الجهاز بالاسم المحدد — أعد فحص الأجهزة واختر الاسم من القائمة';
+  }
+  if (/unknown input format|dshow is not|v4l2 is not|capture device is not/i.test(t)) {
+    return 'نسخة ffmpeg هذه لا تدعم إدخال الالتقاط (dshow/v4l2) — استخدم ffmpeg.exe المرفق مع المشروع';
+  }
+  return null;
+}
+
+/** رسالة جاهزة للعرض: شرح مفهوم، وإلا فأول سطر خطأ من ffmpeg. */
+function errorMessage(text) {
+  return explainError(text) || firstError(text) || 'فشل فتح الجهاز';
+}
+
 // ---------------------------------------------------------------- scanning
+
+/** هل هذه القدرات نتيجة قراءة حقيقية؟ (كائن فارغ = القراءة فشلت) */
+function hasCaps(caps) {
+  if (!caps) return false;
+  return Boolean(
+    (caps.resolutions && caps.resolutions.length) ||
+    (caps.pixelFormats && caps.pixelFormats.length) ||
+    (caps.modes && caps.modes.length) ||
+    (caps.audio && ((caps.audio.sampleRates || []).length || (caps.audio.channels || []).length))
+  );
+}
 
 async function scanWindows() {
   const listed = await run(['-hide_banner', '-list_devices', 'true', '-f', 'dshow', '-i', 'dummy'], { timeout: 15000 });
@@ -310,12 +450,17 @@ async function scan(opts) {
 
     for (const dev of found) {
       const old = prev.get(dev.key);
-      const keep = old && old.caps && !opts.forceCaps;
+      // قراءة فاشلة (قدرات فارغة — مثلاً لأن الجهاز كان مشغولاً وقت القراءة) ليست نهائية:
+      // يُعاد سؤال الجهاز بعد مهلة، وإلا بقي «لم تُقرأ قدرات» معروضاً في الواجهة للأبد.
+      const staleEmpty = old && !hasCaps(old.caps) &&
+        (!old.capsTriedAt || Date.now() - old.capsTriedAt > CAPS_RETRY_MS);
+      const keep = old && !opts.forceCaps && hasCaps(old.caps) && !staleEmpty;
       const capsRes = keep ? { caps: old.caps, raw: old.raw } : await readCaps(dev);
       next.push(Object.assign(dev, {
         caps: capsRes.caps,
         raw: capsRes.raw,
         capsAt: keep ? old.capsAt : Date.now(),
+        capsTriedAt: keep ? old.capsTriedAt : Date.now(),
         error: null
       }));
     }
@@ -387,45 +532,41 @@ function stopWatcher() {
 // ---------------------------------------------------------------- device test
 
 /**
- * اختبار حقيقي لجهاز: التقاط ثانيتين إلى مخرج فارغ. هذا يكشف «الجهاز موجود لكنه
- * مشغول أو لا يفتح» قبل ربطه بقناة.
+ * اختبار حقيقي لجهاز: التقاط فعلي إلى مخرج فارغ. هذا يكشف «الجهاز موجود لكنه مشغول
+ * أو لا يفتح» قبل ربطه بقناة. يجرّب المجموعات بالترتيب (المحفوظ ← بلا صوت ← التلقائي)
+ * ويبلغ عن المجموعة التي نجحت، فلا يُحكم على الجهاز بالفشل بسبب إعداد واحد يرفضه.
  */
-async function testCapture(source, seconds) {
-  const args = ['-hide_banner'];
-  if (source.type === 'screen') {
-    args.push('-f', IS_WIN ? 'gdigrab' : 'x11grab', '-framerate', String(source.fps || 15));
-    if (source.videoSize) args.push('-video_size', source.videoSize);
-    args.push('-i', IS_WIN ? 'desktop' : (process.env.DISPLAY || ':0'));
-  } else if (IS_WIN) {
-    args.push('-f', 'dshow', '-rtbufsize', '256M', '-thread_queue_size', '1024');
-    if (source.pixelFormat) args.push('-pixel_format', source.pixelFormat);
-    else if (source.vcodec) args.push('-vcodec', source.vcodec);
-    if (source.videoSize) args.push('-video_size', source.videoSize);
-    if (source.fps) args.push('-framerate', String(source.fps));
-    args.push('-i', 'video="' + source.videoDevice + '"' + (source.audioDevice ? ':audio="' + source.audioDevice + '"' : ''));
-  } else {
-    args.push('-f', 'v4l2', '-thread_queue_size', '1024');
-    if (source.pixelFormat) args.push('-input_format', source.pixelFormat);
-    if (source.videoSize) args.push('-video_size', source.videoSize);
-    if (source.fps) args.push('-framerate', String(source.fps));
-    args.push('-i', source.videoDevice);
-    if (source.audioDevice) args.push('-f', 'alsa', '-i', source.audioDevice);
-  }
-  args.push('-t', String(seconds || 2), '-f', 'null', '-');
-
+async function testCapture(source, seconds, platform) {
   const started = Date.now();
-  const res = await run(args, { timeout: ((seconds || 2) + 12) * 1000 });
-  const text = (res.stderr || '');
-  const ok = res.code === 0 || /frame=\s*\d+/.test(text);
-  const frames = (text.match(/frame=\s*(\d+)/g) || []).map((s) => Number(s.replace(/\D/g, ''))).pop() || 0;
+  const tried = await tryCapture(source, seconds, platform);
+  const ms = Date.now() - started;
+  const used = tried.attempts[tried.attempts.length - 1] || null;
+
+  if (tried.ok) {
+    const fallback = tried.attempts.length > 1;
+    return {
+      ok: true,
+      frames: tried.frames,
+      ms,
+      variant: used.label,
+      message: 'نجح الالتقاط (' + tried.frames + ' إطار في ' + Math.round(ms / 100) / 10 + ' ث)' +
+        (fallback ? ' — بـ' + used.label : ''),
+      attempts: tried.attempts,
+      stderr: tried.stderr
+    };
+  }
+
+  const first = tried.attempts[0] || null;
+  const reason = errorMessage(tried.stderr);
+  const raw = first && first.error ? ' (ffmpeg: ' + first.error + ')' : '';
   return {
-    ok,
-    frames,
-    ms: Date.now() - started,
-    message: ok
-      ? 'نجح الالتزام بالجهاز (' + frames + ' إطار في ' + Math.round((Date.now() - started) / 100) / 10 + ' ث)'
-      : firstError(text) || 'فشل فتح الجهاز',
-    stderr: text.slice(-2000)
+    ok: false,
+    frames: 0,
+    ms,
+    variant: null,
+    message: reason + raw,
+    attempts: tried.attempts,
+    stderr: tried.stderr
   };
 }
 
@@ -448,6 +589,13 @@ module.exports = {
   stopWatcher,
   on,
   testCapture,
+  tryCapture,
+  inputVariants,
+  buildInputArgs,
+  forcesSettings,
+  explainError,
+  errorMessage,
+  hasCaps,
   firstError,
   // دوال نقية للاختبار
   parseDshowDevices,

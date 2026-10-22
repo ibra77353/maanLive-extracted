@@ -83,3 +83,64 @@ test('مخرجات لا تحوي أجهزة: لا نتائج ولا تخمين',
   assert.deepStrictEqual(devices.parseDshowDevices('FFmpeg version 6.1\n[dshow @ 0x1] "dummy" (none)'), []);
   assert.deepStrictEqual(devices.parseDshowVideoOptions('nothing here'), []);
 });
+
+// ---------------------------------------------------------------- بدائل الإدخال
+
+const USB = {
+  type: 'usb',
+  videoDevice: 'USB Video',
+  audioDevice: 'USB Audio',
+  videoSize: '1280x720',
+  fps: 30,
+  pixelFormat: 'mjpeg',
+  vcodec: '',
+  captureSafeMode: false
+};
+
+test('مجموعات الإدخال: المحفوظ أولاً ثم بلا صوت ثم الإعدادات التلقائية', () => {
+  const variants = devices.inputVariants(USB, 'win32');
+  assert.deepStrictEqual(variants.map((v) => v.label), [
+    'الإعدادات المحفوظة',
+    'فيديو فقط بلا صوت',
+    'الإعدادات التلقائية للجهاز',
+    'الإعدادات التلقائية بلا صوت'
+  ]);
+  assert.ok(variants[0].args.includes('video="USB Video":audio="USB Audio"'));
+  assert.strictEqual(variants[1].args[variants[1].args.length - 1], 'video="USB Video"');
+
+  const auto = variants[2].args.join(' ');
+  assert.ok(!auto.includes('-pixel_format') && !auto.includes('-video_size') && !auto.includes('-framerate'),
+    'الإعدادات التلقائية يجب ألا تفرض شيئاً');
+});
+
+test('مصدر بلا صوت وبلا إعدادات مفروضة: احتمال واحد فلا تجربة قبل التشغيل', () => {
+  const plain = Object.assign({}, USB, { audioDevice: '', videoSize: '', fps: null, pixelFormat: '' });
+  assert.strictEqual(devices.inputVariants(plain, 'win32').length, 1);
+});
+
+test('وضع الالتقاط الآمن: لا إعدادات مفروضة، فيبقى احتمالا الصوت', () => {
+  const safe = Object.assign({}, USB, { captureSafeMode: true });
+  const variants = devices.inputVariants(safe, 'win32');
+  assert.deepStrictEqual(variants.map((v) => v.label), ['الإعدادات المحفوظة', 'فيديو فقط بلا صوت']);
+  assert.ok(!variants[0].args.includes('-video_size'));
+});
+
+test('مصدر الشاشة: لا بديل «بلا صوت» على غير Windows', () => {
+  const screen = { type: 'screen', videoDevice: '', audioDevice: '', videoSize: '1280x720', fps: 15, pixelFormat: '', vcodec: '' };
+  assert.strictEqual(devices.inputVariants(screen, 'linux').length, 1);
+});
+
+test('شرح أعطال الفتح: «I/O error» = الجهاز مشغول، والاسم الخطأ يُشرح بلفظه', () => {
+  assert.match(devices.explainError('Error opening input files: I/O error'), /مشغول/);
+  assert.match(devices.errorMessage('Could not find video device with name'), /لم يُعثر/);
+  assert.match(devices.explainError('Unknown input format: \'dshow\''), /ffmpeg/);
+  assert.strictEqual(devices.explainError('frame= 120 fps=25'), null, 'لا شرح لسطر سليم');
+});
+
+test('قدرات فارغة لا تُعدّ قراءة ناجحة (يُعاد سؤال الجهاز لاحقاً)', () => {
+  assert.strictEqual(devices.hasCaps(null), false);
+  assert.strictEqual(devices.hasCaps({}), false);
+  assert.strictEqual(devices.hasCaps(devices.buildCaps([], [])), false);
+  assert.strictEqual(devices.hasCaps({ resolutions: ['640x480'] }), true);
+  assert.strictEqual(devices.hasCaps({ audio: { sampleRates: [44100] } }), true);
+});
