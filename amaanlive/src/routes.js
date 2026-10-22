@@ -476,7 +476,10 @@ function createRouter() {
           const src = store.findSource(c.sourceId);
           // اسم المصدر يأتي مع القناة نفسها، فلا يعتمد العمود على وصول قائمة المصادر أولاً.
           // ويأتي معها كودك المصدر: هل «نسخ المصدر» ممكن فعلاً لهذه القناة أم لا.
-          return Object.assign({}, c, ffmpeg.statusOf(c.id), {
+          // حالة التشغيل تُدمج أولاً ثم سجل القناة المحفوظ فوقها، فلا يطغى حقل من
+          // وقت التشغيل (fps مثلاً، وهو معدل الإطارات الداخل) على إعداد القناة
+          // نفسه — وإلا قرأ النموذج معدل الإطارات الخطأ وكتبه في الإعدادات.
+          return Object.assign({}, ffmpeg.statusOf(c.id), c, {
             sourceName: src ? src.name : '',
             sourceCodec: ffmpeg.sourceVideoCodec(src),
             copySupported: ffmpeg.copySupported(src),

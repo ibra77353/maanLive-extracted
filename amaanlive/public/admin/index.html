@@ -48,6 +48,12 @@
 
     <!-- ===== المراقبة والسجلات ===== -->
     <section id="view-dashboard" class="view">
+      <header class="view-head">
+        <h1>المراقبة والسجلات</h1>
+        <div class="head-actions">
+          <button class="btn" id="statsRefreshBtn">↻ تحديث الحالة</button>
+        </div>
+      </header>
       <div class="capsule-bar" id="sysStats"></div>
       <div class="dash-grid" id="dashGrid"></div>
       <div class="table-wrap">
@@ -100,6 +106,7 @@
           <button class="btn btn-primary" id="addSourceBtn">+ إضافة مصدر</button>
         </div>
       </header>
+      <p class="hint">المصدر هو مدخل الفيديو (جهاز التقاط DirectShow أو التقاط الشاشة) ويُحفظ بإعداداته الخاصة. أما <b>القناة</b> فهي التي تربط مصدراً بإعدادات الإخراج وتظهر للمشاهدين.</p>
 
       <div class="card">
         <div class="card-head">
@@ -333,8 +340,11 @@
       <label>اسم القناة<input class="input" id="ch_name" required></label>
       <label>المصدر<select class="input" id="ch_sourceId"></select></label>
       <div class="src-dev" id="ch_sourceDev"></div>
+      <div class="row-actions" style="margin:-6px 0 10px">
+        <button type="button" class="link-btn" id="chManageSources">＋ إدارة مصادر البث</button>
+      </div>
       <label>التصنيف<input class="input" id="ch_category" placeholder="مثال: رياضة"></label>
-      <div class="grid-2">
+      <div class="grid-3">
         <label>جودة الإخراج
           <select class="input" id="ch_quality">
             <option value="copy">نسخ المصدر (بلا ترميز — لمصادر H.264 فقط)</option>
@@ -342,6 +352,7 @@
             <option value="480p">480p</option><option value="720p">720p</option><option value="1080p">1080p</option>
           </select>
         </label>
+        <label>معدل الإطارات (اختياري)<input class="input" id="ch_fps" type="number" min="1" max="60" placeholder="تلقائي"></label>
         <label>الترتيب<input class="input" id="ch_sort" type="number" value="0"></label>
       </div>
       <p class="hint" id="ch_outSummary">اختر مصدراً لعرض ملخص الالتقاط والإخراج.</p>

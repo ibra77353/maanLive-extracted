@@ -32,7 +32,7 @@ a{color:var(--accent)}
 /* ---- layout ---- */
 .app{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh}
 .sidebar{background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;
-  position:sticky;top:0;height:100vh}
+  position:sticky;top:0;height:100vh;min-width:0}
 .brand{padding:22px 18px 14px;border-bottom:1px solid var(--line)}
 .brand-logo{max-height:42px;max-width:100%;margin-bottom:8px;display:block}
 .brand-name{font-size:22px;font-weight:800;color:#fff}
@@ -44,7 +44,7 @@ a{color:var(--accent)}
   animation:pulse 1.4s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
 @media (prefers-reduced-motion: reduce){.onair-strip.live::before{animation:none}}
-.nav{padding:12px 10px;display:flex;flex-direction:column;gap:4px;flex:1;overflow:auto}
+.nav{padding:12px 10px;display:flex;flex-direction:column;gap:4px;flex:1;overflow:auto;min-width:0}
 .nav-btn{background:none;border:0;color:var(--muted);font-family:inherit;font-size:15px;text-align:right;
   padding:11px 14px;border-radius:8px;cursor:pointer;border-right:3px solid transparent}
 .nav-btn:hover{background:var(--panel2);color:var(--text)}
@@ -253,3 +253,13 @@ label .input{margin-top:6px}
   .sidebar-foot .btn{flex:1}
   .admin-footer{right:0}
 }
+
+/* ---- الهاتف الصغير: تبويبات القائمة تلتف على سطرين بدل تمرير أفقي يُخفي قسمين.
+   و`min-width:0` على الشريط والمحتوى يمنع عرض المحتوى من توسيع الصفحة أفقياً. ---- */
+@media (max-width:620px){
+  .nav{flex-wrap:wrap;overflow:visible}
+  .main{padding:14px 12px 72px}
+}
+
+/* ---- تمييز السجل المقصود عند الانتقال من قسم إلى قسم (ربط المصادر بالقنوات) ---- */
+.table tr.row-flash td{background:rgba(224,138,60,.16)}

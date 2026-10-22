@@ -38,7 +38,7 @@ const S_KEYS = [
   'ownerName', 'networkName', 'city'
 ];
 
-const DATA = { settings: {}, sources: [], channels: [], ads: [], devices: { devices: [] }, nginx: null };
+const DATA = { settings: {}, sources: [], channels: [], statusChannels: [], ads: [], devices: { devices: [] }, nginx: null };
 let statusTimer = null;
 let logChannelId = null;
 let editingChannelId = null;
@@ -201,8 +201,14 @@ $$('.nav-btn').forEach((b) => b.addEventListener('click', () => switchView(b.dat
 function switchView(name) {
   $$('.nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.view === name));
   $$('.view').forEach((v) => v.classList.toggle('hidden', v.id !== 'view-' + name));
+  // على الشاشات المتوسطة يظهر شريط التنقل أفقيًا: نُبقي تبويب القسم المفتوح ظاهرًا.
+  const nav = $('.nav');
+  const activeTab = nav && nav.querySelector('.nav-btn.active');
+  if (activeTab && nav.scrollWidth > nav.clientWidth + 4) activeTab.scrollIntoView({ inline: 'nearest', block: 'nearest' });
   if (name === 'channels') { loadChannels(); loadSources(); }
-  if (name === 'sources') { loadDevices(); loadSources(); }
+  // نُعيد وعد تحميل المصادر ليتمكّن نداء الانتقال من قسم آخر (goToSource) من
+  // انتظار اكتمال الرسم قبل تمييز السجل — بلا تحميل مزدوج يستبدل الصف بعد تمييزه.
+  if (name === 'sources') { loadDevices(); return loadSources(); }
   if (name === 'scheduler') loadSchedules();
   if (name === 'ads') loadAds();
   if (name === 'settings') { loadSettings(); loadNginxStatus(); }
@@ -222,10 +228,13 @@ async function refreshStats() {
     const r = await api('/stats');
     const s = r.stats;
     DATA.stats = s;
-    DATA.channels = r.channels || [];
+    // لقطة المراقبة جزئية (بلا sourceId ولا جدولة ولا ترتيب) فتُحفظ في قائمة خاصة بها،
+    // ولا تستبدل سجلات القنوات الكاملة التي تبني عليها نوافذ التعديل والجدولة — وإلا
+    // فتح النموذج ببيانات ناقصة وغيّر علاقة القناة بمصدرها عند الحفظ.
+    DATA.statusChannels = r.channels || [];
     renderDash(s);
     renderHeadStats(s);
-    renderStatusTable(r.channels || []);
+    renderStatusTable(DATA.statusChannels);
     const running = (r.channels || []).filter((c) => c.live).length;
     const strip = $('#onairStrip');
     strip.textContent = running ? 'ON AIR · ' + running : 'OFF AIR';
@@ -294,9 +303,15 @@ function renderStatusTable(channels) {
         '<button class="btn btn-sm" data-act="stop" data-id="' + c.id + '">إيقاف</button>' +
         '<button class="btn btn-sm" data-act="restart" data-id="' + c.id + '">إعادة</button>' +
         '<button class="btn btn-sm" data-act="log" data-id="' + c.id + '">السجل</button>' +
+        '<button class="btn btn-sm" data-act="edit" data-id="' + c.id + '">تعديل</button>' +
       '</div></td></tr>';
   }).join('');
 }
+
+$('#statsRefreshBtn').addEventListener('click', () => {
+  refreshStats();
+  toast('حُدّثت حالة المراقبة');
+});
 
 $('#statusTable').addEventListener('click', async (e) => {
   const btn = e.target.closest('button[data-act]');
@@ -304,6 +319,7 @@ $('#statusTable').addEventListener('click', async (e) => {
   const id = btn.dataset.id;
   const act = btn.dataset.act;
   if (act === 'log') return openLog(id);
+  if (act === 'edit') return openChannelById(id);
   btn.disabled = true;
   try {
     const r = await api('/channels/' + id + '/' + act, { method: 'POST', body: {} });
@@ -327,7 +343,7 @@ $('#statusTable').addEventListener('click', async (e) => {
 
 async function openLog(id) {
   logChannelId = id;
-  const ch = DATA.channels.find((c) => c.id === id);
+  const ch = DATA.channels.find((c) => c.id === id) || DATA.statusChannels.find((c) => c.id === id);
   $('#logTitle').textContent = 'سجل القناة — ' + (ch ? ch.name : id);
   $('#logCard').classList.remove('hidden');
   await refreshLog();
@@ -389,6 +405,12 @@ function qualityCell(c) {
   return 'نسخ المصدر';
 }
 
+/** خلية «المصدر» في جدول القنوات: اسم المصدر رابط ينقل إلى قسم المصادر ويميّز سجلّه. */
+function sourceLinkCell(c, sourceName) {
+  if (!c.sourceId) return '<span class="tag-warn">غير مرتبط بمصدر</span>';
+  return '<button class="link-btn" data-gosrc="' + esc(c.sourceId) + '">' + esc(sourceName || 'مصدر محذوف') + ' ↗</button>';
+}
+
 function renderChannelsTable() {
   const tb = $('#channelsTable tbody');
   if (!DATA.channels.length) {
@@ -407,8 +429,8 @@ function renderChannelsTable() {
       '<td>' + (c.sort || 0) + '</td>' +
       '<td><b>' + esc(c.name) + '</b><div class="cell-muted">' + esc(c.id) + '</div></td>' +
       '<td>' + esc(c.category || '—') + '</td>' +
-      '<td>' + esc(sourceName) + '</td>' +
-      '<td>' + qualityCell(c) + '</td>' +
+      '<td>' + sourceLinkCell(c, sourceName) + '</td>' +
+      '<td>' + qualityCell(c) + (c.fps ? '<div class="cell-muted">' + c.fps + 'fps (تجاوز)</div>' : '') + '</td>' +
       '<td>' + (c.autoStart ? 'نعم' : 'لا') + '</td>' +
       '<td>' + sched + '</td>' +
       '<td><div class="cell-status">' + chip(c.state) + restartBadge(c.restarts) + '</div>' +
@@ -424,6 +446,8 @@ function renderChannelsTable() {
 }
 
 $('#channelsTable').addEventListener('click', async (e) => {
+  const srcBtn = e.target.closest('button[data-gosrc]');
+  if (srcBtn) return goToSource(srcBtn.dataset.gosrc);
   const btn = e.target.closest('button[data-cact]');
   if (!btn) return;
   const id = btn.dataset.id;
@@ -550,6 +574,7 @@ function openChannelModal(id) {
   $('#ch_category').value = ch ? ch.category || '' : '';
   $('#ch_cover').value = ch ? ch.cover || '' : '';
   $('#ch_sort').value = ch ? ch.sort || 0 : DATA.channels.length;
+  $('#ch_fps').value = ch && ch.fps ? ch.fps : '';
   $('#ch_enabled').checked = ch ? ch.enabled !== false : true;
   $('#ch_autoStart').checked = ch ? Boolean(ch.autoStart) : false;
   const sched = (ch && ch.schedule) || { enabled: false, days: [], from: '08:00', to: '23:59' };
@@ -564,6 +589,14 @@ function openChannelModal(id) {
         esc(s.videoDevice ? deviceLabel(s.videoDevice, s.videoDeviceLabel) : 'الشاشة') + ')</option>').join('')
     : '<option value="">— لا مصادر، أضف مصدراً أولاً —</option>';
   if (ch) $('#ch_sourceId').value = ch.sourceId;
+  // المصدر المحفوظ قد يكون حُذف: نُبقيه ظاهراً في القائمة ونحذّر، بدل استبداله
+  // صامتاً بأول مصدر في القائمة فيتحوّل البث إلى مصدر آخر عند الحفظ.
+  if (ch && ch.sourceId && !DATA.sources.some((s) => s.id === ch.sourceId)) {
+    $('#ch_sourceId').insertAdjacentHTML('beforeend',
+      '<option value="' + esc(ch.sourceId) + '">— المصدر المرتبط غير موجود —</option>');
+    $('#ch_sourceId').value = ch.sourceId;
+    $('#channelError').textContent = 'المصدر المرتبط بهذه القناة لم يعد موجوداً — اختر مصدراً قبل الحفظ.';
+  }
   onChannelSourceChange(ch ? ch.quality || '' : '');
 
   $('#channelModal').classList.remove('hidden');
@@ -580,7 +613,55 @@ function onChannelSourceChange(desired) {
   updateChannelOutputSummary();
 }
 
+/**
+ * سجلات القنوات الكاملة قبل فتح النموذج من قسم آخر: لقطة المراقبة لا تحمل المصدر
+ * ولا الجدولة ولا الترتيب، فلا يُبنى النموذج على بيانات ناقصة.
+ */
+async function ensureFullChannels() {
+  try {
+    const r = await api('/channels');
+    DATA.channels = r.channels || [];
+  } catch (e) { /* نبني على ما هو محمّل */ }
+  return DATA.channels;
+}
+
+/** فتح نافذة قناة من أي قسم: بمعرّفها، أو قناة جديدة على مصدر محدّد. */
+async function openChannelById(id, sourceId) {
+  await ensureFullChannels();
+  openChannelModal(id || null);
+  if (!id && sourceId) {
+    setSelectValue('#ch_sourceId', sourceId);
+    onChannelSourceChange('');
+  }
+  return undefined;
+}
+
+/** فتح نافذة قناة باسمها — جدول المصادر يعرض أسماء القنوات المستعملة للمصدر. */
+async function openChannelByName(name) {
+  await ensureFullChannels();
+  const ch = DATA.channels.find((c) => c.name === name);
+  if (!ch) { toast('لم يُعثر على القناة «' + name + '»', true); return undefined; }
+  openChannelModal(ch.id);
+  return undefined;
+}
+
+/** الانتقال إلى سجل المصدر في قسم «مصادر البث» وتمييزه (ربط القنوات بالمصادر). */
+async function goToSource(id) {
+  await switchView('sources');
+  const row = $('#sourcesTable tbody').querySelector('tr[data-srcid="' + id + '"]');
+  if (!row) return undefined;
+  row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  row.classList.add('row-flash');
+  setTimeout(() => row.classList.remove('row-flash'), 1800);
+  return undefined;
+}
+
 $('#addChannelBtn').addEventListener('click', () => openChannelModal(null));
+// من نموذج القناة إلى قسم المصادر مباشرةً (ربط الأقسام ببعضها)
+$('#chManageSources').addEventListener('click', () => {
+  $('#channelModal').classList.add('hidden');
+  switchView('sources');
+});
 $('#ch_sourceId').addEventListener('change', () => onChannelSourceChange());
 $('#ch_quality').addEventListener('change', updateChannelOutputSummary);
 // زر إظهار/إخفاء معرّف جهاز المصدر داخل نافذة القناة
@@ -597,6 +678,7 @@ $('#channelSave').addEventListener('click', async () => {
     category: $('#ch_category').value.trim(),
     cover: $('#ch_cover').value.trim(),
     quality: $('#ch_quality').value,
+    fps: $('#ch_fps').value.trim() ? Number($('#ch_fps').value) : null,
     sort: Number($('#ch_sort').value) || 0,
     enabled: $('#ch_enabled').checked,
     autoStart: $('#ch_autoStart').checked,
@@ -775,10 +857,13 @@ $('#diagnoseBtn').addEventListener('click', async () => {
 $('#sourcesTable').addEventListener('click', async (e) => {
   const idBtn = e.target.closest('button[data-devid]');
   if (idBtn) return toggleDeviceId(idBtn);
+  const chBtn = e.target.closest('button[data-gotoch]');
+  if (chBtn) return openChannelByName(chBtn.dataset.gotoch);
   const btn = e.target.closest('button[data-sact]');
   if (!btn) return;
   const id = btn.dataset.id;
   if (btn.dataset.sact === 'edit') return openSourceModal(id);
+  if (btn.dataset.sact === 'newchannel') return openChannelById(null, id);
   if (btn.dataset.sact === 'test') {
     // اختبار التقاط حقيقي على المصدر المحفوظ (ثانيتان): لا يعدّل المصدر ولا يحفظ شيئاً،
     // ويبلغ بنتيجة ffmpeg نفسها أو سبب الفشل بلفظه — لتشخيص مصدر لا يعمل.
@@ -850,6 +935,13 @@ function deviceCell(s) {
       : '');
 }
 
+/** خلية «القنوات» في جدول المصادر: كل قناة رابط يفتح نموذجها (ربط الأقسام). */
+function channelLinksCell(s) {
+  const names = s.usedByChannels || [];
+  if (!names.length) return '<span class="hint">—</span>';
+  return names.map((n) => '<button class="link-btn" data-gotoch="' + esc(n) + '">' + esc(n) + '</button>').join('<br>');
+}
+
 function renderSourcesTable() {
   const tb = $('#sourcesTable tbody');
   if (!DATA.sources.length) {
@@ -862,15 +954,16 @@ function renderSourcesTable() {
     const state = s.type === 'screen'
       ? '<span class="chip running">التقاط الشاشة</span>'
       : (s.devicePresent ? '<span class="chip running">موصول</span>' : '<span class="chip error">مفصول</span>');
-    return '<tr>' +
+    return '<tr data-srcid="' + esc(s.id) + '">' +
       '<td><b>' + esc(s.name) + '</b></td>' +
       '<td>' + (s.type === 'usb' ? 'التقاط DirectShow' : 'التقاط الشاشة') + '</td>' +
       '<td class="cell-muted">' + deviceCell(s) + '</td>' +
       '<td>' + esc(s.videoSize || 'تلقائي') + ' · ' + (s.fps ? s.fps + 'fps' : 'تلقائي') +
         '<div class="cell-muted">' + esc(s.pixelFormat || s.vcodec || '—') + (modes ? ' · ' + modes + ' وضع' : '') + '</div></td>' +
       '<td>' + state + '</td>' +
-      '<td>' + (s.usedByChannels && s.usedByChannels.length ? esc(s.usedByChannels.join('، ')) : '—') + '</td>' +
+      '<td>' + channelLinksCell(s) + '</td>' +
       '<td><div class="row-actions">' +
+        '<button class="btn btn-sm btn-primary" data-sact="newchannel" data-id="' + s.id + '">＋ قناة</button>' +
         '<button class="btn btn-sm" data-sact="test" data-id="' + s.id + '">🎥 اختبار</button>' +
         '<button class="btn btn-sm" data-sact="edit" data-id="' + s.id + '">تعديل</button>' +
         '<button class="btn btn-sm btn-danger" data-sact="delete" data-id="' + s.id + '">حذف</button>' +
