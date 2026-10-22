@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   RegExp    a recovered source string (flags are not recovered by this emitter)
+//   RegExp    a recovered source string and the flags the cache compiled: `new RegExp(src, "gi")`
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).
@@ -613,7 +613,7 @@ async function func_importChannel_0x100000019(a0)
 		r8 = accu
 		if (accu)
 		{
-			r14 = new RegExp("^https?:\\/\\/")
+			r14 = new RegExp("^https?:\\/\\/", "i")
 			r13 = r14["test"]
 			if (r14["test"](r8))
 			{
@@ -984,7 +984,7 @@ function func_unknown_0x100000007(a0)
 	r5 = ctx19
 	s20_2 = a0
 	s20_3 = func_0x1663_0x100000001
-	if (((!s19_2) || (r7 = new RegExp("^https?:\\/\\/"), (!r7["test"](s19_2)))))
+	if (((!s19_2) || (r7 = new RegExp("^https?:\\/\\/", "i"), (!r7["test"](s19_2)))))
 	{
 		return s20_2("")
 	}
@@ -1009,7 +1009,7 @@ function func_unknown_0x100000007(a0)
 	r10 = r0["pathname"]
 	r8 = r8(r10)
 	r7 = r8["match"]
-	r9 = new RegExp("\\.(png|jpg|jpeg|gif|webp)")
+	r9 = new RegExp("\\.(png|jpg|jpeg|gif|webp)", "i")
 	accu = r7(r9)
 	if (!r7(r9))
 	{

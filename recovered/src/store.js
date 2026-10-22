@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   RegExp    a recovered source string (flags are not recovered by this emitter)
+//   RegExp    a recovered source string and the flags the cache compiled: `new RegExp(src, "gi")`
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).

@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   RegExp    a recovered source string (flags are not recovered by this emitter)
+//   RegExp    a recovered source string and the flags the cache compiled: `new RegExp(src, "gi")`
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).
@@ -545,7 +545,7 @@ function func_normalizeHost_0x100000011(a0)
 	r2 = r3["replace"]
 	r4 = new RegExp("\\/+$")
 	r1 = r2(r4, "")
-	r3 = new RegExp("^https?:\\/\\/")
+	r3 = new RegExp("^https?:\\/\\/", "i")
 	r2 = r3["test"]
 	if (!r2(r1))
 	{
@@ -929,16 +929,16 @@ function func_0x3d26ce_0x100000003()
 	r7 = r7(r9, 1024)
 	r1 = r3(r5, 0, r7)
 	r2 = "other"
-	r4 = new RegExp("#EXTM3U")
+	r4 = new RegExp("#EXTM3U", "i")
 	r3 = r4["test"]
-	if ((((r3(r1)) || (r4 = new RegExp("\\.m3u8(\\?|$)"), r3 = r4["test"], r5 = s21_5["pathname"], r5 = (r5 + s21_5["search"]), (r3(r5)))) || (r4 = new RegExp("mpegurl"), r3 = r4["test"], (r3(s23_4)))))
+	if ((((r3(r1)) || (r4 = new RegExp("\\.m3u8(\\?|$)", "i"), r3 = r4["test"], r5 = s21_5["pathname"], r5 = (r5 + s21_5["search"]), (r3(r5)))) || (r4 = new RegExp("mpegurl", "i"), r3 = r4["test"], (r3(s23_4)))))
 	{
 		r2 = "m3u8"
 	}
 	else
 	{
-		r4 = new RegExp("mp2t")
-		if (((r4["test"](s23_4)) || (r4 = new RegExp("\\.ts(\\?|$)"), r3 = r4["test"], r5 = s21_5["pathname"], r5 = (r5 + s21_5["search"]), (r3(r5)))))
+		r4 = new RegExp("mp2t", "i")
+		if (((r4["test"](s23_4)) || (r4 = new RegExp("\\.ts(\\?|$)", "i"), r3 = r4["test"], r5 = s21_5["pathname"], r5 = (r5 + s21_5["search"]), (r3(r5)))))
 		{
 			r2 = "ts"
 		}

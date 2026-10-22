@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   RegExp    a recovered source string (flags are not recovered by this emitter)
+//   RegExp    a recovered source string and the flags the cache compiled: `new RegExp(src, "gi")`
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).
@@ -668,7 +668,7 @@ async function func_unknown_0x100000056()
 function func_looksLikeHls_0x100000055(a0)
 {
 	let r0, r1, r2, r3, accu;
-	r1 = new RegExp("m3u8?([?#]|$)")
+	r1 = new RegExp("m3u8?([?#]|$)", "i")
 	r0 = r1["test"]
 	accu = a0
 	if (!a0)
@@ -2764,7 +2764,7 @@ function func_autoFixSource_0x100000028(a0)
 		accu = func_getSource_0x100000021(r0["sourceId"])
 	}
 	s34_4 = accu
-	if ((((!s34_4) || ((!s34_4["url"]))) || (r5 = new RegExp("^https?:\\/\\/"), r4 = r5["test"], r6 = s34_4["url"], (!r4(r6)))))
+	if ((((!s34_4) || ((!s34_4["url"]))) || (r5 = new RegExp("^https?:\\/\\/", "i"), r4 = r5["test"], r6 = s34_4["url"], (!r4(r6)))))
 	{
 		return undefined
 	}
@@ -2894,14 +2894,14 @@ function func_0x398616_0x100000024()
 	r10 = r10(r12, 2048)
 	r1 = s38_5["toString"]("utf8", 0, r10)
 	r2 = ""
-	r7 = new RegExp("#EXTM3U")
-	if (((r7["test"](r1)) || (r7 = new RegExp("mpegurl"), r6 = r7["test"], (r6(s38_4)))))
+	r7 = new RegExp("#EXTM3U", "i")
+	if (((r7["test"](r1)) || (r7 = new RegExp("mpegurl", "i"), r6 = r7["test"], (r6(s38_4)))))
 	{
 		r2 = "m3u8"
 	}
 	else
 	{
-		r7 = new RegExp("mp2t")
+		r7 = new RegExp("mp2t", "i")
 		r6 = r7["test"]
 		if (((r6(s38_4)) || (r7 = new RegExp("^\\x47"), r6 = r7["test"], r10 = "binary", r8 = s38_5["toString"](r10, 0, 1), (r6(r8)))))
 		{
@@ -3462,7 +3462,7 @@ function func_x264BufsizeFor_0x10000001a(a0, a1)
 	}
 	r3 = String(a1)
 	r2 = r3["match"]
-	r4 = new RegExp("^(\\d+)k$")
+	r4 = new RegExp("^(\\d+)k$", "i")
 	accu = r2(r4)
 	r1 = r2(r4)
 	if (r2(r4))
@@ -4602,13 +4602,13 @@ function func_classifySeverity_0x10000000c(a0)
 	}
 	r3 = accu
 	r1 = String(r3)
-	r3 = new RegExp("\\b40[13]\\b|Forbidden|access denied|HTTP error 40[13]|Name does not resolve|Failed to resolve|Connection refused|No route to host|Protocol not found|Invalid data|No such file|could not open|Server returned 404")
+	r3 = new RegExp("\\b40[13]\\b|Forbidden|access denied|HTTP error 40[13]|Name does not resolve|Failed to resolve|Connection refused|No route to host|Protocol not found|Invalid data|No such file|could not open|Server returned 404", "i")
 	r2 = r3["test"]
 	if (r2(r1))
 	{
 		return "high"
 	}
-	r3 = new RegExp("\\b5\\d{2}\\b|I\\/O error|Input\\/output error|Connection reset|\\b406\\b|Operation timed out|Server returned 4")
+	r3 = new RegExp("\\b5\\d{2}\\b|I\\/O error|Input\\/output error|Connection reset|\\b406\\b|Operation timed out|Server returned 4", "i")
 	r2 = r3["test"]
 	if (r2(r1))
 	{
@@ -4672,7 +4672,7 @@ function func_appendLog_0x10000000b(a0, a1)
 function func_unknown_0x10000000a(a0)
 {
 	let r0, r1;
-	r1 = new RegExp("error|invalid|failed|denied|not found|no such|could not|unable")
+	r1 = new RegExp("error|invalid|failed|denied|not found|no such|could not|unable", "i")
 	r0 = r1["test"]
 	return r0(a0)
 }

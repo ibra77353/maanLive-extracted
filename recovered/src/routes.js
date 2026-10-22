@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   RegExp    a recovered source string (flags are not recovered by this emitter)
+//   RegExp    a recovered source string and the flags the cache compiled: `new RegExp(src, "gi")`
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).
@@ -2982,7 +2982,7 @@ async function func_unknown_0x10000005e(a0, a1)
 			accu = "VLC/3.0.20 LibVLC/3.0.20"
 		}
 		r2 = accu
-		r6 = new RegExp("^https?:\\/\\/")
+		r6 = new RegExp("^https?:\\/\\/", "i")
 		r8 = 254
 		r5 = r6["test"]
 		accu = r5(r1)
@@ -3373,7 +3373,7 @@ function func_unknown_0x100000055(a0, a1)
 	r7 = null
 	if (r3["nginxPath"])
 	{
-		r13 = new RegExp("nginx\\.exe$")
+		r13 = new RegExp("nginx\\.exe$", "i")
 		r12 = r13["test"]
 		r14 = r3["nginxPath"]
 		accu = r12(r14)
@@ -3434,7 +3434,7 @@ function func_unknown_0x100000055(a0, a1)
 			accu = r13(r8, r4)
 			r13 = r5["push"]
 			r15 = r8["replace"]
-			r17 = new RegExp("\\\\")
+			r17 = new RegExp("\\\\", "g")
 			r15 = r15(r17, "/")
 			accu = r13(r15)
 			r13 = ctx1
@@ -3443,7 +3443,7 @@ function func_unknown_0x100000055(a0, a1)
 				r15 = "child_process"
 				r14 = s1_2(r15)
 				r9 = r14["spawnSync"]
-				r15 = new RegExp("nginx\\.exe$")
+				r15 = new RegExp("nginx\\.exe$", "i")
 				r14 = r15["test"]
 				accu = r3["nginxPath"]
 				if (!r3["nginxPath"])
@@ -4442,7 +4442,7 @@ function func_filename_0x100000035(a0, a1, a2)
 	let r1, r2, r3, r4, accu;
 	r3 = a1["originalname"]
 	r2 = r3["replace"]
-	r4 = new RegExp("[^\\w.\\-\\u0600-\\u06FF]+")
+	r4 = new RegExp("[^\\w.\\-\\u0600-\\u06FF]+", "g")
 	r1 = r2(r4, "_")
 	r4 = Date["now"]
 	r4 = r4()
@@ -4576,7 +4576,7 @@ async function func_addOneXtream_0x100000031(a0, a1)
 		r7 = accu
 		if (accu)
 		{
-			r14 = new RegExp("^https?:\\/\\/")
+			r14 = new RegExp("^https?:\\/\\/", "i")
 			r13 = r14["test"]
 			if (r13(r7))
 			{
@@ -5007,7 +5007,7 @@ function func_unknown_0x100000020(a0, a1)
 	accu = !Boolean(a0)
 	if (!Boolean(a0))
 	{
-		r2 = new RegExp("nginx\\.exe")
+		r2 = new RegExp("nginx\\.exe", "i")
 		r1 = r2["test"]
 		accu = a1
 		if (!a1)
@@ -5256,9 +5256,9 @@ function func_autoChanId_0x100000019(a0, a1)
 	r7 = r8["toLowerCase"]
 	r7 = r7()
 	r6 = r7["replace"]
-	r8 = new RegExp("[^a-z0-9]+")
+	r8 = new RegExp("[^a-z0-9]+", "g")
 	r6 = r6(r8, "-")
-	r7 = new RegExp("^-+|-+$")
+	r7 = new RegExp("^-+|-+$", "g")
 	r5 = r6["replace"](r7, "")
 	r1 = r5["slice"](0, 24)
 	if (!r5["slice"](0, 24))
@@ -5499,16 +5499,16 @@ function func_0x47df7a_0x10000000c()
 	r8 = r8(s110_5["length"], 2048)
 	r1 = r4(r6, 0, r8)
 	r2 = "other"
-	r5 = new RegExp("#EXTM3U")
+	r5 = new RegExp("#EXTM3U", "i")
 	r4 = r5["test"]
-	if ((((r4(r1)) || (r5 = new RegExp("\\.m3u8"), r4 = r5["test"], (r4(s107_3)))) || (r5 = new RegExp("mpegurl"), (r5["test"](s110_4)))))
+	if ((((r4(r1)) || (r5 = new RegExp("\\.m3u8", "i"), r4 = r5["test"], (r4(s107_3)))) || (r5 = new RegExp("mpegurl", "i"), (r5["test"](s110_4)))))
 	{
 		r2 = "m3u8"
 	}
 	else
 	{
-		r5 = new RegExp("mp2t|video\\/mp2t")
-		if (((r5["test"](s110_4)) || (r5 = new RegExp("\\.ts(\\?|$)"), r4 = r5["test"], (r4(s107_3)))))
+		r5 = new RegExp("mp2t|video\\/mp2t", "i")
+		if (((r5["test"](s110_4)) || (r5 = new RegExp("\\.ts(\\?|$)", "i"), r4 = r5["test"], (r4(s107_3)))))
 		{
 			r2 = "ts"
 		}
@@ -5541,7 +5541,7 @@ function func_0x47df7a_0x10000000c()
 	r5["statusText"] = accu
 	r5["contentType"] = s110_4
 	r5["kind"] = r2
-	r9 = new RegExp("[^\\x09\\x0A\\x0D\\x20-\\x7E؀-ۿ]")
+	r9 = new RegExp("[^\\x09\\x0A\\x0D\\x20-\\x7E؀-ۿ]", "g")
 	r7 = r1["replace"](r9, ".")
 	r5["preview"] = r7["slice"](0, 1200)
 	accu = r3
@@ -5965,7 +5965,7 @@ function func_buildNginxConf_0x100000002(a0)
 {
 	let r1, r2, r3, r4, r6, accu;
 	r4 = s1_8["ROOT"]["replace"]
-	r6 = new RegExp("\\\\")
+	r6 = new RegExp("\\\\", "g")
 	r1 = r4(r6, "/")
 	accu = a0["nginxPort"]
 	if (!a0["nginxPort"])

@@ -14,7 +14,7 @@ and independent behavioural checks are still required; lowering alone does not p
   `a2[r4] = r5` with `r4 = "exports"`      `module[r4] = r5` (the wrapper's module parameter)
   `(-parseInt(r5)) \\ 1`                   `(-parseInt(r5)) / 1`  (View8 prints the `DivSmi` opcode as `\\`)
   `new {"login": null}`                   `{"login": null}`
-  a backslash-delimited RegExp source    `new RegExp("...")` (a verified source string)
+  a backslash-delimited RegExp source    `new RegExp("...", "gi")` (the cache's source and flags)
   `<closure>` / `<this>`                  `__closure` / `this`
   a function body containing `await`      `async function`
 
@@ -43,6 +43,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import resolve_strings  # noqa: E402  (the string-array decoder, used to verify recovered literals)
 from normalize_listing import code_only, mask_literals, normalize_body, restore_literals  # noqa: E402
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, "verify"))
+from semantics import scan_disassembly  # noqa: E402  (the shared reader for the disassembler dump)
 
 REGISTER = re.compile(r"\br\d+\b")
 SCOPE_SLOT = re.compile(r"Scope\[(\d+)\]\[(\d+)\]")
@@ -66,7 +68,7 @@ HEADER = """\
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   RegExp    a recovered source string (flags are not recovered by this emitter)
+//   RegExp    a recovered source string and the flags the cache compiled: `new RegExp(src, "gi")`
 """
 
 
@@ -169,6 +171,21 @@ def make_verifier(binary: bytes, listing: str):
     return check
 
 
+def module_regexp_flags(disassembly: str) -> dict[str, str]:
+    """Pattern → flags for every `CreateRegExpLiteral` the module's disassembler dump prints.
+
+    V8 carries a RegExp literal's flags in the `CreateRegExpLiteral [pattern], [pool], #mask` operand,
+    which `tools/verify/semantics.py` reads together with the constant pool that names the pattern. A
+    pattern printed with two different masks in one module cannot be paired by value and is dropped
+    here; the caller reports every literal it could not pair.
+    """
+    flags: dict[str, set[str]] = {}
+    for readings, mask in scan_disassembly(disassembly)["regexes"]:
+        for reading in readings:
+            flags.setdefault(reading, set()).add(mask)
+    return {pattern: next(iter(masks)) for pattern, masks in flags.items() if len(masks) == 1}
+
+
 def decode_string(raw: str, verify) -> tuple[str, str]:
     """Decode one `"..."` literal; prefer the reading that can be verified against the module."""
     body = raw[1:-1]
@@ -198,7 +215,7 @@ def quote(value: str) -> str:
 
 # ------------------------------------------------------------------------------------ line lowering
 
-def protect(line: str, verify, stats: dict) -> str:
+def protect(line: str, verify, stats: dict, regexp_flags: dict[str, str] | None = None) -> str:
     """Lower code without ever interpreting RegExp quotes as string delimiters."""
     masked, literals = mask_literals(line)
     decoded: list[tuple[str, str]] = []
@@ -206,9 +223,13 @@ def protect(line: str, verify, stats: dict) -> str:
         if kind == "regex":
             value, how = decode_regex(raw[1:-1], verify)
             counter, readings = "regexes", "regex_readings"
+            flags = (regexp_flags or {}).get(value)
+            stats["regex_flags" if flags is not None else "regex_flags_unpaired"] += 1
             # A JSON-escaped *string* is not a RegExp-literal body. Use a constructor so quotes,
-            # slashes, newlines, and backslashes survive exactly one JavaScript decoding step.
-            rendered = "new RegExp(%s)" % quote(value)
+            # slashes, newlines, and backslashes survive exactly one JavaScript decoding step, and keep
+            # the flags the cache compiled, so a literal the listing prints bare as `\…\` stays exact.
+            rendered = ("new RegExp(%s, %s)" % (quote(value), quote(flags)) if flags
+                        else "new RegExp(%s)" % quote(value))
         else:
             value, how = decode_string(raw, verify)
             counter, readings = "strings", "string_readings"
@@ -321,6 +342,7 @@ def emit(ir_path: str, binary_path: str, out_path: str, listing_path: str | None
     disassembly = open(listing_path or default_listing(ir_path), encoding="utf-8", errors="replace").read()
     binary = open(binary_path, "rb").read()
     stats: dict = {"strings": 0, "regexes": 0, "string_readings": {}, "regex_readings": {},
+                   "regex_flags": 0, "regex_flags_unpaired": 0,
                    "unverified": [], "functions": 0, "registers": 0, "lines": 0}
 
     lines = listing.split("\n")
@@ -339,10 +361,11 @@ def emit(ir_path: str, binary_path: str, out_path: str, listing_path: str | None
         slots |= set(SCOPE_SLOT.findall(every))
         contexts |= set(SCOPE_PUSH.findall(every))
 
+    regexp_flags = module_regexp_flags(disassembly)
     lowered: list[dict] = []
     for func in funcs:
         body = func["body"][:-1] if func["body"] else []          # drop the closing `}`
-        body = normalize_body([protect(line, verify, stats) for line in body])
+        body = normalize_body([protect(line, verify, stats, regexp_flags) for line in body])
         entry = {"name": func["name"], "params": func["params"], "outer": func is outer,
                  "async": bool(re.search(r"\bawait\b", "\n".join(code_only(line) for line in body))),
                  "module": func is module_func, "body": body}

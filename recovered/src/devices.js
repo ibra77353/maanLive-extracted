@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   RegExp    a recovered source string (flags are not recovered by this emitter)
+//   RegExp    a recovered source string and the flags the cache compiled: `new RegExp(src, "gi")`
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).
@@ -507,7 +507,7 @@ async function func_listDeviceOptions_0x100000017(a0)
 			}
 			r17 = r25
 			r18 = Set(ctx5)
-			r19 = new RegExp("(\\d{3,4}x\\d{3,4})")
+			r19 = new RegExp("(\\d{3,4}x\\d{3,4})", "g")
 			r20 = undefined
 			while (true)
 			{
@@ -517,7 +517,7 @@ async function func_listDeviceOptions_0x100000017(a0)
 				r27 = r20[1]
 				accu = r18["add"](r27)
 			}
-			r26 = new RegExp("yuyv422")
+			r26 = new RegExp("yuyv422", "i")
 			r25 = r26["test"]
 			accu = r25(r17)
 			if (r25(r17))
@@ -529,7 +529,7 @@ async function func_listDeviceOptions_0x100000017(a0)
 				accu = []
 			}
 			r21 = accu
-			r26 = new RegExp("mjpeg|Motion-JPEG")
+			r26 = new RegExp("mjpeg|Motion-JPEG", "i")
 			r25 = r26["test"]
 			accu = r25(r17)
 			if (r25(r17))

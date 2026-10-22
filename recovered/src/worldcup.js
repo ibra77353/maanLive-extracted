@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   RegExp    a recovered source string (flags are not recovered by this emitter)
+//   RegExp    a recovered source string and the flags the cache compiled: `new RegExp(src, "gi")`
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).
@@ -566,12 +566,12 @@ function func_parseFeed_0x10000000b(a0)
 	r0 = func_0x1a86_0x100000003
 	r1 = []
 	r9 = a0["match"]
-	r11 = new RegExp("<item[\\s\\S]*?<\\/item>")
+	r11 = new RegExp("<item[\\s\\S]*?<\\/item>", "gi")
 	accu = r9(r11)
 	if (!r9(r11))
 	{
 		r9 = a0["match"]
-		r11 = new RegExp("<entry[\\s\\S]*?<\\/entry>")
+		r11 = new RegExp("<entry[\\s\\S]*?<\\/entry>", "gi")
 		accu = r9(r11)
 		if (!r9(r11))
 		{
@@ -597,7 +597,7 @@ function func_parseFeed_0x10000000b(a0)
 			r11 = false
 			r5 = r15["value"]
 			r17 = r15["value"][r0(117)]
-			r19 = new RegExp("<title[^>]*>([\\s\\S]*?)<\\/title>")
+			r19 = new RegExp("<title[^>]*>([\\s\\S]*?)<\\/title>", "i")
 			accu = r17(r19)
 			r15 = r15["value"]
 			if (!r17(r19))
@@ -619,7 +619,7 @@ function func_parseFeed_0x10000000b(a0)
 			if (!r16[1])
 			{
 				r17 = r5[r0(117)]
-				r19 = new RegExp("<link[^>]*>([\\s\\S]*?)<\\/link>")
+				r19 = new RegExp("<link[^>]*>([\\s\\S]*?)<\\/link>", "i")
 				accu = r17(r19)
 				if (!r17(r19))
 				{
@@ -631,11 +631,11 @@ function func_parseFeed_0x10000000b(a0)
 			}
 			r7 = accu
 			r17 = r5[r0(117)]
-			r19 = new RegExp("<pubDate>([\\s\\S]*?)<\\/pubDate>")
+			r19 = new RegExp("<pubDate>([\\s\\S]*?)<\\/pubDate>", "i")
 			accu = r17(r19)
 			if (!r17(r19))
 			{
-				r19 = new RegExp("<updated>([\\s\\S]*?)<\\/updated>")
+				r19 = new RegExp("<updated>([\\s\\S]*?)<\\/updated>", "i")
 				accu = r5["match"](r19)
 				if (!r5["match"](r19))
 				{
@@ -699,24 +699,24 @@ function func_decodeEntities_0x10000000a(a0)
 	}
 	r10 = accu
 	r9 = String(r10)
-	r10 = new RegExp("<!\\[CDATA\\[(.*?)\\]\\]>")
+	r10 = new RegExp("<!\\[CDATA\\[(.*?)\\]\\]>", "gs")
 	r8 = r9["replace"](r10, "$1")
 	r7 = r8["replace"]
-	r9 = new RegExp("&amp;")
+	r9 = new RegExp("&amp;", "g")
 	r7 = r7(r9, "&")
-	r8 = new RegExp("&lt;")
+	r8 = new RegExp("&lt;", "g")
 	r6 = r7["replace"](r8, "<")
 	r5 = r6["replace"]
-	r7 = new RegExp("&gt;")
+	r7 = new RegExp("&gt;", "g")
 	r5 = r5(r7, ">")
 	r4 = r5["replace"]
-	r6 = new RegExp("&quot;")
+	r6 = new RegExp("&quot;", "g")
 	r4 = r4(r6, "\"")
 	r3 = r4["replace"]
-	r5 = new RegExp("&#39;")
+	r5 = new RegExp("&#39;", "g")
 	r3 = r3(r5, "'")
 	r2 = r3["replace"]
-	r4 = new RegExp("<[^>]+>")
+	r4 = new RegExp("<[^>]+>", "g")
 	r2 = r2(r4, "")
 	r1 = r2["trim"]
 	return r1()

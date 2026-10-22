@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   RegExp    a recovered source string (flags are not recovered by this emitter)
+//   RegExp    a recovered source string and the flags the cache compiled: `new RegExp(src, "gi")`
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).
@@ -1376,7 +1376,7 @@ function func_hardwareId_0x100000002()
 				r9 = r10["toString"]
 				r4 = r9()
 				r9 = r4["match"]
-				r11 = new RegExp("MachineGuid\\s+REG_SZ\\s+([\\w-]+)")
+				r11 = new RegExp("MachineGuid\\s+REG_SZ\\s+([\\w-]+)", "i")
 				accu = r9(r11)
 				r5 = r9(r11)
 				if (r9(r11))
@@ -1493,7 +1493,7 @@ function func_unknown_0x100000001(a0)
 	accu = a0
 	if (a0)
 	{
-		r1 = new RegExp("UUID")
+		r1 = new RegExp("UUID", "i")
 		r0 = r1["test"]
 		accu = !Boolean(r0(a0))
 	}

@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   RegExp    a recovered source string (flags are not recovered by this emitter)
+//   RegExp    a recovered source string and the flags the cache compiled: `new RegExp(src, "gi")`
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).
@@ -224,7 +224,7 @@ async function func_apply_0x100000014()
 		r20 = {"recursive": null}
 		r20["recursive"] = !(!Boolean([]))
 		accu = r17(r3, r20)
-		r18 = new RegExp("\\.exe(\\?|$)")
+		r18 = new RegExp("\\.exe(\\?|$)", "i")
 		r17 = r18["test"]
 		r19 = r2["url"]
 		accu = r18["test"](r19)

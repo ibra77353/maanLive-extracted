@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   RegExp    a recovered source string (flags are not recovered by this emitter)
+//   RegExp    a recovered source string and the flags the cache compiled: `new RegExp(src, "gi")`
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).
@@ -137,7 +137,7 @@ async function func_fetchViaProxy_0x100000014(a0)
 		r14 = r14()
 		r15 = new RegExp("\\/+$")
 		r7 = r14["replace"](r15, "")
-		r14 = new RegExp("^https?:\\/\\/")
+		r14 = new RegExp("^https?:\\/\\/", "i")
 		if (!r14["test"](r7))
 		{
 			r13 = "http://"
@@ -172,7 +172,7 @@ async function func_fetchViaProxy_0x100000014(a0)
 			accu = r13
 		}
 		r10 = r13
-		r14 = new RegExp("#EXTM3U")
+		r14 = new RegExp("#EXTM3U", "i")
 		r13 = r14["test"]
 		if (!r13(r10))
 		{
@@ -225,7 +225,7 @@ async function func_fetchFromM3UUrl_0x100000013(a0, a1)
 			accu = r5
 		}
 		r2 = r5
-		r6 = new RegExp("#EXTM3U")
+		r6 = new RegExp("#EXTM3U", "i")
 		r5 = r6["test"]
 		if (!r5(r2))
 		{
@@ -330,7 +330,7 @@ async function func_fetchChannels_0x100000012(a0)
 				accu = r13
 			}
 			r7 = r13
-			r14 = new RegExp("#EXTM3U")
+			r14 = new RegExp("#EXTM3U", "i")
 			r13 = r14["test"]
 			if (!r13(r7))
 			{
@@ -410,7 +410,7 @@ async function func_fetchViaPlayerApi_0x100000011(a0)
 		r13 = r14["replace"]
 		r15 = new RegExp("\\/+$")
 		s12_3 = r13(r15, "")
-		r14 = new RegExp("^https?:\\/\\/")
+		r14 = new RegExp("^https?:\\/\\/", "i")
 		r13 = r14["test"]
 		if (!r13(s12_3))
 		{
@@ -1484,7 +1484,7 @@ function func_buildGetUrl_0x100000000(a0, a1, a2, a3)
 	r4 = r4()
 	r5 = new RegExp("\\/+$")
 	r1 = r4["replace"](r5, "")
-	r4 = new RegExp("^https?:\\/\\/")
+	r4 = new RegExp("^https?:\\/\\/", "i")
 	r3 = r4["test"]
 	if (!r3(r1))
 	{

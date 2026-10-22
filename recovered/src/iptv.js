@@ -13,7 +13,7 @@
 //   ctxN      a context pushed from Scope[n]
 //   a0..aN    function parameters; in __module__ they are the CommonJS exports, require, module,
 //             __filename and __dirname
-//   RegExp    a recovered source string (flags are not recovered by this emitter)
+//   RegExp    a recovered source string and the flags the cache compiled: `new RegExp(src, "gi")`
 
 // ----------------------------------------------------------------------------------------
 // Context slots shared by this module's functions (V8's Scope[n][m]).
@@ -114,7 +114,7 @@ async function func_importFromUrl_0x10000000e(a0)
 			accu = r4
 		}
 		r2 = r4
-		r5 = new RegExp("#EXTM3U")
+		r5 = new RegExp("#EXTM3U", "i")
 		if (!r5["test"](r2))
 		{
 			r4 = func_parseM3U_0x100000009(r2)
