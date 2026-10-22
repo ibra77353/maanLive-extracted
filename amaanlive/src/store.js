@@ -109,9 +109,9 @@ function load() {
   if (!data.session || !data.session.secret) {
     data.session = { secret: crypto.randomBytes(32).toString('hex') };
   }
-  // كلمة مرور المسؤول الأولية (Admin22) تُجزَّأ عند أول تشغيل، ولا تُحفظ صريحة أبداً.
+  // كلمة مرور المسؤول الأولية (admin123) تُجزَّأ عند أول تشغيل، ولا تُحفظ صريحة أبداً.
   if (!data.admin.hash || !data.admin.salt) {
-    const initial = process.env.AMAAN_INITIAL_PASSWORD || 'Admin22';
+    const initial = process.env.AMAAN_INITIAL_PASSWORD || 'admin123';
     data.admin.user = data.admin.user || 'admin';
     setPassword(initial);
     data.admin.passwordIsDefault = true;
