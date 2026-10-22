@@ -108,6 +108,9 @@ function load() {
     data = mergeDefaults({}, defaults);
   }
 
+  // كلمة المرور الأولية لا تُحفظ صريحةً أبداً، حتى لو بقيت في ملف إعدادات قديم.
+  if (data.admin && data.admin.defaultPassword) delete data.admin.defaultPassword;
+
   // مفتاح توقيع الجلسة: يُولَّد مرة واحدة ويُحفظ، فتبقى الجلسة صالحة بعد إعادة التشغيل.
   if (!data.session || !data.session.secret) {
     data.session = { secret: crypto.randomBytes(32).toString('hex') };

@@ -89,7 +89,7 @@ echo     صفحة المشاهدين: http://localhost:%NG_PORT%/
 if "%NGINX_ON%"=="0" (
   echo     ^(بدون Nginx^): http://localhost:%ND_PORT%/admin
 )
-echo     الدخول الأول : admin / Admin22  ^(غيّرها من الإعدادات^)
+echo     الدخول الأول : admin / admin123  ^(غيّرها من الإعدادات^)
 echo   للإيقاف: نفّذ «ايقاف السيرفر.bat» أو اضغط Ctrl+C
 echo ==============================================
 echo.

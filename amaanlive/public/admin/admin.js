@@ -366,6 +366,8 @@ function renderChannelsTable() {
   }
   tb.innerHTML = DATA.channels.map((c) => {
     const src = DATA.sources.find((s) => s.id === c.sourceId);
+    // الاسم يأتي مع القناة (sourceName) فيظهر صحيحاً من أول رسم، وقائمة المصادر احتياط.
+    const sourceName = c.sourceName || (src ? src.name : '') || 'غير مرتبط';
     const sched = c.schedule && c.schedule.enabled
       ? (c.schedule.days && c.schedule.days.length ? c.schedule.days.map((d) => DAYS[d]).join('، ') : 'كل الأيام') +
         '<div class="cell-muted">' + esc(c.schedule.from + ' → ' + c.schedule.to) + '</div>'
@@ -374,7 +376,7 @@ function renderChannelsTable() {
       '<td>' + (c.sort || 0) + '</td>' +
       '<td><b>' + esc(c.name) + '</b><div class="cell-muted">' + esc(c.id) + '</div></td>' +
       '<td>' + esc(c.category || '—') + '</td>' +
-      '<td>' + esc(src ? src.name : 'غير مرتبط') + '</td>' +
+      '<td>' + esc(sourceName) + '</td>' +
       '<td>' + esc(c.quality || 'copy') + '</td>' +
       '<td>' + (c.autoStart ? 'نعم' : 'لا') + '</td>' +
       '<td>' + sched + '</td>' +

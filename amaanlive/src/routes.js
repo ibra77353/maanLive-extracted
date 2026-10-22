@@ -228,7 +228,10 @@ function createRouter() {
       'playerMaxBufferLength', 'playerBackBufferLength', 'playerLiveSyncDuration', 'capLevelToPlayerSize', 'cpuSaverDefault',
       'logoImage', 'logoPosition', 'logoSizePct', 'logoOpacityPct'
     ];
+    // نبني نسخة مرشّحة ثم نتحقق منها قبل المساس بالإعدادات الحيّة: الطلب المرفوض
+    // (مثل تساوي المنفذين) يجب ألّا يترك التطبيق في حالة داخلية متناقضة تُعطّل كل حفظ لاحق.
     const restartRequired = [];
+    const candidate = Object.assign({}, s);
     for (const k of allowed) {
       if (body[k] === undefined) continue;
       let v = body[k];
@@ -238,9 +241,12 @@ function createRouter() {
       }
       if (typeof s[k] === 'boolean') v = Boolean(v);
       if ((k === 'port' || k === 'nginxPort') && Number(v) !== Number(s[k])) restartRequired.push(k);
-      s[k] = v;
+      candidate[k] = v;
     }
-    if (Number(s.port) === Number(s.nginxPort)) return fail(res, 400, 'منفذ النظام ومنفذ Nginx يجب أن يكونا مختلفين');
+    if (Number(candidate.port) === Number(candidate.nginxPort)) {
+      return fail(res, 400, 'منفذ النظام ومنفذ Nginx يجب أن يكونا مختلفين');
+    }
+    Object.assign(s, candidate);
     store.save();
 
     // إعدادات تؤثر على الأجهزة/المؤقتات تُطبَّق فوراً
@@ -413,7 +419,14 @@ function createRouter() {
       channels: data.channels
         .slice()
         .sort((a, b) => (a.sort || 0) - (b.sort || 0))
-        .map((c) => Object.assign({}, c, ffmpeg.statusOf(c.id), { nextOpen: scheduler.nextOpenMinutes(c.schedule) }))
+        .map((c) => {
+          const src = store.findSource(c.sourceId);
+          // اسم المصدر يأتي مع القناة نفسها، فلا يعتمد العمود على وصول قائمة المصادر أولاً.
+          return Object.assign({}, c, ffmpeg.statusOf(c.id), {
+            sourceName: src ? src.name : '',
+            nextOpen: scheduler.nextOpenMinutes(c.schedule)
+          });
+        })
     });
   });
 
